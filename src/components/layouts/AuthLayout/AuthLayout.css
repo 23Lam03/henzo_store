@@ -1,0 +1,122 @@
+/* ─── Auth Layout ─────────────────────────────────────────────────────── */
+.auth-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.auth-layout__left {
+  flex: 1;
+  background: var(--gradient-primary);
+  padding: var(--space-10) var(--space-12);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-layout__left::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+@media (max-width: 1023px) {
+  .auth-layout__left { display: none; }
+}
+
+.auth-layout__brand {
+  position: relative;
+  z-index: 1;
+}
+
+.auth-layout__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+}
+
+.auth-layout__logo-text {
+  font-size: 24px;
+  font-weight: 900;
+  color: white;
+  letter-spacing: -0.03em;
+}
+
+.auth-layout__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  max-width: 440px;
+}
+
+.auth-layout__title {
+  font-size: var(--font-size-4xl);
+  font-weight: 800;
+  color: white;
+  line-height: 1.2;
+  margin-bottom: var(--space-5);
+  letter-spacing: -0.02em;
+}
+
+.auth-layout__subtitle {
+  font-size: var(--font-size-lg);
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.7;
+  margin-bottom: var(--space-8);
+}
+
+.auth-layout__features {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.auth-layout__feature {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.auth-layout__feature-icon {
+  font-size: 20px;
+}
+
+.auth-layout__footer {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.5);
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Right Side ─────────────────────────────────────────────────────── */
+.auth-layout__right {
+  width: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+  padding: var(--space-8);
+}
+
+@media (max-width: 767px) {
+  .auth-layout__right {
+    width: 100%;
+    padding: var(--space-6);
+    align-items: flex-start;
+    padding-top: var(--space-10);
+  }
+}
+
+.auth-layout__form-wrapper {
+  width: 100%;
+  max-width: 400px;
+  animation: fade-up var(--transition-slow) ease;
+}

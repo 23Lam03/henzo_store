@@ -1,0 +1,18 @@
+.admin-access-page__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-6); }
+.role-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); }
+.role-card { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--color-border); border-radius: 12px; }
+.role-card__dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.role-card__name { font-weight: 700; font-size: var(--font-size-sm); }
+.role-card__desc { font-size: var(--font-size-xs); color: var(--color-text-muted); }
+.role-card__count { margin-left: auto; font-size: 1.25rem; font-weight: 800; color: var(--color-text-muted); }
+.access-table { overflow-x: auto; }
+.access-table__head,
+.access-table__row { display: grid; grid-template-columns: 1.5fr 1.5fr 90px 2fr 1.2fr 100px 120px; gap: var(--space-3); padding: 12px var(--space-4); border-bottom: 1px solid var(--color-border); align-items: center; }
+.access-table__head { font-size: var(--font-size-xs); font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; }
+.access-table__name { font-weight: 600; font-size: var(--font-size-sm); }
+.access-table__email { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+.access-table__permissions { display: flex; flex-wrap: wrap; gap: 4px; }
+.permission-tag { padding: 2px 8px; background: var(--color-bg-secondary); border-radius: 4px; font-size: 10px; font-weight: 500; color: var(--color-text-secondary); }
+.access-table__login { font-size: var(--font-size-xs); color: var(--color-text-muted); }
+.access-table__actions { display: flex; gap: var(--space-2); }
+@media (max-width: 1024px) { .role-cards { grid-template-columns: repeat(2, 1fr); } }

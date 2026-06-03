@@ -1,0 +1,219 @@
+.product-compare {
+  background: var(--color-surface);
+  border-radius: 20px;
+  padding: 24px;
+  border: 1px solid var(--color-border);
+}
+
+.product-compare--empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.product-compare--empty svg {
+  opacity: 0.3;
+}
+
+.product-compare--empty h3 {
+  font-size: 18px;
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+.product-compare--empty p {
+  font-size: 14px;
+}
+
+.product-compare__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.product-compare__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.product-compare__table-wrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+}
+
+.product-compare__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 600px;
+}
+
+.product-compare__table th,
+.product-compare__table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+}
+
+.product-compare__table thead tr {
+  background: var(--color-background);
+}
+
+.product-compare__label-cell {
+  width: 140px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: var(--color-background);
+  position: sticky;
+  left: 0;
+  z-index: 2;
+}
+
+.product-compare__product-cell {
+  width: 200px;
+  text-align: center;
+  position: relative;
+  padding-top: 32px;
+}
+
+.product-compare__empty-cell {
+  width: 200px;
+}
+
+.product-compare__remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.product-compare__remove:hover {
+  background: var(--color-danger);
+  color: #fff;
+}
+
+.product-compare__img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin: 0 auto 8px;
+  display: block;
+}
+
+.product-compare__name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  text-decoration: none;
+  display: block;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.product-compare__name:hover {
+  color: var(--color-primary);
+}
+
+.product-compare__price {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.product-compare__current-price {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--color-danger);
+}
+
+.product-compare__original-price {
+  font-size: 12px;
+  color: #9ca3af;
+  text-decoration: line-through;
+}
+
+.product-compare__discount {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-danger);
+  background: rgba(239, 68, 68, 0.1);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.product-compare__rating {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.product-compare__add-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px;
+  border: 2px dashed var(--color-border);
+  border-radius: 12px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.product-compare__add-slot:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.product-compare__value-cell {
+  text-align: center;
+  color: var(--color-text-primary);
+  font-size: 13px;
+}
+
+.product-compare__in-stock {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.product-compare__out-stock {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.product-compare__table tbody tr:hover {
+  background: rgba(79, 70, 229, 0.03);
+}
+
+.product-compare__table tbody tr:last-child td {
+  border-bottom: none;
+}

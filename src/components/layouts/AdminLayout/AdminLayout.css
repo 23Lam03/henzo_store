@@ -1,0 +1,10 @@
+/* ─── Admin Layout ──────────────────────────────────────────────────────── */
+/* Reuses .admin-layout styles from ShopLayout's AdminLayout.css */
+/* Additional overrides if needed */
+
+.admin-layout__logo-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

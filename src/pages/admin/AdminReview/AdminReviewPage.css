@@ -1,0 +1,10 @@
+.review-table { overflow-x: auto; }
+.review-table__head,
+.review-table__row { display: grid; grid-template-columns: 1.5fr 1.2fr 1fr 70px 2fr 90px 90px 80px; gap: var(--space-3); padding: 12px var(--space-4); border-bottom: 1px solid var(--color-border); align-items: center; }
+.review-table__head { font-size: var(--font-size-xs); font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; }
+.review-table__product { font-weight: 600; font-size: var(--font-size-sm); }
+.review-table__shop { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+.review-table__stars { color: #F59E0B; font-size: var(--font-size-sm); letter-spacing: 1px; }
+.review-table__comment { font-size: var(--font-size-xs); color: var(--color-text-secondary); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.review-table__date { font-size: var(--font-size-xs); color: var(--color-text-muted); }
+.review-table__actions { display: flex; gap: var(--space-2); }

@@ -1,0 +1,110 @@
+.product-sort {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.product-sort__info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.product-sort__total {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.product-sort__controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.product-sort__view-toggle {
+  display: flex;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.product-sort__view-btn {
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.product-sort__view-btn:hover {
+  color: var(--color-primary);
+}
+
+.product-sort__view-btn.active {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.product-sort__select-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.product-sort__label {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.product-sort__select {
+  appearance: none;
+  padding: 8px 36px 8px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: border-color 0.2s;
+  min-width: 180px;
+  font-family: inherit;
+}
+
+.product-sort__select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.product-sort__select-icon {
+  position: absolute;
+  right: 12px;
+  pointer-events: none;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 768px) {
+  .product-sort {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .product-sort__controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .product-sort__select {
+    min-width: 140px;
+  }
+}

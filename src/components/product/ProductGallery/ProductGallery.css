@@ -1,0 +1,128 @@
+.gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 100px;
+}
+
+.gallery__main {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #f8fafc;
+  cursor: zoom-in;
+  border: 1px solid var(--color-border);
+}
+
+.gallery__main--zoomed {
+  cursor: zoom-out;
+}
+
+.gallery__main-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.2s;
+}
+
+.gallery__main--zoomed .gallery__main-img {
+  transform: scale(2);
+  transform-origin: var(--zoom-x) var(--zoom-y);
+}
+
+.gallery__zoom-hint {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+}
+
+.gallery__badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  z-index: 2;
+}
+
+.gallery__badge--sale {
+  background: var(--color-danger);
+  color: #fff;
+}
+
+.gallery__badge--new {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.gallery__thumbs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 4px;
+}
+
+.gallery__thumbs::-webkit-scrollbar {
+  display: none;
+}
+
+.gallery__thumb {
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  background: none;
+  transition: border-color 0.2s;
+}
+
+.gallery__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gallery__thumb--active {
+  border-color: var(--color-primary);
+}
+
+.gallery__thumb:hover {
+  border-color: var(--color-primary-light);
+}
+
+@media (max-width: 768px) {
+  .gallery {
+    position: static;
+  }
+
+  .gallery__main {
+    aspect-ratio: 4 / 3;
+  }
+
+  .gallery__thumbs {
+    gap: 8px;
+  }
+
+  .gallery__thumb {
+    width: 60px;
+    height: 60px;
+  }
+}

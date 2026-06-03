@@ -1,0 +1,38 @@
+/* ─── Back To Top ───────────────────────────────────────────────────────── */
+.back-to-top {
+  position: fixed;
+  bottom: var(--space-8);
+  right: var(--space-6);
+  width: 48px;
+  height: 48px;
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-primary);
+  z-index: var(--z-sticky);
+  transition: all var(--transition-normal);
+  animation: fade-up var(--transition-normal) ease;
+}
+
+.back-to-top:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-glow);
+}
+
+.back-to-top:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 480px) {
+  .back-to-top {
+    bottom: var(--space-4);
+    right: var(--space-4);
+    width: 42px;
+    height: 42px;
+  }
+}

@@ -1,0 +1,11 @@
+.admin-promotion-page__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-6); }
+.promotion-table { overflow-x: auto; }
+.promotion-table__head,
+.promotion-table__row { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.2fr 1.5fr 1fr 1fr 120px; gap: var(--space-3); padding: 12px var(--space-4); border-bottom: 1px solid var(--color-border); align-items: center; }
+.promotion-table__head { font-size: var(--font-size-xs); font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; }
+.promotion-table__name { font-weight: 600; font-size: var(--font-size-sm); }
+.promotion-table__discount { font-weight: 700; color: var(--color-danger); font-size: var(--font-size-sm); }
+.promotion-table__date { display: flex; flex-direction: column; gap: 2px; font-size: var(--font-size-xs); }
+.text-muted { color: var(--color-text-muted); }
+.promotion-table__participants { font-weight: 600; font-size: var(--font-size-sm); }
+.promotion-table__actions { display: flex; gap: var(--space-2); }

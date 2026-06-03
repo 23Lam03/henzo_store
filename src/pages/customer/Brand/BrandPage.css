@@ -1,0 +1,58 @@
+.brand-page__header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 32px;
+  background: var(--color-surface);
+  border-radius: 20px;
+  margin: 16px 0 32px;
+  border: 1px solid var(--color-border);
+}
+
+.brand-page__logo {
+  width: 80px;
+  height: 80px;
+  border-radius: 16px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.brand-page__info h1 {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+}
+
+.brand-page__info p {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.brand-page__count {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: rgba(79, 70, 229, 0.08);
+  padding: 4px 12px;
+  border-radius: 8px;
+}
+
+.brand-page {
+  padding-bottom: 64px;
+}
+
+@media (max-width: 768px) {
+  .brand-page__header {
+    flex-direction: column;
+    text-align: center;
+    padding: 24px;
+  }
+
+  .brand-page__info h1 {
+    font-size: 22px;
+  }
+}

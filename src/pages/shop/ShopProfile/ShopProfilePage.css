@@ -1,0 +1,6 @@
+.shop-profile-page__grid { display: grid; grid-template-columns: 1fr 400px; gap: var(--space-4); align-items: start; }
+.shop-profile-page__avatar-section { display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-6); }
+.shop-profile-page__avatar { width: 80px; height: 80px; border-radius: 16px; object-fit: cover; border: 2px solid var(--color-border); }
+.shop-profile-page__form { display: flex; flex-direction: column; gap: var(--space-4); }
+.shop-profile-page__row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+@media (max-width: 1024px) { .shop-profile-page__grid { grid-template-columns: 1fr; } }

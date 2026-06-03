@@ -1,0 +1,8 @@
+.support-table { overflow-x: auto; }
+.support-table__head,
+.support-table__row { display: grid; grid-template-columns: 80px 1.5fr 1fr 2fr 80px 90px 100px 80px; gap: var(--space-3); padding: 12px var(--space-4); border-bottom: 1px solid var(--color-border); align-items: center; }
+.support-table__head { font-size: var(--font-size-xs); font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; }
+.support-table__id { font-family: monospace; font-size: var(--font-size-xs); color: var(--color-primary); }
+.support-table__from { font-weight: 600; font-size: var(--font-size-sm); }
+.support-table__subject { font-size: var(--font-size-sm); }
+.support-table__date { font-size: var(--font-size-xs); color: var(--color-text-muted); }

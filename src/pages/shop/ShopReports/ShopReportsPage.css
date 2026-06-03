@@ -1,0 +1,21 @@
+.shop-reports-page .page-heading { margin-bottom: var(--space-6); }
+.report-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); margin-bottom: var(--space-6); }
+.report-card__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-2); }
+.report-card__label { font-size: var(--font-size-sm); color: var(--color-text-muted); }
+.report-card__change { font-size: var(--font-size-sm); font-weight: 700; }
+.report-card__value { font-size: 1.5rem; font-weight: 800; }
+.chart { display: flex; align-items: flex-end; gap: var(--space-4); height: 200px; padding: var(--space-4); }
+.chart__bar-group { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); flex: 1; height: 100%; }
+.chart__bar-wrapper { flex: 1; width: 100%; display: flex; align-items: flex-end; }
+.chart__bar { min-height: 8px; width: 100%; border-radius: 6px 6px 0 0; position: relative; transition: height 0.5s ease; display: flex; align-items: flex-start; justify-content: center; }
+.chart__bar-value { position: absolute; top: -24px; font-size: var(--font-size-xs); font-weight: 700; color: var(--color-primary); }
+.chart__label { font-size: var(--font-size-sm); color: var(--color-text-muted); font-weight: 600; }
+.report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+.report-row { display: flex; align-items: center; gap: var(--space-3); padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+.report-row__rank { width: 24px; height: 24px; border-radius: 50%; background: var(--color-bg-secondary); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-xs); font-weight: 700; color: var(--color-text-muted); flex-shrink: 0; }
+.report-row__name { flex: 1; font-size: var(--font-size-sm); font-weight: 600; }
+.report-row__sold { font-size: var(--font-size-xs); color: var(--color-text-muted); }
+.report-row__revenue { font-weight: 700; color: var(--color-danger); font-size: var(--font-size-sm); }
+.report-row__dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.report-row__bar { width: 80px; height: 8px; background: var(--color-bg-secondary); border-radius: 4px; overflow: hidden; }
+@media (max-width: 1024px) { .report-summary { grid-template-columns: repeat(2, 1fr); } .report-grid { grid-template-columns: 1fr; } }
