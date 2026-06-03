@@ -1,10 +1,17 @@
 import { Suspense, lazy, type ReactNode } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { ProtectedRoute } from '../guards';
 import { PermissionRoute } from '../guards';
 import { ROUTES } from '../constants/routes';
 import { RouteLoader } from '../components/common/RouteLoader/RouteLoader';
-import { MainLayout, ShopLayout, AdminLayout, CustomerLayout, AuthLayout } from '../components/layouts';
+import { MainLayout, ShopLayout, AdminLayout, CustomerLayout, AuthLayout, SuperAdminLayout } from '../components/layouts';
 import type { UserRole } from '../types';
+
+// ─── Role Constants ───────────────────────────────────────────────────────────
+const CUSTOMER_ROLE: UserRole[] = ['CUSTOMER' as UserRole];
+const SHOP_ROLE: UserRole[] = ['SHOP' as UserRole, 'ADMIN' as UserRole];
+const ADMIN_ROLE: UserRole[] = ['ADMIN' as UserRole, 'SUPER_ADMIN' as UserRole];
+const SUPER_ADMIN_ROLE: UserRole[] = ['SUPER_ADMIN' as UserRole];
 
 // ─── Lazy Page Loading ────────────────────────────────────────────────────────
 const load = <T extends object>(fn: () => Promise<T>, key: keyof T) =>
@@ -52,6 +59,7 @@ const ShopPaymentPage = load(() => import('../pages/shop/ShopPayment/ShopPayment
 const ShopSupportPage = load(() => import('../pages/shop/ShopSupport/ShopSupportPage'), 'ShopSupportPage');
 const ShopProfilePage = load(() => import('../pages/shop/ShopProfile/ShopProfilePage'), 'ShopProfilePage');
 const ShopShippingPage = load(() => import('../pages/shop/ShopShipping/ShopShippingPage'), 'ShopShippingPage');
+const ShopNotificationsPage = load(() => import('../pages/shop/ShopNotifications/ShopNotificationsPage'), 'ShopNotificationsPage');
 
 // Admin pages
 const AdminDashboardPage = load(() => import('../pages/admin/AdminDashboard/DashboardPage'), 'AdminDashboardPage');
@@ -68,6 +76,16 @@ const AdminPromotionPage = load(() => import('../pages/admin/AdminPromotion/Admi
 const AdminAccessPage = load(() => import('../pages/admin/AdminAccess/AdminAccessPage'), 'AdminAccessPage');
 const AdminFinancePage = load(() => import('../pages/admin/AdminFinance/AdminFinancePage'), 'AdminFinancePage');
 
+// Super Admin pages
+const SuperAdminDashboardPage = load(() => import('../pages/super-admin/SuperAdminDashboard/SuperAdminDashboardPage'), 'SuperAdminDashboardPage');
+const AdminManagementPage = load(() => import('../pages/super-admin/AdminManagement/AdminManagementPage'), 'AdminManagementPage');
+const PermissionManagementPage = load(() => import('../pages/super-admin/PermissionManagement/PermissionManagementPage'), 'PermissionManagementPage');
+const SystemManagementPage = load(() => import('../pages/super-admin/SystemManagement/SystemManagementPage'), 'SystemManagementPage');
+const SystemFinancialPage = load(() => import('../pages/super-admin/SystemFinancial/SystemFinancialPage'), 'SystemFinancialPage');
+const SystemLogPage = load(() => import('../pages/super-admin/SystemLog/SystemLogPage'), 'SystemLogPage');
+const SuperAdminNotificationsPage = load(() => import('../pages/super-admin/SuperAdminNotifications/SuperAdminNotificationsPage'), 'SuperAdminNotificationsPage');
+const SuperAdminSettingsPage = load(() => import('../pages/super-admin/SuperAdminSettings/SuperAdminSettingsPage'), 'SuperAdminSettingsPage');
+
 // Error pages
 const NotFoundPage = load(() => import('../pages/errors/ErrorPages'), 'NotFoundPage');
 const ForbiddenPage = load(() => import('../pages/errors/ErrorPages'), 'ForbiddenPage');
@@ -78,12 +96,7 @@ const Page = ({ children }: { children: ReactNode }) => (
   <Suspense fallback={<RouteLoader />}>{children}</Suspense>
 );
 
-type AppRole = UserRole;
-
-// Role helpers
-const ADMIN_ROLE: AppRole[] = ['ADMIN' as AppRole];
-const SHOP_ADMIN_ROLE: AppRole[] = ['SHOP' as AppRole, 'ADMIN' as AppRole];
-
+// ─── Router ──────────────────────────────────────────────────────────────────
 export const router = createBrowserRouter([
   // ─── Auth Routes ────────────────────────────────────────────────────────────
   {
@@ -118,54 +131,133 @@ export const router = createBrowserRouter([
   {
     element: <CustomerLayout />,
     children: [
-      { path: ROUTES.ACCOUNT, element: <Page><AccountPage /></Page> },
-      { path: ROUTES.ORDERS, element: <Page><OrderHistoryPage /></Page> },
-      { path: ROUTES.CHECKOUT, element: <Page><CheckoutPage /></Page> },
-      { path: ROUTES.NOTIFICATIONS, element: <Page><NotificationPage /></Page> },
-      { path: ROUTES.SUPPORT, element: <Page><NotificationPage /></Page> },
+      {
+        path: ROUTES.ACCOUNT,
+        element: (
+          <ProtectedRoute>
+            <PermissionRoute allowedRoles={CUSTOMER_ROLE}>
+              <Page><AccountPage /></Page>
+            </PermissionRoute>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: ROUTES.ORDERS,
+        element: (
+          <ProtectedRoute>
+            <PermissionRoute allowedRoles={CUSTOMER_ROLE}>
+              <Page><OrderHistoryPage /></Page>
+            </PermissionRoute>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: ROUTES.CHECKOUT,
+        element: (
+          <ProtectedRoute>
+            <Page><CheckoutPage /></Page>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: ROUTES.NOTIFICATIONS,
+        element: (
+          <ProtectedRoute>
+            <PermissionRoute allowedRoles={CUSTOMER_ROLE}>
+              <Page><NotificationPage /></Page>
+            </PermissionRoute>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: ROUTES.SUPPORT,
+        element: (
+          <ProtectedRoute>
+            <PermissionRoute allowedRoles={CUSTOMER_ROLE}>
+              <Page><NotificationPage /></Page>
+            </PermissionRoute>
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
 
-  // ─── Shop Routes ────────────────────────────────────────────────────────────
+  // ─── Shop Routes (/seller/*) ─────────────────────────────────────────────────
   {
-    path: '/shop',
-    element: <ShopLayout />,
+    path: '/seller',
+    element: (
+      <ProtectedRoute>
+        <PermissionRoute allowedRoles={SHOP_ROLE}>
+          <ShopLayout />
+        </PermissionRoute>
+      </ProtectedRoute>
+    ),
     children: [
-      { index: true, element: <PermissionRoute allowedRoles={SHOP_ADMIN_ROLE}><Page><ShopDashboardPage /></Page></PermissionRoute> },
-      { path: 'products', element: <PermissionRoute allowedRoles={SHOP_ADMIN_ROLE}><Page><ShopProductListPage /></Page></PermissionRoute> },
-      { path: 'products/create', element: <PermissionRoute allowedRoles={SHOP_ADMIN_ROLE}><Page><CreateProductPage /></Page></PermissionRoute> },
-      { path: 'products/edit/:id', element: <PermissionRoute allowedRoles={SHOP_ADMIN_ROLE}><Page><CreateProductPage /></Page></PermissionRoute> },
-      { path: 'orders', element: <PermissionRoute allowedRoles={SHOP_ADMIN_ROLE}><Page><ShopOrderListPage /></Page></PermissionRoute> },
-      { path: 'inventory', element: <PermissionRoute allowedRoles={SHOP_ADMIN_ROLE}><Page><ShopInventoryPage /></Page></PermissionRoute> },
-      { path: 'reviews', element: <PermissionRoute allowedRoles={SHOP_ADMIN_ROLE}><Page><ShopReviewsPage /></Page></PermissionRoute> },
-      { path: 'promotions', element: <PermissionRoute allowedRoles={SHOP_ADMIN_ROLE}><Page><ShopPromotionsPage /></Page></PermissionRoute> },
-      { path: 'reports', element: <PermissionRoute allowedRoles={SHOP_ADMIN_ROLE}><Page><ShopReportsPage /></Page></PermissionRoute> },
-      { path: 'finance', element: <PermissionRoute allowedRoles={SHOP_ADMIN_ROLE}><Page><ShopFinancePage /></Page></PermissionRoute> },
-      { path: 'payments', element: <PermissionRoute allowedRoles={SHOP_ADMIN_ROLE}><Page><ShopPaymentPage /></Page></PermissionRoute> },
-      { path: 'support', element: <PermissionRoute allowedRoles={SHOP_ADMIN_ROLE}><Page><ShopSupportPage /></Page></PermissionRoute> },
-      { path: 'shipping', element: <PermissionRoute allowedRoles={SHOP_ADMIN_ROLE}><Page><ShopShippingPage /></Page></PermissionRoute> },
-      { path: 'profile', element: <PermissionRoute allowedRoles={SHOP_ADMIN_ROLE}><Page><ShopProfilePage /></Page></PermissionRoute> },
+      { index: true, element: <Page><ShopDashboardPage /></Page> },
+      { path: 'dashboard', element: <Page><ShopDashboardPage /></Page> },
+      { path: 'products', element: <Page><ShopProductListPage /></Page> },
+      { path: 'products/create', element: <Page><CreateProductPage /></Page> },
+      { path: 'products/edit/:id', element: <Page><CreateProductPage /></Page> },
+      { path: 'orders', element: <Page><ShopOrderListPage /></Page> },
+      { path: 'inventory', element: <Page><ShopInventoryPage /></Page> },
+      { path: 'reviews', element: <Page><ShopReviewsPage /></Page> },
+      { path: 'promotions', element: <Page><ShopPromotionsPage /></Page> },
+      { path: 'reports', element: <Page><ShopReportsPage /></Page> },
+      { path: 'finance', element: <Page><ShopFinancePage /></Page> },
+      { path: 'payments', element: <Page><ShopPaymentPage /></Page> },
+      { path: 'support', element: <Page><ShopSupportPage /></Page> },
+      { path: 'shipping', element: <Page><ShopShippingPage /></Page> },
+      { path: 'profile', element: <Page><ShopProfilePage /></Page> },
+      { path: 'notifications', element: <Page><ShopNotificationsPage /></Page> },
     ],
   },
 
-  // ─── Admin Routes ───────────────────────────────────────────────────────────
+  // ─── Admin Routes (/admin/*) ─────────────────────────────────────────────────
   {
     path: '/admin',
-    element: <AdminLayout />,
+    element: (
+      <ProtectedRoute>
+        <PermissionRoute allowedRoles={ADMIN_ROLE}>
+          <AdminLayout />
+        </PermissionRoute>
+      </ProtectedRoute>
+    ),
     children: [
-      { index: true, element: <PermissionRoute allowedRoles={ADMIN_ROLE}><Page><AdminDashboardPage /></Page></PermissionRoute> },
-      { path: 'products', element: <PermissionRoute allowedRoles={ADMIN_ROLE}><Page><AdminProductPage /></Page></PermissionRoute> },
-      { path: 'orders', element: <PermissionRoute allowedRoles={ADMIN_ROLE}><Page><AdminOrderPage /></Page></PermissionRoute> },
-      { path: 'customers', element: <PermissionRoute allowedRoles={ADMIN_ROLE}><Page><AdminCustomerPage /></Page></PermissionRoute> },
-      { path: 'stores', element: <PermissionRoute allowedRoles={ADMIN_ROLE}><Page><AdminStorePage /></Page></PermissionRoute> },
-      { path: 'payments', element: <PermissionRoute allowedRoles={ADMIN_ROLE}><Page><AdminPaymentPage /></Page></PermissionRoute> },
-      { path: 'reviews', element: <PermissionRoute allowedRoles={ADMIN_ROLE}><Page><AdminReviewPage /></Page></PermissionRoute> },
-      { path: 'promotions', element: <PermissionRoute allowedRoles={ADMIN_ROLE}><Page><AdminPromotionPage /></Page></PermissionRoute> },
-      { path: 'support', element: <PermissionRoute allowedRoles={ADMIN_ROLE}><Page><AdminSupportPage /></Page></PermissionRoute> },
-      { path: 'reports', element: <PermissionRoute allowedRoles={ADMIN_ROLE}><Page><AdminReportsPage /></Page></PermissionRoute> },
-      { path: 'notifications', element: <PermissionRoute allowedRoles={ADMIN_ROLE}><Page><AdminNotificationPage /></Page></PermissionRoute> },
-      { path: 'access', element: <PermissionRoute allowedRoles={ADMIN_ROLE}><Page><AdminAccessPage /></Page></PermissionRoute> },
-      { path: 'finance', element: <PermissionRoute allowedRoles={ADMIN_ROLE}><Page><AdminFinancePage /></Page></PermissionRoute> },
+      { index: true, element: <Page><AdminDashboardPage /></Page> },
+      { path: 'products', element: <Page><AdminProductPage /></Page> },
+      { path: 'orders', element: <Page><AdminOrderPage /></Page> },
+      { path: 'customers', element: <Page><AdminCustomerPage /></Page> },
+      { path: 'stores', element: <Page><AdminStorePage /></Page> },
+      { path: 'payments', element: <Page><AdminPaymentPage /></Page> },
+      { path: 'reviews', element: <Page><AdminReviewPage /></Page> },
+      { path: 'promotions', element: <Page><AdminPromotionPage /></Page> },
+      { path: 'support', element: <Page><AdminSupportPage /></Page> },
+      { path: 'reports', element: <Page><AdminReportsPage /></Page> },
+      { path: 'notifications', element: <Page><AdminNotificationPage /></Page> },
+      { path: 'access', element: <Page><AdminAccessPage /></Page> },
+      { path: 'finance', element: <Page><AdminFinancePage /></Page> },
+    ],
+  },
+
+  // ─── Super Admin Routes (/super-admin/*) ─────────────────────────────────────
+  {
+    path: '/super-admin',
+    element: (
+      <ProtectedRoute>
+        <PermissionRoute allowedRoles={SUPER_ADMIN_ROLE}>
+          <SuperAdminLayout />
+        </PermissionRoute>
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <Page><SuperAdminDashboardPage /></Page> },
+      { path: 'admins', element: <Page><AdminManagementPage /></Page> },
+      { path: 'permissions', element: <Page><PermissionManagementPage /></Page> },
+      { path: 'system', element: <Page><SystemManagementPage /></Page> },
+      { path: 'financial', element: <Page><SystemFinancialPage /></Page> },
+      { path: 'logs', element: <Page><SystemLogPage /></Page> },
+      { path: 'notifications', element: <Page><SuperAdminNotificationsPage /></Page> },
+      { path: 'settings', element: <Page><SuperAdminSettingsPage /></Page> },
     ],
   },
 

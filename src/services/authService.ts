@@ -37,6 +37,16 @@ const MOCK_USERS: (User & { password: string })[] = [
     role: 'ADMIN',
     createdAt: '2023-01-01T00:00:00Z',
   },
+  {
+    id: 'user-super-admin-1',
+    email: 'superadmin@pixelstore.com',
+    password: '123456',
+    name: 'Super Admin',
+    phone: '0909999888',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=superadmin',
+    role: 'SUPER_ADMIN',
+    createdAt: '2022-01-01T00:00:00Z',
+  },
 ];
 
 export const authService = {

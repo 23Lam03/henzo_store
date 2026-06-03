@@ -82,7 +82,7 @@ export const UserMenu = ({ onClose }: { onClose: () => void }) => {
           </Link>
         )}
         {user?.role === 'SHOP' && (
-          <Link to="/shop" className="user-menu__link user-menu__link--admin" onClick={onClose}>
+          <Link to="/seller" className="user-menu__link user-menu__link--admin" onClick={onClose}>
             <IconShield /> Trang cửa hàng
           </Link>
         )}

@@ -7,7 +7,7 @@ import {
   useRef,
   type ReactNode,
 } from 'react';
-import type { User } from '../../types/auth';
+import type { User, UserRole } from '../../types/auth';
 import { authService } from '../../services/authService';
 
 interface AuthContextValue {
@@ -15,8 +15,9 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   isLoading: boolean;
   role: string;
+  userRole: UserRole;
   token: string | null;
-  login: (email: string, password: string, rememberMe?: boolean) => Promise<{ success: boolean; message: string }>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<{ success: boolean; message: string; role?: string }>;
   register: (data: { name: string; email: string; phone: string; password: string }) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
   updateUser: (data: Partial<User>) => void;
@@ -71,7 +72,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     email: string,
     password: string,
     rememberMe = false
-  ): Promise<{ success: boolean; message: string }> => {
+  ): Promise<{ success: boolean; message: string; role?: string }> => {
     setIsLoading(true);
     try {
       const result = await authService.login(email, password);
@@ -90,7 +91,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         sessionStorage.setItem(STORAGE_USER, JSON.stringify(loggedInUser));
       }
       setIsLoading(false);
-      return { success: true, message: 'Đăng nhập thành công!' };
+      return { success: true, message: 'Đăng nhập thành công!', role: loggedInUser.role };
     } catch {
       setIsLoading(false);
       return { success: false, message: 'Đã xảy ra lỗi. Vui lòng thử lại!' };
@@ -130,6 +131,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const role: string = user?.role || 'GUEST';
+  const userRole: UserRole = (user?.role as UserRole) || 'GUEST';
 
   return (
     <AuthContext.Provider value={{
@@ -137,6 +139,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       isAuthenticated: !!user,
       isLoading,
       role,
+      userRole,
       token,
       login,
       register,

@@ -1,14 +1,17 @@
-.shipping-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); padding: var(--space-4); border-bottom: 1px solid var(--color-border); }
-.shipping-summary__card { text-align: center; padding: var(--space-4); border-radius: 12px; background: var(--color-bg-secondary); }
-.shipping-summary__value { display: block; font-size: 2rem; font-weight: 800; }
-.shipping-summary__label { font-size: var(--font-size-sm); color: var(--color-text-muted); }
-.shipping-table { overflow-x: auto; }
-.shipping-table__head,
-.shipping-table__row { display: grid; grid-template-columns: 80px 80px 1.5fr 1.2fr 1fr 90px 120px 90px; gap: var(--space-3); padding: 12px var(--space-4); border-bottom: 1px solid var(--color-border); align-items: center; }
-.shipping-table__head { font-size: var(--font-size-xs); font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; }
-.shipping-table__id, .shipping-table__order { font-family: monospace; font-size: var(--font-size-xs); color: var(--color-primary); }
-.shipping-table__customer strong { display: block; font-size: var(--font-size-sm); }
-.shipping-table__customer small { display: block; font-size: var(--font-size-xs); color: var(--color-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
-.shipping-table__carrier { font-size: var(--font-size-sm); }
-.shipping-table__tracking { font-size: var(--font-size-xs); color: var(--color-text-muted); }
-.shipping-table__eta { font-size: var(--font-size-sm); }
+/* Shipping Page */
+.seller-shipping-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  text-align: center;
+}
+.seller-shipping-stat__label { font-size: var(--font-size-xs); color: var(--color-text-muted); margin: 0; font-weight: 500; }
+.seller-shipping-stat__value { font-size: var(--font-size-2xl); font-weight: 800; color: var(--color-text-primary); margin: 0; }
+.seller-shipping-address { font-size: var(--font-size-xs); color: var(--color-text-secondary); margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* Reuse shared .seller-tabs, .seller-tab, .seller-pagination, .seller-table, .seller-empty, .seller-action-btn styles from OrderListPage.css */

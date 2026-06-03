@@ -10,13 +10,13 @@ interface PermissionRouteProps {
 }
 
 export const PermissionRoute = ({ children, allowedRoles }: PermissionRouteProps) => {
-  const { role, isLoading } = useAuth();
+  const { userRole, isLoading } = useAuth();
 
   if (isLoading) {
     return <RouteLoader />;
   }
 
-  if (!allowedRoles.includes(role as UserRole)) {
+  if (!allowedRoles.includes(userRole)) {
     return <Navigate to={ROUTES.FORBIDDEN} replace />;
   }
 

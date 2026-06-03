@@ -1,183 +1,247 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Breadcrumb } from '../../../components/breadcrumb';
 import './CreateProductPage.css';
 
 const CATEGORIES = ['Điện thoại', 'Laptop', 'PC Gaming', 'Màn hình', 'Chuột', 'Bàn phím', 'Tai nghe', 'Phụ kiện'];
 const BRANDS = ['Apple', 'Samsung', 'ASUS', 'Dell', 'Lenovo', 'MSI', 'Razer', 'Logitech', 'Sony', 'Xiaomi'];
-const TAG_OPTIONS = ['Hot', 'New', 'Featured', 'Best Seller'];
+
+const EMPTY_FORM = {
+  name: '', category: '', brand: '', sku: '',
+  shortDesc: '', detailDesc: '',
+  price: '', originalPrice: '', stock: '',
+  imageUrl: '',
+  cpu: '', gpu: '', ram: '', ssd: '', screen: '', pin: '', weight: '',
+  isHot: false, isNew: false, isFeatured: false,
+};
 
 export const CreateProductPage = () => {
   const navigate = useNavigate();
-  const [images, setImages] = useState<string[]>([]);
-  const [form, setForm] = useState({
-    name: '', slug: '', category: CATEGORIES[0], brand: BRANDS[0],
-    price: '', originalPrice: '', stock: '', description: '',
-    tags: [] as string[], specifications: [] as { key: string; value: string }[],
-  });
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [preview, setPreview] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    const slug = form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    setForm(p => ({ ...p, slug }));
-  }, [form.name]);
+  const set = (key: keyof typeof EMPTY_FORM, val: string | boolean) => {
+    setForm(f => ({ ...f, [key]: val }));
+    if (errors[key]) setErrors(e => { const n = { ...e }; delete n[key]; return n; });
+  };
 
-  const addImage = (url: string) => { if (url && images.length < 5) setImages(prev => [...prev, url]); };
-  const removeImage = (i: number) => setImages(prev => prev.filter((_, idx) => idx !== i));
+  const validate = () => {
+    const e: Record<string, string> = {};
+    if (!form.name.trim()) e.name = 'Tên sản phẩm không được để trống';
+    if (!form.category) e.category = 'Vui lòng chọn danh mục';
+    if (!form.price || isNaN(Number(form.price)) || Number(form.price) <= 0) e.price = 'Giá bán phải lớn hơn 0';
+    if (!form.stock || isNaN(Number(form.stock)) || Number(form.stock) < 0) e.stock = 'Số lượng tồn không hợp lệ';
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
 
-  const addSpec = () => setForm(p => ({ ...p, specifications: [...p.specifications, { key: '', value: '' }] }));
-  const updateSpec = (i: number, field: 'key' | 'value', val: string) =>
-    setForm(p => ({ ...p, specifications: p.specifications.map((s, idx) => idx === i ? { ...s, [field]: val } : s) }));
-  const removeSpec = (i: number) => setForm(p => ({ ...p, specifications: p.specifications.filter((_, idx) => idx !== i) }));
-
-  const toggleTag = (tag: string) => setForm(p => ({
-    ...p, tags: p.tags.includes(tag) ? p.tags.filter(t => t !== tag) : [...p.tags, tag],
-  }));
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const discount = form.originalPrice ? Math.round((1 - Number(form.price) / Number(form.originalPrice)) * 100) : 0;
-    const newProduct = {
-      id: Date.now().toString(),
-      name: form.name,
-      slug: form.slug,
-      description: form.description,
-      price: Number(form.price),
-      originalPrice: Number(form.originalPrice) || Number(form.price),
-      discount,
-      images: images.length > 0 ? images : ['https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600'],
-      categoryId: 'cat-other',
-      categoryName: form.category,
-      brand: form.brand,
-      rating: 0,
-      reviewCount: 0,
-      stock: Number(form.stock) || 0,
-      sold: 0,
-      tags: form.tags,
-      specifications: form.specifications.reduce<Record<string, string>>((acc, s) => ({ ...acc, [s.key]: s.value }), {}),
-      isFeatured: form.tags.includes('Featured'),
-      isNew: form.tags.includes('New'),
-      isHot: form.tags.includes('Hot'),
-      createdAt: new Date().toISOString(),
-    };
-    console.log('New product:', newProduct);
-    alert('Thêm sản phẩm thành công!');
-    navigate('/shop/products');
+  const handleSubmit = (action: 'save' | 'publish') => {
+    if (!validate()) return;
+    console.log('Product data:', { ...form, status: action === 'publish' ? 'selling' : 'draft' });
+    navigate('/seller/products');
   };
 
   return (
-    <div className="create-product-page">
-      <Breadcrumb />
-      <h1 className="create-product-page__title">Thêm Sản Phẩm Mới</h1>
-
-      <form onSubmit={handleSubmit} className="create-product-page__grid">
-        <div className="create-product-page__main">
-          <div className="card mb-4">
-            <h3 className="mb-4">Thông tin cơ bản</h3>
-            <div className="input-group mb-4">
-              <label className="input-label">Tên sản phẩm *</label>
-              <input className="input" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required placeholder="VD: iPhone 16 Pro Max 256GB..." />
-            </div>
-            <div className="input-group mb-4">
-              <label className="input-label">Slug (URL)</label>
-              <input className="input" value={form.slug} onChange={e => setForm(p => ({ ...p, slug: e.target.value }))} placeholder="auto-generated-from-name" />
-            </div>
-            <div className="create-product-page__row">
-              <div className="input-group">
-                <label className="input-label">Danh mục *</label>
-                <select className="input" value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))}>
-                  {CATEGORIES.map(c => <option key={c}>{c}</option>)}
-                </select>
-              </div>
-              <div className="input-group">
-                <label className="input-label">Thương hiệu *</label>
-                <select className="input" value={form.brand} onChange={e => setForm(p => ({ ...p, brand: e.target.value }))}>
-                  {BRANDS.map(b => <option key={b}>{b}</option>)}
-                </select>
-              </div>
-            </div>
-            <div className="input-group">
-              <label className="input-label">Mô tả sản phẩm</label>
-              <textarea className="input" rows={5} value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} placeholder="Mô tả chi tiết sản phẩm..." />
-            </div>
-          </div>
-
-          <div className="card mb-4">
-            <h3 className="mb-4">Hình ảnh sản phẩm</h3>
-            <p className="input-hint mb-3">Tối đa 5 hình ảnh. Sử dụng link ảnh trực tiếp từ internet.</p>
-            <div className="image-upload-grid">
-              {images.map((img, i) => (
-                <div key={i} className="image-upload-preview">
-                  <img src={img} alt={`Image ${i + 1}`} />
-                  <button type="button" className="image-upload-preview__remove" onClick={() => removeImage(i)}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                  </button>
-                </div>
-              ))}
-              {images.length < 5 && (
-                <div className="image-upload-box">
-                  <input
-                    type="url"
-                    className="input"
-                    placeholder="Dán link ảnh (URL)..."
-                    onBlur={e => { if (e.target.value) { addImage(e.target.value); e.target.value = ''; } }}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="card">
-            <h3 className="mb-4">Thông số kỹ thuật</h3>
-            {form.specifications.map((spec, i) => (
-              <div key={i} className="create-product-page__row mb-3">
-                <input className="input" value={spec.key} onChange={e => updateSpec(i, 'key', e.target.value)} placeholder="VD: Màn hình" />
-                <input className="input" value={spec.value} onChange={e => updateSpec(i, 'value', e.target.value)} placeholder="VD: 6.9 inch OLED" />
-                <button type="button" className="btn btn-sm btn-outline" onClick={() => removeSpec(i)}>Xóa</button>
-              </div>
-            ))}
-            <button type="button" className="btn btn-outline" onClick={addSpec}>+ Thêm thông số</button>
-          </div>
+    <div className="create-product-page admin-page">
+      <div className="admin-page__header">
+        <div>
+          <h1 className="admin-page__title">Đăng sản phẩm mới</h1>
+          <p className="admin-page__subtitle">Tạo và đăng sản phẩm lên cửa hàng</p>
         </div>
-
-        <div className="create-product-page__sidebar">
-          <div className="card mb-4">
-            <h3 className="mb-4">Giá &amp; Tồn kho</h3>
-            <div className="input-group mb-3">
-              <label className="input-label">Giá bán (VNĐ) *</label>
-              <input type="number" className="input" value={form.price} onChange={e => setForm(p => ({ ...p, price: e.target.value }))} required placeholder="34990000" />
-            </div>
-            <div className="input-group mb-3">
-              <label className="input-label">Giá gốc (VNĐ)</label>
-              <input type="number" className="input" value={form.originalPrice} onChange={e => setForm(p => ({ ...p, originalPrice: e.target.value }))} placeholder="39990000" />
-            </div>
-            <div className="input-group">
-              <label className="input-label">Số lượng tồn kho</label>
-              <input type="number" className="input" value={form.stock} onChange={e => setForm(p => ({ ...p, stock: e.target.value }))} placeholder="100" />
-            </div>
-          </div>
-
-          <div className="card mb-4">
-            <h3 className="mb-4">Tags</h3>
-            <div className="tags-grid">
-              {TAG_OPTIONS.map(tag => (
-                <button
-                  key={tag}
-                  type="button"
-                  className={`tag-btn ${form.tags.includes(tag) ? 'active' : ''}`}
-                  onClick={() => toggleTag(tag)}
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <button type="submit" className="btn btn-primary btn-full btn-lg">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-            Đăng sản phẩm
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn btn-secondary" onClick={() => setPreview(!preview)}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            {preview ? 'Ẩn xem trước' : 'Xem trước'}
           </button>
         </div>
-      </form>
+      </div>
+
+      {/* Tabs */}
+      <div className="create-product-tabs">
+        <button className="create-product-tab create-product-tab--active">Thông tin cơ bản</button>
+        <button className="create-product-tab" disabled>Giá & Kho hàng</button>
+        <button className="create-product-tab" disabled>Hình ảnh</button>
+        <button className="create-product-tab" disabled>Thông số kỹ thuật</button>
+      </div>
+
+      <div className="create-product__layout">
+        {/* Form */}
+        <div className="create-product__form">
+          <div className="admin-section">
+            <div className="admin-section__header">
+              <h3 className="admin-section__title">Thông tin cơ bản</h3>
+            </div>
+            <div className="admin-section__body">
+              <div className="admin-form">
+                <div className="admin-form-group">
+                  <label className="admin-form-label">Tên sản phẩm <span>*</span></label>
+                  <input className={`admin-form-input ${errors.name ? 'input-error' : ''}`} placeholder="VD: iPhone 16 Pro Max 256GB" value={form.name} onChange={e => set('name', e.target.value)} />
+                  {errors.name && <span className="input-error-message">{errors.name}</span>}
+                </div>
+                <div className="admin-form-row">
+                  <div className="admin-form-group">
+                    <label className="admin-form-label">Danh mục <span>*</span></label>
+                    <select className={`admin-form-select ${errors.category ? 'input-error' : ''}`} value={form.category} onChange={e => set('category', e.target.value)}>
+                      <option value="">Chọn danh mục</option>
+                      {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    {errors.category && <span className="input-error-message">{errors.category}</span>}
+                  </div>
+                  <div className="admin-form-group">
+                    <label className="admin-form-label">Thương hiệu</label>
+                    <select className="admin-form-select" value={form.brand} onChange={e => set('brand', e.target.value)}>
+                      <option value="">Chọn thương hiệu</option>
+                      {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="admin-form-group">
+                  <label className="admin-form-label">SKU</label>
+                  <input className="admin-form-input" placeholder="Mã SKU tự động nếu để trống" value={form.sku} onChange={e => set('sku', e.target.value)} />
+                </div>
+                <div className="admin-form-group">
+                  <label className="admin-form-label">Mô tả ngắn</label>
+                  <input className="admin-form-input" placeholder="Mô tả ngắn gọn (hiển thị trên card sản phẩm)" value={form.shortDesc} onChange={e => set('shortDesc', e.target.value)} />
+                </div>
+                <div className="admin-form-group">
+                  <label className="admin-form-label">Mô tả chi tiết</label>
+                  <textarea className="admin-form-textarea" placeholder="Mô tả chi tiết sản phẩm..." rows={4} value={form.detailDesc} onChange={e => set('detailDesc', e.target.value)} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="admin-section">
+            <div className="admin-section__header">
+              <h3 className="admin-section__title">Giá & Kho hàng</h3>
+            </div>
+            <div className="admin-section__body">
+              <div className="admin-form">
+                <div className="admin-form-row">
+                  <div className="admin-form-group">
+                    <label className="admin-form-label">Giá bán (VNĐ) <span>*</span></label>
+                    <input type="number" className={`admin-form-input ${errors.price ? 'input-error' : ''}`} placeholder="VD: 29990000" value={form.price} onChange={e => set('price', e.target.value)} />
+                    {errors.price && <span className="input-error-message">{errors.price}</span>}
+                  </div>
+                  <div className="admin-form-group">
+                    <label className="admin-form-label">Giá gốc (VNĐ)</label>
+                    <input type="number" className="admin-form-input" placeholder="Giá trước khi giảm" value={form.originalPrice} onChange={e => set('originalPrice', e.target.value)} />
+                  </div>
+                </div>
+                <div className="admin-form-group">
+                  <label className="admin-form-label">Số lượng tồn kho <span>*</span></label>
+                  <input type="number" className={`admin-form-input ${errors.stock ? 'input-error' : ''}`} placeholder="0" value={form.stock} onChange={e => set('stock', e.target.value)} />
+                  {errors.stock && <span className="input-error-message">{errors.stock}</span>}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="admin-section">
+            <div className="admin-section__header">
+              <h3 className="admin-section__title">Hình ảnh sản phẩm</h3>
+            </div>
+            <div className="admin-section__body">
+              <div className="admin-form-group">
+                <label className="admin-form-label">URL Hình ảnh</label>
+                <input className="admin-form-input" placeholder="Dán URL hình ảnh sản phẩm" value={form.imageUrl} onChange={e => set('imageUrl', e.target.value)} />
+                {form.imageUrl && (
+                  <div className="create-product__img-preview">
+                    <img src={form.imageUrl} alt="Preview"
+                      onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/120x120/cccccc/999999?text=Invalid+URL'; }} />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="admin-section">
+            <div className="admin-section__header">
+              <h3 className="admin-section__title">Thông số kỹ thuật</h3>
+            </div>
+            <div className="admin-section__body">
+              <div className="admin-form">
+                <div className="admin-form-row">
+                  {[['cpu', 'CPU'], ['gpu', 'GPU'], ['ram', 'RAM'], ['ssd', 'Ổ cứng SSD']].map(([key, label]) => (
+                    <div key={key} className="admin-form-group">
+                      <label className="admin-form-label">{label}</label>
+                      <input className="admin-form-input" placeholder={`VD: Intel Core i9`} value={(form as any)[key]} onChange={e => set(key as any, e.target.value)} />
+                    </div>
+                  ))}
+                </div>
+                <div className="admin-form-row">
+                  {[['screen', 'Màn hình'], ['pin', 'Pin'], ['weight', 'Trọng lượng']].map(([key, label]) => (
+                    <div key={key} className="admin-form-group">
+                      <label className="admin-form-label">{label}</label>
+                      <input className="admin-form-input" placeholder={`VD: 15.6 inch`} value={(form as any)[key]} onChange={e => set(key as any, e.target.value)} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Tags */}
+          <div className="admin-section">
+            <div className="admin-section__header">
+              <h3 className="admin-section__title">Gắn thẻ sản phẩm</h3>
+            </div>
+            <div className="admin-section__body">
+              <div className="create-product__tags">
+                {[
+                  { key: 'isHot', label: '🔥 Hot - Sản phẩm hot' },
+                  { key: 'isNew', label: '✨ Mới - Sản phẩm mới' },
+                  { key: 'isFeatured', label: '⭐ Nổi bật - Sản phẩm nổi bật' },
+                ].map(t => (
+                  <label key={t.key} className={`create-product__tag ${(form as any)[t.key] ? 'create-product__tag--active' : ''}`}>
+                    <input type="checkbox" checked={(form as any)[t.key]} onChange={e => set(t.key as any, e.target.checked)} />
+                    {t.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="create-product__actions">
+            <button className="btn btn-secondary" onClick={() => handleSubmit('save')}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Lưu nháp
+            </button>
+            <button className="btn btn-primary" onClick={() => handleSubmit('publish')}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Đăng bán ngay
+            </button>
+          </div>
+        </div>
+
+        {/* Preview Panel */}
+        {preview && (
+          <div className="create-product__preview">
+            <div className="admin-section">
+              <div className="admin-section__header">
+                <h3 className="admin-section__title">Xem trước sản phẩm</h3>
+              </div>
+              <div className="admin-section__body">
+                <div className="create-product-preview-card">
+                  {form.imageUrl && (
+                    <img src={form.imageUrl} alt={form.name} className="create-product-preview-card__img"
+                      onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/300x300/cccccc/999999?text=No+Image'; }} />
+                  )}
+                  <div className="create-product-preview-card__body">
+                    {form.category && <span className="badge badge-dark">{form.category}</span>}
+                    {form.isHot && <span className="badge badge-danger">Hot</span>}
+                    {form.isNew && <span className="badge badge-success">Mới</span>}
+                    <h4 className="create-product-preview-card__name">{form.name || 'Tên sản phẩm'}</h4>
+                    {form.price && <p className="create-product-preview-card__price">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(Number(form.price))}</p>}
+                    <p className="create-product-preview-card__desc">{form.shortDesc || 'Mô tả ngắn sản phẩm...'}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

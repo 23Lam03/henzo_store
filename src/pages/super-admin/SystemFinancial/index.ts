@@ -1,0 +1,1 @@
+export { SystemFinancialPage } from './SystemFinancialPage';

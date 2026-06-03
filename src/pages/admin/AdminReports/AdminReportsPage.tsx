@@ -120,7 +120,7 @@ export const AdminReportsPage = () => {
             {topProducts.map((p, i) => (
               <div key={i} className="report-top-item">
                 <span className="report-top-rank">{i + 1}</span>
-                <img src={p.images[0]} alt={p.name} className="report-top-img" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/44'; }} />
+                <img src={p.images[0]} alt={p.name} className="report-top-img" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/48x44/cccccc/999999?text=No+Image'; }} />
                 <div className="report-top-info">
                   <p className="report-top-name">{p.name}</p>
                   <p className="report-top-sub">{p.brand} · {formatNumber(p.sold)} đã bán</p>

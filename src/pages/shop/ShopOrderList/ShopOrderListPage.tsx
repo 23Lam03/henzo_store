@@ -1,89 +1,318 @@
-import { useState } from 'react';
-import { Breadcrumb } from '../../../components/breadcrumb';
+import { useState, useMemo } from 'react';
+import { useSeller } from '../../../contexts/SellerContext';
+import type { SellerOrder } from '../../../types/seller';
 import './ShopOrderListPage.css';
 
-const MOCK_ORDERS = [
-  { id: 'SHOP-001', customer: 'Nguyễn Văn A', phone: '0901234567', items: 2, amount: '42,990,000đ', status: 'Chờ xác nhận', statusColor: '#F59E0B', date: '2025-06-01 10:30' },
-  { id: 'SHOP-002', customer: 'Trần Thị B', phone: '0934567890', items: 1, amount: '18,990,000đ', status: 'Đã xác nhận', statusColor: '#3B82F6', date: '2025-06-01 09:15' },
-  { id: 'SHOP-003', customer: 'Lê Văn C', phone: '0912345678', items: 3, amount: '89,990,000đ', status: 'Đang đóng gói', statusColor: '#8B5CF6', date: '2025-05-31 16:20' },
-  { id: 'SHOP-004', customer: 'Phạm Thị D', phone: '0987654321', items: 1, amount: '34,990,000đ', status: 'Đang vận chuyển', statusColor: '#06B6D4', date: '2025-05-31 14:00' },
-  { id: 'SHOP-005', customer: 'Hoàng Văn E', phone: '0971234567', items: 2, amount: '52,990,000đ', status: 'Đã giao', statusColor: '#10B981', date: '2025-05-30 11:00' },
-  { id: 'SHOP-006', customer: 'Vũ Thị F', phone: '0961234567', items: 1, amount: '22,990,000đ', status: 'Đã hủy', statusColor: '#EF4444', date: '2025-05-30 09:30' },
+const formatVND = (n: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(n);
+const formatNum = (n: number) => new Intl.NumberFormat('vi-VN').format(n);
+
+const STATUS_TABS = [
+  { key: 'all', label: 'Tất cả' },
+  { key: 'pending', label: 'Chờ xác nhận' },
+  { key: 'confirmed', label: 'Đã xác nhận' },
+  { key: 'preparing', label: 'Đang chuẩn bị' },
+  { key: 'shipped', label: 'Đã giao shipper' },
+  { key: 'delivering', label: 'Đang giao' },
+  { key: 'delivered', label: 'Hoàn thành' },
+  { key: 'cancelled', label: 'Đã hủy' },
+  { key: 'returned', label: 'Hoàn trả' },
 ];
 
-const STATUS_OPTIONS = ['Tất cả', 'Chờ xác nhận', 'Đã xác nhận', 'Đang đóng gói', 'Đang vận chuyển', 'Đã giao', 'Đã hủy'];
+const STATUS_BADGE: Record<string, string> = {
+  pending: 'badge-warning', confirmed: 'badge-primary', preparing: 'badge-accent',
+  shipped: 'badge-primary', delivering: 'badge-accent', delivered: 'badge-success',
+  cancelled: 'badge-danger', returned: 'badge-danger',
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  pending: 'Chờ xác nhận', confirmed: 'Đã xác nhận', preparing: 'Đang chuẩn bị',
+  shipped: 'Đã giao shipper', delivering: 'Đang giao', delivered: 'Hoàn thành',
+  cancelled: 'Đã hủy', returned: 'Hoàn trả',
+};
+
+const PAYMENT_LABEL: Record<string, string> = {
+  cod: 'COD', banking: 'Chuyển khoản', vnpay: 'VNPay', momo: 'MoMo', zalopay: 'ZaloPay',
+};
+
+const NEXT_STATUS: Partial<Record<string, { next: string; label: string }>> = {
+  pending: { next: 'confirmed', label: 'Xác nhận đơn' },
+  confirmed: { next: 'preparing', label: 'Bắt đầu chuẩn bị' },
+  preparing: { next: 'shipped', label: 'Giao cho shipper' },
+  shipped: { next: 'delivering', label: 'Đang vận chuyển' },
+  delivering: { next: 'delivered', label: 'Xác nhận giao thành công' },
+};
 
 export const ShopOrderListPage = () => {
-  const [orders] = useState(MOCK_ORDERS);
-  const [filterStatus, setFilterStatus] = useState('Tất cả');
+  const { orders, updateOrderStatus } = useSeller();
+  const [tab, setTab] = useState('all');
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [selectedOrder, setSelectedOrder] = useState<SellerOrder | null>(null);
+  const perPage = 15;
 
-  const filtered = orders.filter(o => {
-    const matchStatus = filterStatus === 'Tất cả' || o.status === filterStatus;
-    const matchSearch = o.id.toLowerCase().includes(search.toLowerCase()) || o.customer.toLowerCase().includes(search.toLowerCase());
-    return matchStatus && matchSearch;
+  const filtered = useMemo(() => {
+    let list = tab === 'all' ? orders : orders.filter(o => o.status === tab);
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(o => o.orderCode.toLowerCase().includes(q) || o.customerName.toLowerCase().includes(q));
+    }
+    return list;
+  }, [orders, tab, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+  const paginated = filtered.slice((page - 1) * perPage, page * perPage);
+
+  const tabCounts: Record<string, number> = { all: orders.length };
+  STATUS_TABS.slice(1).forEach(t => {
+    tabCounts[t.key] = orders.filter(o => o.status === t.key).length;
   });
 
-  const updateStatus = (_id: string, _newStatus: string) => {
-    // Mock update - handle status update
+  const handleAdvance = (order: SellerOrder) => {
+    const next = NEXT_STATUS[order.status];
+    if (next && confirm(`${next.label} đơn hàng ${order.orderCode}?`)) {
+      updateOrderStatus(order.id, next.next as any);
+    }
   };
 
+  const orderStatuses = STATUS_TABS.slice(1, STATUS_TABS.length - 2).map(t => t.key);
+
   return (
-    <div className="shop-order-list-page">
-      <Breadcrumb />
-      <div className="shop-order-list-page__header">
+    <div className="seller-orders admin-page">
+      <div className="admin-page__header">
         <div>
-          <h1 className="shop-order-list-page__title">Quản Lý Đơn Hàng</h1>
-          <p className="shop-order-list-page__subtitle">{orders.length} đơn hàng • {orders.filter(o => o.status === 'Chờ xác nhận').length} đơn chờ xử lý</p>
+          <h1 className="admin-page__title">Quản lý đơn hàng</h1>
+          <p className="admin-page__subtitle">Tổng cộng <strong>{orders.length}</strong> đơn hàng</p>
         </div>
       </div>
 
-      <div className="card">
-        <div className="shop-order-list-page__toolbar">
-          <div className="input-group" style={{ marginBottom: 0, flex: 1 }}>
-            <input type="text" className="input" placeholder="Tìm theo mã đơn, tên khách hàng..." value={search} onChange={e => setSearch(e.target.value)} />
-          </div>
-          <select className="input" style={{ width: 'auto' }} value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-            {STATUS_OPTIONS.map(s => <option key={s}>{s}</option>)}
-          </select>
+      {/* Tabs */}
+      <div className="seller-tabs">
+        {STATUS_TABS.map(t => (
+          <button
+            key={t.key}
+            className={`seller-tab ${tab === t.key ? 'seller-tab--active' : ''}`}
+            onClick={() => { setTab(t.key); setPage(1); }}
+          >
+            {t.label}
+            {tabCounts[t.key] > 0 && (
+              <span className="seller-tab__count">{tabCounts[t.key]}</span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Search */}
+      <div className="seller-orders__search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input
+          type="text"
+          placeholder="Tìm theo mã đơn, tên khách hàng..."
+          value={search}
+          onChange={e => { setSearch(e.target.value); setPage(1); }}
+          className="seller-orders__search-input"
+        />
+      </div>
+
+      {/* Table */}
+      <div className="admin-section">
+        <div className="seller-table-wrap">
+          <table className="seller-table">
+            <thead>
+              <tr>
+                <th>Mã đơn</th>
+                <th>Khách hàng</th>
+                <th>Tổng tiền</th>
+                <th>Thanh toán</th>
+                <th>Ngày đặt</th>
+                <th>Trạng thái</th>
+                <th style={{ width: 180 }}>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginated.length === 0 ? (
+                <tr>
+                  <td colSpan={7}>
+                    <div className="seller-empty">
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                      <p>Không có đơn hàng nào</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : paginated.map(order => (
+                <tr key={order.id}>
+                  <td><span className="seller-order-code">{order.orderCode}</span></td>
+                  <td>
+                    <div className="seller-table__customer">
+                      <img src={order.customerAvatar} alt={order.customerName} className="seller-table__avatar" />
+                      <div>
+                        <p className="seller-table__customer-name">{order.customerName}</p>
+                        <p className="seller-table__customer-phone">{order.customerPhone}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span className="seller-order-amount">{formatVND(order.finalAmount)}</span>
+                    <span className="seller-order-items">{order.items} sản phẩm</span>
+                  </td>
+                  <td>
+                    <span className="seller-payment-method">{PAYMENT_LABEL[order.paymentMethod] || order.paymentMethod}</span>
+                    <span className={`badge ${order.paymentStatus === 'paid' ? 'badge-success' : order.paymentStatus === 'unpaid' ? 'badge-warning' : 'badge-danger'}`} style={{ fontSize: 10 }}>
+                      {order.paymentStatus === 'paid' ? 'Đã thanh toán' : order.paymentStatus === 'unpaid' ? 'Chưa thanh toán' : 'Hoàn tiền'}
+                    </span>
+                  </td>
+                  <td>
+                    <span className="seller-order-date">{new Date(order.createdAt).toLocaleDateString('vi-VN')}</span>
+                    <span className="seller-order-time">{new Date(order.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</span>
+                  </td>
+                  <td><span className={`badge ${STATUS_BADGE[order.status]}`}>{STATUS_LABEL[order.status]}</span></td>
+                  <td>
+                    <div className="seller-order-actions">
+                      <button className="seller-action-btn seller-action-btn--primary" title="Xem chi tiết" onClick={() => setSelectedOrder(order)}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        Chi tiết
+                      </button>
+                      {NEXT_STATUS[order.status] && (
+                        <button className="seller-action-btn seller-action-btn--success" title={NEXT_STATUS[order.status]!.label} onClick={() => handleAdvance(order)}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                          {NEXT_STATUS[order.status]!.label}
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
-        <div className="shop-order-table">
-          <div className="shop-order-table__head">
-            <span>Mã đơn</span>
-            <span>Khách hàng</span>
-            <span>SL</span>
-            <span>Tổng tiền</span>
-            <span>Ngày đặt</span>
-            <span>Trạng thái</span>
-            <span>Thao tác</span>
+        {/* Pagination */}
+        {filtered.length > perPage && (
+          <div className="seller-pagination">
+            <span className="seller-pagination__info">
+              Hiển thị {(page - 1) * perPage + 1}–{Math.min(page * perPage, filtered.length)} của {filtered.length} đơn
+            </span>
+            <div className="seller-pagination__buttons">
+              <button className="seller-pagination__btn" disabled={page === 1} onClick={() => setPage(p => p - 1)}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                let p = i + 1;
+                if (totalPages > 7) {
+                  if (page <= 4) p = i + 1;
+                  else if (page >= totalPages - 3) p = totalPages - 6 + i;
+                  else p = page - 3 + i;
+                }
+                return (
+                  <button key={i} className={`seller-pagination__btn ${page === p ? 'seller-pagination__btn--active' : ''}`} onClick={() => setPage(p)}>
+                    {p}
+                  </button>
+                );
+              })}
+              <button className="seller-pagination__btn" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
           </div>
-          {filtered.map(order => (
-            <div key={order.id} className="shop-order-table__row">
-              <span className="shop-order-table__id">{order.id}</span>
-              <div className="shop-order-table__customer">
-                <strong>{order.customer}</strong>
-                <small>{order.phone}</small>
+        )}
+      </div>
+
+      {/* Order Detail Panel */}
+      {selectedOrder && (
+        <>
+          <div className="admin-detail-panel-overlay" onClick={() => setSelectedOrder(null)} />
+          <div className="admin-detail-panel">
+            <div className="admin-detail-panel__header">
+              <h2 className="admin-detail-panel__title">Chi tiết đơn hàng {selectedOrder.orderCode}</h2>
+              <button className="admin-detail-panel__close" onClick={() => setSelectedOrder(null)}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div className="admin-detail-panel__body">
+              {/* Status */}
+              <div className="seller-order-timeline">
+                {orderStatuses.map(s => (
+                  <div key={s} className={`seller-order-timeline__step ${s === selectedOrder.status ? 'active' : orderStatuses.indexOf(s) < orderStatuses.indexOf(selectedOrder.status as any) ? 'done' : ''}`}>
+                    <div className="seller-order-timeline__dot" />
+                    <span>{STATUS_LABEL[s]}</span>
+                  </div>
+                ))}
               </div>
-              <span>{order.items}</span>
-              <span className="shop-order-table__amount">{order.amount}</span>
-              <span className="shop-order-table__date">{order.date}</span>
-              <span className="badge" style={{ background: `${order.statusColor}15`, color: order.statusColor, width: 'fit-content' }}>{order.status}</span>
-              <div className="shop-order-table__actions">
-                <select
-                  className="input input-sm"
-                  style={{ width: 'auto', padding: '4px 8px', fontSize: '12px' }}
-                  value={order.status}
-                  onChange={e => updateStatus(order.id, e.target.value)}
-                >
-                  {STATUS_OPTIONS.filter(s => s !== 'Tất cả').map(s => <option key={s}>{s}</option>)}
-                </select>
-                <button className="btn btn-sm btn-outline">Chi tiết</button>
+
+              <div className="admin-detail-section">
+                <h4 className="admin-detail-section__title">Thông tin khách hàng</h4>
+                <div className="admin-detail-row">
+                  <span className="admin-detail-label">Tên</span>
+                  <span className="admin-detail-value">{selectedOrder.customerName}</span>
+                </div>
+                <div className="admin-detail-row">
+                  <span className="admin-detail-label">Điện thoại</span>
+                  <span className="admin-detail-value">{selectedOrder.customerPhone}</span>
+                </div>
+                <div className="admin-detail-row">
+                  <span className="admin-detail-label">Địa chỉ giao</span>
+                  <span className="admin-detail-value">{selectedOrder.shippingAddress}</span>
+                </div>
+                <div className="admin-detail-row">
+                  <span className="admin-detail-label">Ghi chú</span>
+                  <span className="admin-detail-value">{selectedOrder.note || 'Không có'}</span>
+                </div>
+              </div>
+
+              <div className="admin-detail-section">
+                <h4 className="admin-detail-section__title">Sản phẩm ({selectedOrder.items})</h4>
+                {selectedOrder.products.map((item, i) => (
+                  <div key={i} className="seller-order-product">
+                    <img src={item.productImage} alt={item.productName}
+                      className="seller-order-product__img"
+                      onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/48x48/cccccc/999999?text=IMG'; }} />
+                    <div className="seller-order-product__info">
+                      <p className="seller-order-product__name">{item.productName}</p>
+                      <p className="seller-order-product__sku">SKU: {item.sku}</p>
+                    </div>
+                    <div className="seller-order-product__right">
+                      <p className="seller-order-product__price">{formatVND(item.unitPrice)}</p>
+                      <p className="seller-order-product__qty">x{item.quantity}</p>
+                      <p className="seller-order-product__total">{formatVND(item.totalPrice)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="admin-detail-section">
+                <h4 className="admin-detail-section__title">Thanh toán</h4>
+                <div className="admin-detail-row">
+                  <span className="admin-detail-label">Tổng tiền</span>
+                  <span className="admin-detail-value">{formatVND(selectedOrder.totalAmount)}</span>
+                </div>
+                <div className="admin-detail-row">
+                  <span className="admin-detail-label">Phí vận chuyển</span>
+                  <span className="admin-detail-value">{formatVND(selectedOrder.shippingFee)}</span>
+                </div>
+                {selectedOrder.discount > 0 && (
+                  <div className="admin-detail-row">
+                    <span className="admin-detail-label">Giảm giá</span>
+                    <span className="admin-detail-value" style={{ color: 'var(--color-success)' }}>-{formatVND(selectedOrder.discount)}</span>
+                  </div>
+                )}
+                <div className="admin-detail-row" style={{ fontWeight: 700, fontSize: 'var(--font-size-md)' }}>
+                  <span className="admin-detail-label">Thành tiền</span>
+                  <span className="admin-detail-value" style={{ color: 'var(--color-danger)', fontSize: 'var(--font-size-lg)' }}>{formatVND(selectedOrder.finalAmount)}</span>
+                </div>
+                <div className="admin-detail-row">
+                  <span className="admin-detail-label">Phương thức</span>
+                  <span className="admin-detail-value">{PAYMENT_LABEL[selectedOrder.paymentMethod] || selectedOrder.paymentMethod}</span>
+                </div>
+                {selectedOrder.trackingNumber && (
+                  <div className="admin-detail-row">
+                    <span className="admin-detail-label">Mã vận đơn</span>
+                    <span className="admin-detail-value">{selectedOrder.trackingNumber}</span>
+                  </div>
+                )}
               </div>
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

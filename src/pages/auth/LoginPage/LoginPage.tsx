@@ -4,6 +4,16 @@ import { useAuth } from '../../../contexts';
 import { ROUTES } from '../../../constants/routes';
 import './LoginPage.css';
 
+const getRoleRedirect = (role: string): string => {
+  switch (role) {
+    case 'SUPER_ADMIN': return '/super-admin';
+    case 'ADMIN': return '/admin';
+    case 'SHOP': return '/seller';
+    case 'CUSTOMER': return '/account';
+    default: return '/';
+  }
+};
+
 export const LoginPage = () => {
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -20,17 +30,19 @@ export const LoginPage = () => {
     }
     const result = await login(form.email, form.password, form.rememberMe);
     if (result.success) {
-      navigate('/');
+      const target = result.role ? getRoleRedirect(result.role) : '/';
+      navigate(target);
     } else {
       setError(result.message);
     }
   };
 
-  const fillDemo = (role: 'admin' | 'shop' | 'customer') => {
+  const fillDemo = (role: 'admin' | 'shop' | 'customer' | 'superadmin') => {
     const accounts = {
       admin: { email: 'admin@henzo.com', password: '123456' },
       shop: { email: 'shop@henzo.com', password: '123456' },
       customer: { email: 'customer@henzo.com', password: '123456' },
+      superadmin: { email: 'superadmin@pixelstore.com', password: '123456' },
     };
     setForm({ ...form, ...accounts[role] });
   };
@@ -136,6 +148,7 @@ export const LoginPage = () => {
           <button type="button" className="btn btn-sm btn-secondary" onClick={() => fillDemo('admin')}>Admin</button>
           <button type="button" className="btn btn-sm btn-secondary" onClick={() => fillDemo('shop')}>Shop</button>
           <button type="button" className="btn btn-sm btn-secondary" onClick={() => fillDemo('customer')}>Customer</button>
+          <button type="button" className="btn btn-sm btn-secondary" onClick={() => fillDemo('superadmin')}>Super Admin</button>
         </div>
       </div>
 

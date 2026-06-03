@@ -38,33 +38,47 @@ export const ROUTES = {
   NOTIFICATIONS: '/notifications',
   SUPPORT: '/support',
 
-  // Shop (protected - SHOP)
-  SHOP_DASHBOARD: '/shop/dashboard',
-  SHOP_PRODUCTS: '/shop/products',
-  SHOP_PRODUCT_CREATE: '/shop/products/create',
-  SHOP_PRODUCT_EDIT: '/shop/products/edit/:id',
-  SHOP_ORDERS: '/shop/orders',
-  SHOP_INVENTORY: '/shop/inventory',
-  SHOP_PROMOTIONS: '/shop/promotions',
-  SHOP_REVIEWS: '/shop/reviews',
-  SHOP_REPORTS: '/shop/reports',
-  SHOP_FINANCE: '/shop/finance',
-  SHOP_PAYMENTS: '/shop/payments',
-  SHOP_SUPPORT: '/shop/support',
-  SHOP_PROFILE: '/shop/profile',
+  // Shop (protected - SHOP, ADMIN)
+  SHOP_DASHBOARD: '/seller',
+  SHOP_PRODUCTS: '/seller/products',
+  SHOP_PRODUCT_CREATE: '/seller/products/create',
+  SHOP_PRODUCT_EDIT: '/seller/products/edit/:id',
+  SHOP_ORDERS: '/seller/orders',
+  SHOP_INVENTORY: '/seller/inventory',
+  SHOP_PROMOTIONS: '/seller/promotions',
+  SHOP_REVIEWS: '/seller/reviews',
+  SHOP_REPORTS: '/seller/reports',
+  SHOP_FINANCE: '/seller/finance',
+  SHOP_PAYMENTS: '/seller/payments',
+  SHOP_SUPPORT: '/seller/support',
+  SHOP_PROFILE: '/seller/profile',
+  SHOP_SHIPPING: '/seller/shipping',
+  SHOP_NOTIFICATIONS: '/seller/notifications',
 
   // Admin (protected - ADMIN, SUPER_ADMIN)
-  ADMIN_DASHBOARD: '/admin/dashboard',
+  ADMIN_DASHBOARD: '/admin',
   ADMIN_PRODUCTS: '/admin/products',
   ADMIN_ORDERS: '/admin/orders',
   ADMIN_CUSTOMERS: '/admin/customers',
-  ADMIN_SHOPS: '/admin/shops',
+  ADMIN_STORES: '/admin/stores',
   ADMIN_PAYMENTS: '/admin/payments',
   ADMIN_REVIEWS: '/admin/reviews',
   ADMIN_PROMOTIONS: '/admin/promotions',
   ADMIN_SUPPORT: '/admin/support',
   ADMIN_REPORTS: '/admin/reports',
-  ADMIN_ROLES: '/admin/roles',
+  ADMIN_NOTIFICATIONS: '/admin/notifications',
+  ADMIN_ACCESS: '/admin/access',
+  ADMIN_FINANCE: '/admin/finance',
+
+  // Super Admin (protected - SUPER_ADMIN)
+  SUPER_ADMIN_DASHBOARD: '/super-admin',
+  SUPER_ADMIN_ADMINS: '/super-admin/admins',
+  SUPER_ADMIN_PERMISSIONS: '/super-admin/permissions',
+  SUPER_ADMIN_SYSTEM: '/super-admin/system',
+  SUPER_ADMIN_FINANCIAL: '/super-admin/financial',
+  SUPER_ADMIN_LOGS: '/super-admin/logs',
+  SUPER_ADMIN_NOTIFICATIONS: '/super-admin/notifications',
+  SUPER_ADMIN_SETTINGS: '/super-admin/settings',
 
   // Errors
   NOT_FOUND: '/404',
@@ -74,6 +88,7 @@ export const ROUTES = {
 
 // ─── Page Title Mapping ─────────────────────────────────────────────────────
 export const PAGE_TITLES: Record<string, string> = {
+  // Public
   [ROUTES.HOME]: 'Trang Chủ',
   [ROUTES.PRODUCTS]: 'Sản Phẩm',
   [ROUTES.PRODUCT_DETAIL]: 'Chi Tiết Sản Phẩm',
@@ -90,9 +105,13 @@ export const PAGE_TITLES: Record<string, string> = {
   [ROUTES.CONTACT]: 'Liên Hệ',
   [ROUTES.ABOUT]: 'Giới Thiệu',
   [ROUTES.FAQ]: 'Câu Hỏi Thường Gặp',
+
+  // Auth
   [ROUTES.LOGIN]: 'Đăng Nhập',
   [ROUTES.REGISTER]: 'Đăng Ký',
   [ROUTES.FORGOT_PASSWORD]: 'Quên Mật Khẩu',
+
+  // Customer
   [ROUTES.ACCOUNT]: 'Tài Khoản',
   [ROUTES.ACCOUNT_DASHBOARD]: 'Tài Khoản',
   [ROUTES.ORDERS]: 'Đơn Hàng',
@@ -106,6 +125,8 @@ export const PAGE_TITLES: Record<string, string> = {
   [ROUTES.PAYMENTS]: 'Thanh Toán',
   [ROUTES.NOTIFICATIONS]: 'Thông Báo',
   [ROUTES.SUPPORT]: 'Hỗ Trợ',
+
+  // Shop Seller
   [ROUTES.SHOP_DASHBOARD]: 'Dashboard Shop',
   [ROUTES.SHOP_PRODUCTS]: 'Quản Lý Sản Phẩm',
   [ROUTES.SHOP_PRODUCT_CREATE]: 'Thêm Sản Phẩm',
@@ -119,17 +140,35 @@ export const PAGE_TITLES: Record<string, string> = {
   [ROUTES.SHOP_PAYMENTS]: 'Thanh Toán Shop',
   [ROUTES.SHOP_SUPPORT]: 'Hỗ Trợ Shop',
   [ROUTES.SHOP_PROFILE]: 'Cài Đặt Cửa Hàng',
+  [ROUTES.SHOP_SHIPPING]: 'Vận Chuyển',
+  [ROUTES.SHOP_NOTIFICATIONS]: 'Thông Báo',
+
+  // Admin
   [ROUTES.ADMIN_DASHBOARD]: 'Dashboard Admin',
   [ROUTES.ADMIN_PRODUCTS]: 'Quản Lý Sản Phẩm',
   [ROUTES.ADMIN_ORDERS]: 'Quản Lý Đơn Hàng',
   [ROUTES.ADMIN_CUSTOMERS]: 'Quản Lý Khách Hàng',
-  [ROUTES.ADMIN_SHOPS]: 'Quản Lý Shop',
+  [ROUTES.ADMIN_STORES]: 'Quản Lý Shop',
   [ROUTES.ADMIN_PAYMENTS]: 'Quản Lý Thanh Toán',
   [ROUTES.ADMIN_REVIEWS]: 'Quản Lý Đánh Giá',
   [ROUTES.ADMIN_PROMOTIONS]: 'Quản Lý Khuyến Mãi',
   [ROUTES.ADMIN_SUPPORT]: 'Quản Lý Hỗ Trợ',
   [ROUTES.ADMIN_REPORTS]: 'Báo Cáo Hệ Thống',
-  [ROUTES.ADMIN_ROLES]: 'Phân Quyền',
+  [ROUTES.ADMIN_NOTIFICATIONS]: 'Quản Lý Thông Báo',
+  [ROUTES.ADMIN_ACCESS]: 'Phân Quyền',
+  [ROUTES.ADMIN_FINANCE]: 'Tài Chính Hệ Thống',
+
+  // Super Admin
+  [ROUTES.SUPER_ADMIN_DASHBOARD]: 'Dashboard Super Admin',
+  [ROUTES.SUPER_ADMIN_ADMINS]: 'Quản Lý Quản Trị Viên',
+  [ROUTES.SUPER_ADMIN_PERMISSIONS]: 'Quản Lý Phân Quyền',
+  [ROUTES.SUPER_ADMIN_SYSTEM]: 'Quản Lý Hệ Thống',
+  [ROUTES.SUPER_ADMIN_FINANCIAL]: 'Tài Chính Hệ Thống',
+  [ROUTES.SUPER_ADMIN_LOGS]: 'Nhật Ký Hệ Thống',
+  [ROUTES.SUPER_ADMIN_NOTIFICATIONS]: 'Quản Lý Thông Báo',
+  [ROUTES.SUPER_ADMIN_SETTINGS]: 'Cài Đặt Hệ Thống',
+
+  // Errors
   [ROUTES.NOT_FOUND]: '404 - Không Tìm Thấy',
   [ROUTES.FORBIDDEN]: '403 - Không Có Quyền Truy Cập',
   [ROUTES.SERVER_ERROR]: '500 - Lỗi Hệ Thống',

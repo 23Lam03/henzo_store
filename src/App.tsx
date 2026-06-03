@@ -10,6 +10,7 @@ import {
   RecentlyViewedProvider,
   AdminProvider,
 } from './contexts';
+import { SellerProvider } from './contexts/SellerContext';
 import { router } from './router';
 
 function App() {
@@ -23,7 +24,9 @@ function App() {
                 <CompareProvider>
                   <RecentlyViewedProvider>
                     <AdminProvider>
-                      <RouterProvider router={router} />
+                      <SellerProvider>
+                        <RouterProvider router={router} />
+                      </SellerProvider>
                     </AdminProvider>
                   </RecentlyViewedProvider>
                 </CompareProvider>

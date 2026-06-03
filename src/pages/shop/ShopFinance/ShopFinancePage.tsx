@@ -1,88 +1,178 @@
-import { Breadcrumb } from '../../../components/breadcrumb';
+import { useState } from 'react';
+import { useSeller } from '../../../contexts/SellerContext';
 import './ShopFinancePage.css';
 
+const formatVND = (n: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(n);
+const formatNum = (n: number) => new Intl.NumberFormat('vi-VN').format(n);
+
+type Period = 'today' | 'week' | 'month' | 'year';
+
 export const ShopFinancePage = () => {
-  const months = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6'];
-  const revenue = [145, 167, 189, 156, 203, 234];
-  const maxRev = Math.max(...revenue);
+  const { monthlyData, payments } = useSeller();
+  const [period, setPeriod] = useState<Period>('month');
+
+  const successPayments = payments.filter(p => p.status === 'success');
+  const refundedPayments = payments.filter(p => p.status === 'refunded');
+
+  const totalRevenue = successPayments.reduce((s, p) => s + p.amount, 0);
+  const totalPlatformFee = successPayments.reduce((s, p) => s + p.platformFee, 0);
+  const totalRefund = refundedPayments.reduce((s, p) => s + p.amount, 0);
+  const netRevenue = totalRevenue - totalRefund;
+  const avgOrderValue = successPayments.length > 0 ? totalRevenue / successPayments.length : 0;
+  const profit = netRevenue - totalPlatformFee;
+
+  const maxRevenue = Math.max(...monthlyData.map(d => d.revenue), 1);
 
   return (
-    <div className="shop-finance-page">
-      <Breadcrumb />
-      <h1 className="page-heading">Tài Chính Cửa Hàng</h1>
-
-      <div className="finance-summary">
-        {[
-          { label: 'Tổng doanh thu', value: '1,094,000,000đ', change: '+18.5%', icon: '💰', color: '#4F46E5' },
-          { label: 'Doanh thu tháng này', value: '234,000,000đ', change: '+18.5%', icon: '📈', color: '#10B981' },
-          { label: 'Số dư khả dụng', value: '89,500,000đ', change: '+5.2%', icon: '🏦', color: '#06B6D4' },
-          { label: 'Đang chờ thanh toán', value: '45,000,000đ', change: '', icon: '⏳', color: '#F59E0B' },
-        ].map((s, i) => (
-          <div key={i} className="stat-card card">
-            <div className="stat-card__icon" style={{ background: `${s.color}15`, color: s.color }}>{s.icon}</div>
-            <div className="stat-card__info">
-              <p className="stat-card__label">{s.label}</p>
-              <p className="stat-card__value">{s.value}</p>
-              {s.change && <span className="stat-card__change">{s.change}</span>}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="card mb-4">
-        <div className="card__header"><h3>Biểu đồ doanh thu 6 tháng</h3></div>
-        <div className="finance-chart">
-          {months.map((month, i) => (
-            <div key={i} className="finance-chart__bar-group">
-              <div className="finance-chart__bar-wrapper">
-                <div className="finance-chart__bar" style={{ height: `${(revenue[i] / maxRev) * 100}%` }}>
-                  <span className="finance-chart__bar-value">{revenue[i]}M</span>
-                </div>
-              </div>
-              <span className="finance-chart__label">{month}</span>
-            </div>
-          ))}
+    <div className="seller-finance admin-page">
+      <div className="admin-page__header">
+        <div>
+          <h1 className="admin-page__title">Quản lý tài chính</h1>
+          <p className="admin-page__subtitle">Theo dõi doanh thu, chi phí và lợi nhuận</p>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn btn-secondary btn-sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Xuất Excel
+          </button>
+          <button className="btn btn-secondary btn-sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Xuất PDF
+          </button>
         </div>
       </div>
 
-      <div className="card mb-4">
-        <div className="card__header"><h3>Lịch sử giao dịch</h3></div>
-        <table className="finance-table">
-          <thead>
-            <tr><th>Ngày</th><th>Mô tả</th><th>Loại</th><th>Số tiền</th><th>Trạng thái</th></tr>
-          </thead>
-          <tbody>
-            {[
-              { date: '2025-06-03', desc: 'Thanh toán đơn hàng #SHOP-001', type: 'Thu', amount: '+42,990,000đ', status: 'Hoàn thành', color: '#10B981' },
-              { date: '2025-06-02', desc: 'Rút tiền về tài khoản ngân hàng', type: 'Chi', amount: '-20,000,000đ', status: 'Hoàn thành', color: '#EF4444' },
-              { date: '2025-06-01', desc: 'Thanh toán đơn hàng #SHOP-002', type: 'Thu', amount: '+18,990,000đ', status: 'Hoàn thành', color: '#10B981' },
-              { date: '2025-05-31', desc: 'Phí hoa hồng nền tảng', type: 'Chi', amount: '-4,299,000đ', status: 'Hoàn thành', color: '#EF4444' },
-              { date: '2025-05-30', desc: 'Thanh toán đơn hàng #SHOP-003', type: 'Thu', amount: '+89,990,000đ', status: 'Hoàn thành', color: '#10B981' },
-            ].map((t, i) => (
-              <tr key={i}>
-                <td>{new Date(t.date).toLocaleDateString('vi-VN')}</td>
-                <td style={{ fontWeight: 500 }}>{t.desc}</td>
-                <td><span className={`badge ${t.type === 'Thu' ? 'badge-success' : 'badge-secondary'}`}>{t.type}</span></td>
-                <td style={{ fontWeight: 700, color: t.color }}>{t.amount}</td>
-                <td><span className="badge badge-success">{t.status}</span></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Period Tabs */}
+      <div className="seller-finance__period-tabs">
+        {(['today', 'week', 'month', 'year'] as Period[]).map(p => (
+          <button key={p} className={`seller-period-btn ${period === p ? 'seller-period-btn--active' : ''}`} onClick={() => setPeriod(p)}>
+            {{ today: 'Hôm nay', week: 'Tuần này', month: 'Tháng này', year: 'Năm nay' }[p]}
+          </button>
+        ))}
       </div>
 
-      <div className="card">
-        <div className="card__header"><h3>Rút tiền</h3></div>
-        <div className="withdraw-form">
-          <div className="input-group">
-            <label className="input-label">Số tiền muốn rút</label>
-            <input type="number" className="input" placeholder="Nhập số tiền..." defaultValue={50000000} />
+      {/* Finance Stats */}
+      <div className="admin-stats admin-stats--3">
+        <div className="seller-finance-stat seller-finance-stat--primary">
+          <div className="seller-finance-stat__icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           </div>
-          <div className="input-group">
-            <label className="input-label">Số tài khoản</label>
-            <input type="text" className="input" placeholder="Nhập số tài khoản..." defaultValue="1234567890 - Ngân hàng Vietcombank" />
+          <div className="seller-finance-stat__content">
+            <p className="seller-finance-stat__label">Tổng doanh thu</p>
+            <p className="seller-finance-stat__value">{formatVND(totalRevenue)}</p>
           </div>
-          <button className="btn btn-primary">Yêu cầu rút tiền</button>
+        </div>
+        <div className="seller-finance-stat">
+          <div className="seller-finance-stat__icon" style={{ background: 'rgba(245,158,11,0.1)', color: '#F59E0B' }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+          </div>
+          <div className="seller-finance-stat__content">
+            <p className="seller-finance-stat__label">Tổng phí sàn (2.3%)</p>
+            <p className="seller-finance-stat__value" style={{ color: 'var(--color-warning)' }}>-{formatVND(totalPlatformFee)}</p>
+          </div>
+        </div>
+        <div className="seller-finance-stat">
+          <div className="seller-finance-stat__icon" style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444' }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 11 12 7.5 15.5 2 10"/></svg>
+          </div>
+          <div className="seller-finance-stat__content">
+            <p className="seller-finance-stat__label">Hoàn tiền</p>
+            <p className="seller-finance-stat__value" style={{ color: 'var(--color-danger)' }}>-{formatVND(totalRefund)}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="admin-stats admin-stats--3">
+        <div className="seller-finance-stat seller-finance-stat--success">
+          <div className="seller-finance-stat__icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div className="seller-finance-stat__content">
+            <p className="seller-finance-stat__label">Lợi nhuận ròng</p>
+            <p className="seller-finance-stat__value">{formatVND(profit)}</p>
+          </div>
+        </div>
+        <div className="seller-finance-stat">
+          <div className="seller-finance-stat__icon" style={{ background: 'rgba(6,182,212,0.1)', color: '#06B6D4' }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div className="seller-finance-stat__content">
+            <p className="seller-finance-stat__label">Tổng đơn hàng</p>
+            <p className="seller-finance-stat__value">{formatNum(successPayments.length)}</p>
+          </div>
+        </div>
+        <div className="seller-finance-stat">
+          <div className="seller-finance-stat__icon" style={{ background: 'rgba(139,92,246,0.1)', color: '#8B5CF6' }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div className="seller-finance-stat__content">
+            <p className="seller-finance-stat__label">Giá trị TB đơn hàng</p>
+            <p className="seller-finance-stat__value">{formatVND(avgOrderValue)}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Chart */}
+      <div className="admin-section seller-finance__chart-section">
+        <div className="seller-finance-chart">
+          <div className="seller-finance-chart__header">
+            <h3 className="seller-finance-chart__title">Doanh thu theo tháng</h3>
+            <div className="seller-finance-chart__legend">
+              <span className="seller-finance-chart__legend-item">
+                <span className="seller-finance-chart__legend-dot" style={{ background: 'var(--gradient-primary)' }} />
+                Doanh thu
+              </span>
+            </div>
+          </div>
+          <div className="seller-finance-bar-chart">
+            {monthlyData.map((d, i) => (
+              <div key={i} className="seller-finance-bar-chart__group">
+                <div className="seller-finance-bar-chart__bar-wrapper">
+                  <div className="seller-finance-bar-chart__tooltip">{formatVND(d.revenue)}</div>
+                  <div className="seller-finance-bar-chart__bar" style={{ height: `${(d.revenue / maxRevenue) * 100}%` }} />
+                </div>
+                <span className="seller-finance-bar-chart__label">{d.month}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Monthly Breakdown */}
+      <div className="admin-section">
+        <div className="admin-section__header">
+          <h3 className="admin-section__title">Báo cáo chi tiết theo tháng</h3>
+        </div>
+        <div className="seller-table-wrap">
+          <table className="seller-table">
+            <thead>
+              <tr>
+                <th>Tháng</th>
+                <th>Doanh thu</th>
+                <th>Số đơn</th>
+                <th>Phí sàn</th>
+                <th>Hoàn tiền</th>
+                <th>Thu nhập ròng</th>
+              </tr>
+            </thead>
+            <tbody>
+              {monthlyData.map((d, i) => {
+                const fee = Math.floor(d.revenue * 0.023);
+                const refund = Math.floor(d.revenue * 0.02);
+                const net = d.revenue - fee - refund;
+                return (
+                  <tr key={i}>
+                    <td><strong>{d.month}/2024</strong></td>
+                    <td><strong style={{ color: 'var(--color-primary)' }}>{formatVND(d.revenue)}</strong></td>
+                    <td>{formatNum(d.orders)}</td>
+                    <td style={{ color: 'var(--color-warning)' }}>-{formatVND(fee)}</td>
+                    <td style={{ color: 'var(--color-danger)' }}>-{formatVND(refund)}</td>
+                    <td><strong style={{ color: 'var(--color-success)' }}>{formatVND(net)}</strong></td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

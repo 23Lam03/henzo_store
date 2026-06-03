@@ -1,142 +1,291 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Breadcrumb } from '../../../components/breadcrumb';
-import { mockApi } from '../../../services';
-import type { Product } from '../../../types';
+import { useSeller } from '../../../contexts/SellerContext';
 import './ShopDashboardPage.css';
 
+const formatVND = (n: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(n);
+const formatNum = (n: number) => new Intl.NumberFormat('vi-VN').format(n);
+
 export const ShopDashboardPage = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-
-  useEffect(() => {
-    mockApi.getFeaturedProducts().then(data => {
-      setProducts(data);
+  const { store, stats, orders, dailyRevenue, monthlyData } = useSeller();
+  
+  // Top 5 selling products from orders
+  const [recentOrders] = useState(() => orders.slice(0, 8));
+  
+  // Compute top products from order products
+  const productSales: Record<string, { name: string; image: string; sold: number; revenue: number }> = {};
+  orders.forEach(o => {
+    o.products.forEach(p => {
+      if (!productSales[p.productId]) {
+        productSales[p.productId] = { name: p.productName, image: p.productImage, sold: 0, revenue: 0 };
+      }
+      productSales[p.productId].sold += p.quantity;
+      productSales[p.productId].revenue += p.totalPrice;
     });
-  }, []);
+  });
+  const topProducts = Object.entries(productSales)
+    .sort((a, b) => b[1].sold - a[1].sold)
+    .slice(0, 5);
 
-  const totalRevenue = 156_890_000;
-  const todayRevenue = 12_500_000;
-  const todayOrders = 8;
-  const pendingOrders = 23;
-
-  const recentOrders = [
-    { id: 'SHOP-001', customer: 'Nguyễn Văn A', phone: '0901234567', items: 2, amount: '42,990,000đ', status: 'Chờ xác nhận', statusColor: '#F59E0B', date: '10 phút trước' },
-    { id: 'SHOP-002', customer: 'Trần Thị B', phone: '0934567890', items: 1, amount: '18,990,000đ', status: 'Đã xác nhận', statusColor: '#3B82F6', date: '30 phút trước' },
-    { id: 'SHOP-003', customer: 'Lê Văn C', phone: '0912345678', items: 3, amount: '89,990,000đ', status: 'Đang đóng gói', statusColor: '#8B5CF6', date: '1 giờ trước' },
-    { id: 'SHOP-004', customer: 'Phạm Thị D', phone: '0987654321', items: 1, amount: '34,990,000đ', status: 'Đang vận chuyển', statusColor: '#06B6D4', date: '2 giờ trước' },
-    { id: 'SHOP-005', customer: 'Hoàng Văn E', phone: '0971234567', items: 2, amount: '52,990,000đ', status: 'Đã giao', statusColor: '#10B981', date: '5 giờ trước' },
+  const statCards = [
+    {
+      label: 'Doanh thu tháng',
+      value: formatVND(stats.totalRevenue),
+      change: stats.revenueChange,
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
+      iconBg: 'rgba(79,70,229,0.1)',
+      iconColor: '#4F46E5',
+    },
+    {
+      label: 'Tổng đơn hàng',
+      value: formatNum(stats.totalOrders),
+      change: stats.ordersChange,
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>,
+      iconBg: 'rgba(6,182,212,0.1)',
+      iconColor: '#06B6D4',
+    },
+    {
+      label: 'Đơn đang xử lý',
+      value: formatNum(stats.pendingOrders),
+      change: null,
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+      iconBg: 'rgba(245,158,11,0.1)',
+      iconColor: '#F59E0B',
+    },
+    {
+      label: 'Đơn hoàn thành',
+      value: formatNum(stats.completedOrders),
+      change: null,
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+      iconBg: 'rgba(16,185,129,0.1)',
+      iconColor: '#10B981',
+    },
+    {
+      label: 'Sản phẩm đang bán',
+      value: formatNum(stats.totalProducts),
+      change: null,
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>,
+      iconBg: 'rgba(139,92,246,0.1)',
+      iconColor: '#8B5CF6',
+    },
+    {
+      label: 'Sản phẩm hết hàng',
+      value: formatNum(stats.outOfStockProducts),
+      change: null,
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
+      iconBg: 'rgba(239,68,68,0.1)',
+      iconColor: '#EF4444',
+    },
+    {
+      label: 'Khách hàng mới',
+      value: formatNum(stats.newCustomers),
+      change: null,
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+      iconBg: 'rgba(16,185,129,0.1)',
+      iconColor: '#10B981',
+    },
+    {
+      label: 'Tỷ lệ chuyển đổi',
+      value: `${stats.conversionRate}%`,
+      change: null,
+      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>,
+      iconBg: 'rgba(245,158,11,0.1)',
+      iconColor: '#F59E0B',
+    },
   ];
 
-  const topProducts = products.slice(0, 5).map(p => ({ name: p.name, sold: p.sold, revenue: (p.price * p.sold).toLocaleString('vi-VN') + 'đ', img: p.images[0] }));
+  const statusConfig: Record<string, { label: string; cls: string }> = {
+    pending: { label: 'Chờ xác nhận', cls: 'badge-warning' },
+    confirmed: { label: 'Đã xác nhận', cls: 'badge-primary' },
+    preparing: { label: 'Đang chuẩn bị', cls: 'badge-accent' },
+    shipped: { label: 'Đã giao shipper', cls: 'badge-primary' },
+    delivering: { label: 'Đang giao', cls: 'badge-accent' },
+    delivered: { label: 'Hoàn thành', cls: 'badge-success' },
+    cancelled: { label: 'Đã hủy', cls: 'badge-danger' },
+    returned: { label: 'Hoàn trả', cls: 'badge-danger' },
+  };
+
+  // Revenue chart (last 14 days from dailyRevenue)
+  const chartData = dailyRevenue.slice(-14);
+  const maxRevenue = Math.max(...chartData.map(d => d.revenue), 1);
 
   return (
-    <div className="shop-dashboard">
-      <Breadcrumb />
-      <div className="shop-dashboard__header">
+    <div className="seller-dashboard">
+      {/* Page Header */}
+      <div className="seller-dashboard__header">
         <div>
-          <h1 className="shop-dashboard__title">Tổng Quan Cửa Hàng</h1>
-          <p className="shop-dashboard__subtitle">
-            Chào mừng bạn quay trở lại! Cửa hàng đang hoạt động tốt.
+          <h1 className="seller-dashboard__title">Tổng quan cửa hàng</h1>
+          <p className="seller-dashboard__subtitle">
+            Chào mừng <strong>{store.name}</strong> quay trở lại! Đây là báo cáo hoạt động của cửa hàng.
           </p>
         </div>
-        <div className="shop-dashboard__date">
-          {new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+        <div className="seller-dashboard__actions">
+          <Link to="/seller/products/create" className="btn btn-primary btn-sm">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Đăng sản phẩm
+          </Link>
+          <Link to="/seller/orders" className="btn btn-secondary btn-sm">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Xem đơn hàng
+          </Link>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="shop-dashboard__stats">
-        {[
-          { label: 'Doanh thu tháng', value: totalRevenue.toLocaleString('vi-VN') + 'đ', change: '+18.5%', icon: '💰', color: '#4F46E5', bg: 'rgba(79,70,229,0.08)' },
-          { label: 'Doanh thu hôm nay', value: todayRevenue.toLocaleString('vi-VN') + 'đ', change: '+5.2%', icon: '📈', color: '#06B6D4', bg: 'rgba(6,182,212,0.08)' },
-          { label: 'Đơn hàng hôm nay', value: todayOrders.toString(), change: '+3 đơn', icon: '📦', color: '#10B981', bg: 'rgba(16,185,129,0.08)' },
-          { label: 'Chờ xử lý', value: pendingOrders.toString(), change: 'Cần xử lý ngay', icon: '⏳', color: '#F59E0B', bg: 'rgba(245,158,11,0.08)' },
-        ].map((s, i) => (
-          <div key={i} className="stat-card card">
-            <div className="stat-card__icon" style={{ background: s.bg, color: s.color }}>{s.icon}</div>
-            <div className="stat-card__info">
-              <p className="stat-card__label">{s.label}</p>
-              <p className="stat-card__value">{s.value}</p>
-              <span className="stat-card__change">{s.change}</span>
+      {/* Stats Grid */}
+      <div className="admin-stats admin-stats--4">
+        {statCards.map((card, i) => (
+          <div key={i} className="seller-stat-card">
+            <div className="seller-stat-card__icon" style={{ background: card.iconBg, color: card.iconColor }}>
+              {card.icon}
+            </div>
+            <div className="seller-stat-card__info">
+              <p className="seller-stat-card__label">{card.label}</p>
+              <p className="seller-stat-card__value">{card.value}</p>
+              {card.change !== null && (
+                <span className={`seller-stat-card__change ${card.change >= 0 ? 'seller-stat-card__change--up' : 'seller-stat-card__change--down'}`}>
+                  {card.change >= 0 ? '↑' : '↓'} {Math.abs(card.change)}%
+                </span>
+              )}
             </div>
           </div>
         ))}
       </div>
 
-      {/* Main grid */}
-      <div className="shop-dashboard__grid">
-        <div className="card">
-          <div className="card__header">
-            <h3>Đơn hàng gần đây</h3>
-            <Link to="/shop/orders" className="btn btn-sm btn-outline">Xem tất cả</Link>
+      {/* Charts Row */}
+      <div className="seller-dashboard__charts">
+        {/* Revenue Chart */}
+        <div className="seller-chart-card">
+          <div className="seller-chart-card__header">
+            <h3 className="seller-chart-card__title">Doanh thu 14 ngày gần nhất</h3>
+            <span className="seller-chart-card__total">{formatVND(chartData.reduce((s, d) => s + d.revenue, 0))}</span>
           </div>
-          <div className="order-table">
-            <div className="order-table__head">
-              <span>Mã đơn</span>
-              <span>Khách hàng</span>
-              <span>SL</span>
-              <span>Tổng tiền</span>
-              <span>Trạng thái</span>
-              <span>Thao tác</span>
-            </div>
-            {recentOrders.map(order => (
-              <div key={order.id} className="order-table__row">
-                <span className="order-table__id">{order.id}</span>
-                <div className="order-table__customer">
-                  <strong>{order.customer}</strong>
-                  <small>{order.phone}</small>
+          <div className="seller-bar-chart">
+            {chartData.map((d, i) => (
+              <div key={i} className="seller-bar-chart__group">
+                <div className="seller-bar-chart__bar-wrapper">
+                  <div
+                    className="seller-bar-chart__bar"
+                    style={{ height: `${(d.revenue / maxRevenue) * 100}%` }}
+                    title={formatVND(d.revenue)}
+                  />
                 </div>
-                <span>{order.items}</span>
-                <span className="order-table__amount">{order.amount}</span>
-                <span className="badge" style={{ background: `${order.statusColor}15`, color: order.statusColor }}>{order.status}</span>
-                <Link to={`/shop/orders/${order.id}`} className="btn btn-sm btn-primary">Chi tiết</Link>
+                <span className="seller-bar-chart__label">{d.date}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div>
-          <div className="card mb-4">
-            <div className="card__header">
-              <h3>Sản phẩm bán chạy</h3>
-              <Link to="/shop/products" className="btn btn-sm btn-outline">Xem tất cả</Link>
-            </div>
-            <div className="top-products">
-              {topProducts.map((p, i) => (
-                <div key={i} className="top-product">
-                  <span className="top-product__rank">{i + 1}</span>
-                  <img src={p.img} alt={p.name} className="top-product__img" loading="lazy" />
-                  <div className="top-product__info">
-                    <p className="top-product__name">{p.name}</p>
-                    <p className="top-product__sold">{p.sold} đã bán</p>
+        {/* Monthly Revenue Chart */}
+        <div className="seller-chart-card">
+          <div className="seller-chart-card__header">
+            <h3 className="seller-chart-card__title">Doanh thu theo tháng (12 tháng)</h3>
+            <span className="seller-chart-card__total">{formatVND(monthlyData.reduce((s, d) => s + d.revenue, 0))}</span>
+          </div>
+          <div className="seller-bar-chart">
+            {monthlyData.map((d, i) => {
+              const maxM = Math.max(...monthlyData.map(m => m.revenue), 1);
+              return (
+                <div key={i} className="seller-bar-chart__group">
+                  <div className="seller-bar-chart__bar-wrapper">
+                    <div
+                      className="seller-bar-chart__bar"
+                      style={{ height: `${(d.revenue / maxM) * 100}%`, background: 'linear-gradient(180deg, #06B6D4 0%, #0891B2 100%)' }}
+                      title={formatVND(d.revenue)}
+                    />
                   </div>
-                  <span className="top-product__revenue">{p.revenue}</span>
+                  <span className="seller-bar-chart__label">{d.month}</span>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
+        </div>
+      </div>
 
-          <div className="card">
-            <h3 className="mb-4">Thao tác nhanh</h3>
-            <div className="quick-actions">
-              <Link to="/shop/products/post" className="quick-action">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="12" y1="11" x2="12" y2="17"/></svg>
-                Thêm sản phẩm mới
-              </Link>
-              <Link to="/shop/orders" className="quick-action">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="16" y1="10" x2="8" y2="10"/></svg>
-                Xử lý đơn hàng
-              </Link>
-              <Link to="/shop/promotions" className="quick-action">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                Tạo khuyến mãi
-              </Link>
-              <Link to="/shop/reports" className="quick-action">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                Xem báo cáo
-              </Link>
-            </div>
+      {/* Bottom Row */}
+      <div className="seller-dashboard__bottom">
+        {/* Recent Orders */}
+        <div className="admin-section seller-orders-section">
+          <div className="admin-section__header">
+            <h3 className="admin-section__title">Đơn hàng gần đây</h3>
+            <Link to="/seller/orders" className="seller-section-link">Xem tất cả →</Link>
           </div>
+          <div className="seller-table-wrap">
+            <table className="seller-table">
+              <thead>
+                <tr>
+                  <th>Mã đơn</th>
+                  <th>Khách hàng</th>
+                  <th>Tổng tiền</th>
+                  <th>Ngày đặt</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentOrders.map(order => {
+                  const sc = statusConfig[order.status] || { label: order.status, cls: 'badge-dark' };
+                  return (
+                    <tr key={order.id}>
+                      <td><span className="seller-table__code">{order.orderCode}</span></td>
+                      <td>
+                        <div className="seller-table__customer">
+                          <img src={order.customerAvatar} alt={order.customerName} className="seller-table__avatar" />
+                          <span>{order.customerName}</span>
+                        </div>
+                      </td>
+                      <td><strong>{formatVND(order.finalAmount)}</strong></td>
+                      <td>{new Date(order.createdAt).toLocaleDateString('vi-VN')}</td>
+                      <td><span className={`badge ${sc.cls}`}>{sc.label}</span></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Top Products */}
+        <div className="admin-section seller-top-products-section">
+          <div className="admin-section__header">
+            <h3 className="admin-section__title">Top sản phẩm bán chạy</h3>
+            <Link to="/seller/products" className="seller-section-link">Quản lý →</Link>
+          </div>
+          <div className="seller-top-products">
+            {topProducts.map(([pid, p], i) => (
+              <div key={pid} className="seller-top-product">
+                <span className="seller-top-product__rank">{i + 1}</span>
+                <img src={p.image} alt={p.name} className="seller-top-product__img"
+                  onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/40x40/cccccc/999999?text=IMG'; }} />
+                <div className="seller-top-product__info">
+                  <p className="seller-top-product__name">{p.name}</p>
+                  <p className="seller-top-product__sold">{formatNum(p.sold)} đã bán</p>
+                </div>
+                <span className="seller-top-product__revenue">{formatVND(p.revenue)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Stats Bar */}
+      <div className="seller-dashboard__quick-bar">
+        <div className="seller-quick-stat">
+          <span className="seller-quick-stat__label">Đánh giá trung bình</span>
+          <span className="seller-quick-stat__value">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#F59E0B" stroke="#F59E0B" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            {stats.avgRating} / 5
+          </span>
+        </div>
+        <div className="seller-quick-stat">
+          <span className="seller-quick-stat__label">Giá trị TB đơn hàng</span>
+          <span className="seller-quick-stat__value">{formatVND(stats.totalOrders > 0 ? stats.totalRevenue / stats.totalOrders : 0)}</span>
+        </div>
+        <div className="seller-quick-stat">
+          <span className="seller-quick-stat__label">Tổng doanh thu năm</span>
+          <span className="seller-quick-stat__value">{formatVND(monthlyData.reduce((s, d) => s + d.revenue, 0))}</span>
+        </div>
+        <div className="seller-quick-stat">
+          <span className="seller-quick-stat__label">Đơn hàng năm</span>
+          <span className="seller-quick-stat__value">{formatNum(monthlyData.reduce((s, d) => s + d.orders, 0))}</span>
         </div>
       </div>
     </div>

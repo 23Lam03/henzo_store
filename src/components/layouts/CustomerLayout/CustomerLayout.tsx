@@ -7,6 +7,7 @@ import { Sidebar } from '../../sidebar/Sidebar';
 import type { SidebarItem } from '../../sidebar/Sidebar';
 import { Breadcrumb } from '../../breadcrumb/Breadcrumb';
 import { BackToTop } from '../../common/BackToTop/BackToTop';
+import { usePageTitle } from '../../../hooks';
 import './CustomerLayout.css';
 
 const customerMenuItems: SidebarItem[] = [
@@ -29,6 +30,7 @@ const IconMenu = () => (
 );
 
 export const CustomerLayout = () => {
+  usePageTitle();
   const [showSidebar, setShowSidebar] = useState(false);
   const location = useLocation();
   const isAccountPage = location.pathname.startsWith('/account') || location.pathname.startsWith('/wishlist');

@@ -5,6 +5,7 @@ import type { SidebarItem } from '../../sidebar/Sidebar';
 import { BackToTop } from '../../common/BackToTop/BackToTop';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { usePageTitle } from '../../../hooks';
 import './AdminLayout.css';
 
 const adminMenuItems: SidebarItem[] = [
@@ -32,6 +33,7 @@ const ADMIN_NOTIFICATIONS = [
 ];
 
 export const AdminLayout = () => {
+  usePageTitle();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);

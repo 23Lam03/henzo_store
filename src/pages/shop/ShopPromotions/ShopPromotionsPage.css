@@ -1,14 +1,48 @@
-.shop-promotions-page__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-6); }
-.promotions-table { overflow-x: auto; }
-.promotions-table__head,
-.promotions-table__row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr 1.5fr 1fr 80px; gap: var(--space-3); padding: 12px var(--space-4); border-bottom: 1px solid var(--color-border); align-items: center; }
-.promotions-table__head { font-size: var(--font-size-xs); font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; }
-.promotions-table__name { font-weight: 600; font-size: var(--font-size-sm); }
-.promotions-table__discount { font-weight: 700; color: var(--color-danger); font-size: var(--font-size-sm); }
-.promotions-table__date { display: flex; flex-direction: column; gap: 2px; font-size: var(--font-size-xs); }
-.text-muted { color: var(--color-text-muted); }
-.promotions-table__progress { display: flex; flex-direction: column; gap: 4px; }
-.promotions-table__progress-bar { height: 6px; background: var(--color-bg-secondary); border-radius: 3px; }
-.promotions-table__progress-fill { height: 100%; background: var(--color-primary); border-radius: 3px; }
-.promotions-table__progress span { font-size: var(--font-size-xs); color: var(--color-text-muted); }
-.promotions-table__actions { display: flex; gap: var(--space-2); }
+/* Promotions Page */
+.seller-promotions__filters { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+.seller-filter-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.seller-filter-group__label { font-size: var(--font-size-sm); font-weight: 600; color: var(--color-text-muted); white-space: nowrap; }
+
+.seller-tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 0; border-bottom: 2px solid var(--color-border); margin-bottom: 0; }
+.seller-tab { display: flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: var(--radius-md) var(--radius-md) 0 0; font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-muted); background: transparent; border: none; border-bottom: 3px solid transparent; transition: all var(--transition-fast); cursor: pointer; white-space: nowrap; margin-bottom: -2px; }
+.seller-tab:hover { color: var(--color-primary); }
+.seller-tab--active { color: var(--color-primary); border-bottom-color: var(--color-primary); font-weight: 700; }
+
+.seller-filter-btn { display: flex; align-items: center; gap: 4px; padding: 8px 14px; border-radius: var(--radius-lg); font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-secondary); background: var(--color-surface); border: 1px solid var(--color-border); transition: all var(--transition-fast); cursor: pointer; }
+.seller-filter-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.seller-filter-btn--active { background: var(--color-primary); color: white; border-color: var(--color-primary); font-weight: 600; }
+
+.seller-promotion-stat { display: flex; flex-direction: column; gap: 4px; padding: 16px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); text-align: center; }
+.seller-promotion-stat__label { font-size: var(--font-size-xs); color: var(--color-text-muted); margin: 0; font-weight: 500; }
+.seller-promotion-stat__value { font-size: var(--font-size-2xl); font-weight: 800; color: var(--color-text-primary); margin: 0; }
+
+.seller-promotions__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+
+.seller-promo-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: 20px; display: flex; flex-direction: column; gap: 12px; transition: all var(--transition-normal); }
+.seller-promo-card:hover { box-shadow: var(--shadow-card); transform: translateY(-2px); }
+.seller-promo-card--active { border-color: rgba(16,185,129,0.3); box-shadow: 0 0 0 1px rgba(16,185,129,0.2); }
+
+.seller-promo-card__header { display: flex; align-items: center; justify-content: space-between; }
+.seller-promo-card__badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.seller-promo-card__discount { font-size: var(--font-size-xl); font-weight: 900; color: var(--color-danger); }
+
+.seller-promo-card__name { font-size: var(--font-size-md); font-weight: 700; color: var(--color-text-primary); margin: 0; line-height: 1.3; }
+
+.seller-promo-card__code { display: flex; align-items: center; gap: 6px; font-size: var(--font-size-sm); font-weight: 700; color: var(--color-primary); background: rgba(79,70,229,0.08); padding: 6px 12px; border-radius: var(--radius-md); margin: 0; font-family: monospace; letter-spacing: 0.05em; }
+
+.seller-promo-card__meta { display: flex; flex-direction: column; gap: 4px; }
+.seller-promo-card__meta span { font-size: var(--font-size-xs); color: var(--color-text-muted); }
+
+.seller-promo-card__usage { display: flex; flex-direction: column; gap: 6px; }
+.seller-promo-card__usage-header { display: flex; justify-content: space-between; font-size: var(--font-size-xs); color: var(--color-text-muted); font-weight: 500; }
+.seller-promo-card__usage-bar { height: 6px; background: var(--color-background); border-radius: var(--radius-full); overflow: hidden; }
+.seller-promo-card__usage-fill { height: 100%; background: var(--gradient-primary); border-radius: var(--radius-full); transition: width 0.6s ease; min-width: 2px; }
+
+.seller-promo-card__actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+
+.seller-action-btn { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: var(--radius-md); font-size: var(--font-size-xs); font-weight: 600; color: var(--color-text-secondary); background: var(--color-surface); border: 1px solid var(--color-border); transition: all var(--transition-fast); cursor: pointer; }
+.seller-action-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.seller-action-btn--success { color: var(--color-success); }
+.seller-action-btn--success:hover { background: rgba(16,185,129,0.08); border-color: var(--color-success); }
+.seller-action-btn--danger { color: var(--color-danger); }
+.seller-action-btn--danger:hover { background: rgba(239,68,68,0.08); border-color: var(--color-danger); }

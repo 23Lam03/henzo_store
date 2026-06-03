@@ -7,3 +7,4 @@ export { SearchProvider, useSearch } from './SearchContext';
 export { CompareProvider, useCompare } from './CompareContext';
 export { RecentlyViewedProvider, useRecentlyViewed } from './RecentlyViewedContext';
 export { AdminProvider, useAdmin } from './AdminContext';
+export { SellerProvider, useSeller } from './SellerContext';

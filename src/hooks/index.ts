@@ -109,3 +109,5 @@ export const useLocalStorage = <T>(key: string, initialValue: T): [T, (value: T)
 
   return [storedValue, setValue];
 };
+
+export { usePageTitle } from './usePageTitle';
