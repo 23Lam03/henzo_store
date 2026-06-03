@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import type { UserRole } from '../types/auth';
+import type { UserRole } from '../types';
 import { ROUTES } from '../constants/routes';
 import { RouteLoader } from '../components/common/RouteLoader/RouteLoader';
 

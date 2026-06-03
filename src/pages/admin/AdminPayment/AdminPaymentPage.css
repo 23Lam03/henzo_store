@@ -1,13 +1,16 @@
-.admin-payment-page__header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: var(--space-6); }
-.payment-stats { display: flex; gap: var(--space-6); }
-.payment-stat { text-align: right; }
-.payment-stat__value { display: block; font-size: 1.25rem; font-weight: 800; color: var(--color-primary); }
-.payment-stat__label { font-size: var(--font-size-sm); color: var(--color-text-muted); }
-.admin-table { overflow-x: auto; }
-.admin-table__head,
-.admin-table__row { display: grid; grid-template-columns: 1.5fr 1.5fr 1fr 1fr 1fr 1fr; gap: var(--space-3); padding: 12px var(--space-4); border-bottom: 1px solid var(--color-border); align-items: center; }
-.admin-table__head { font-size: var(--font-size-xs); font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; }
-.admin-table__customer { font-weight: 600; font-size: var(--font-size-sm); }
-.admin-table__order { font-family: monospace; font-size: var(--font-size-xs); color: var(--color-primary); }
-.admin-table__amount { font-weight: 700; color: var(--color-danger); font-size: var(--font-size-sm); }
-.admin-table__date { font-size: var(--font-size-sm); color: var(--color-text-muted); }
+.txn-id {
+  font-size: var(--font-size-xs);
+  background: var(--color-background);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.order-id-small {
+  font-size: var(--font-size-xs);
+  background: var(--color-background);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+}
+.payment-amount { font-weight: 700; color: var(--color-success); }

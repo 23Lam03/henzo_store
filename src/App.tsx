@@ -8,6 +8,7 @@ import {
   SearchProvider,
   CompareProvider,
   RecentlyViewedProvider,
+  AdminProvider,
 } from './contexts';
 import { router } from './router';
 
@@ -21,7 +22,9 @@ function App() {
               <NotificationProvider>
                 <CompareProvider>
                   <RecentlyViewedProvider>
-                    <RouterProvider router={router} />
+                    <AdminProvider>
+                      <RouterProvider router={router} />
+                    </AdminProvider>
                   </RecentlyViewedProvider>
                 </CompareProvider>
               </NotificationProvider>

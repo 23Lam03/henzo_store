@@ -1,4 +1,4 @@
-import type { User } from '../types/auth';
+import type { User } from '../types';
 import { API_DELAY } from '../constants';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

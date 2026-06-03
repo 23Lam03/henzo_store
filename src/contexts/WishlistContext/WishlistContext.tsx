@@ -47,16 +47,13 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
     [items]
   );
 
-  const toggleItem = useCallback(
-    (product: Product) => {
-      if (isInWishlist(product.id)) {
-        removeItem(product.id);
-      } else {
-        addItem(product);
-      }
-    },
-    [isInWishlist, removeItem, addItem]
-  );
+  const toggleItem = useCallback((product: Product) => {
+    if (isInWishlist(product.id)) {
+      removeItem(product.id);
+    } else {
+      addItem(product);
+    }
+  }, [isInWishlist, removeItem, addItem]);
 
   const clearWishlist = useCallback(() => setItems([]), []);
 

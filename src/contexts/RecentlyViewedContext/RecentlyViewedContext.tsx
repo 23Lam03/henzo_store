@@ -5,6 +5,7 @@ import { getStorageItem, setStorageItem } from '../../utils';
 interface RecentlyViewedContextValue {
   items: Product[];
   addItem: (product: Product) => void;
+  removeItem: (productId: string) => void;
   clearAll: () => void;
 }
 
@@ -31,19 +32,27 @@ export const RecentlyViewedProvider = ({ children }: { children: ReactNode }) =>
     });
   }, []);
 
+  const removeItem = useCallback((productId: string) => {
+    setItems(prev => {
+      const newItems = prev.filter(p => p.id !== productId);
+      setStorageItem(STORAGE_KEY, newItems);
+      return newItems;
+    });
+  }, []);
+
   const clearAll = useCallback(() => {
     setItems([]);
     setStorageItem(STORAGE_KEY, []);
   }, []);
 
   return (
-    <RecentlyViewedContext.Provider value={{ items, addItem, clearAll }}>
+    <RecentlyViewedContext.Provider value={{ items, addItem, removeItem, clearAll }}>
       {children}
     </RecentlyViewedContext.Provider>
   );
 };
 
-export const useRecentlyViewed = () => {
+export const useRecentlyViewed = (): RecentlyViewedContextValue => {
   const ctx = useContext(RecentlyViewedContext);
   if (!ctx) throw new Error('useRecentlyViewed must be used within RecentlyViewedProvider');
   return ctx;

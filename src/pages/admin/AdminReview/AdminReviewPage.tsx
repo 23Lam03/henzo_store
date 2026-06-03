@@ -1,37 +1,141 @@
-import { Breadcrumb } from '../../../components/breadcrumb';
+import { useState } from 'react';
+import { useAdmin } from '../../../contexts/AdminContext';
+import { AdminDataTable } from '../../../components/admin/AdminDataTable';
+import { MOCK_PRODUCTS } from '../../../data/products';
+import type { Review } from '../../../types';
 import './AdminReviewPage.css';
 
-const REVIEWS = [
-  { id: '1', product: 'iPhone 16 Pro Max 256GB', shop: 'Henzo Tech Store', customer: 'Nguyễn Văn A', rating: 5, comment: 'Sản phẩm tuyệt vời! Giao hàng nhanh, đóng gói cẩn thận. Camera chụp ảnh rất đẹp!', date: '2025-05-28', status: 'Hiển thị' },
-  { id: '2', product: 'MacBook Pro M4 14"', shop: 'TechPro Shop', customer: 'Trần Thị B', rating: 1, comment: 'Máy bị lỗi ngay từ ngày đầu. Shop không hỗ trợ bảo hành đàng hoàng.', date: '2025-05-25', status: 'Đã ẩn' },
-  { id: '3', product: 'Samsung Galaxy S25 Ultra', shop: 'Henzo Tech Store', customer: 'Lê Văn C', rating: 4, comment: 'Sản phẩm tốt, pin trâu. Giao hàng đúng hẹn. Khuyến mãi hấp dẫn.', date: '2025-05-20', status: 'Hiển thị' },
+const STATUS_OPTIONS = [
+  { label: 'Tất cả', value: 'all' },
+  { label: 'Hiển thị', value: 'visible' },
+  { label: 'Đã ẩn', value: 'hidden' },
 ];
 
+const renderStars = (rating: number) => (
+  <div className="admin-stars">
+    {Array.from({ length: 5 }, (_, i) => (
+      <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill={i < rating ? '#F59E0B' : 'none'} stroke="#F59E0B" strokeWidth="1.5">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </svg>
+    ))}
+  </div>
+);
+
 export const AdminReviewPage = () => {
-  return (
-    <div className="admin-review-page">
-      <Breadcrumb />
-      <h1 className="page-heading">Quản Lý Đánh Giá</h1>
-      <div className="card">
-        <div className="review-table">
-          <div className="review-table__head"><span>Sản phẩm</span><span>Cửa hàng</span><span>Khách hàng</span><span>Đánh giá</span><span>Nhận xét</span><span>Ngày</span><span>Trạng thái</span><span></span></div>
-          {REVIEWS.map(r => (
-            <div key={r.id} className="review-table__row">
-              <span className="review-table__product">{r.product}</span>
-              <span className="review-table__shop">{r.shop}</span>
-              <span>{r.customer}</span>
-              <div className="review-table__stars">
-                {'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}
-              </div>
-              <span className="review-table__comment">{r.comment}</span>
-              <span className="review-table__date">{new Date(r.date).toLocaleDateString('vi-VN')}</span>
-              <span className={`badge ${r.status === 'Hiển thị' ? 'badge-success' : 'badge-secondary'}`}>{r.status}</span>
-              <div className="review-table__actions">
-                <button className="btn btn-sm btn-outline">{r.status === 'Hiển thị' ? 'Ẩn' : 'Hiện'}</button>
-              </div>
-            </div>
-          ))}
+  const { reviews } = useAdmin();
+  const [filter, setFilter] = useState('all');
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
+
+  const enrichedReviews = reviews.map(r => ({
+    ...r,
+    productName: MOCK_PRODUCTS[parseInt(r.productId.replace('product-', ''), 10)]?.name || `Sản phẩm #${r.productId}`,
+    storeName: ['Henzo Tech Store', 'TechPro Shop', 'Apple House', 'Samsung World', 'GameZone Store'][Math.floor(Math.random() * 5)],
+    isHidden: hiddenIds.has(r.id),
+  }));
+
+  const filtered = filter === 'all' ? enrichedReviews :
+    filter === 'visible' ? enrichedReviews.filter(r => !r.isHidden) :
+    enrichedReviews.filter(r => r.isHidden);
+
+  const columns = [
+    {
+      key: 'productName', label: 'Sản phẩm', sortable: true,
+      render: (_: unknown, r: Review & { productName: string; storeName: string; isHidden: boolean }) => (
+        <div className="review-product-cell">
+          <img src={`https://api.dicebear.com/7.x/identicon/svg?seed=${(r as Review).productId}`} alt="" className="review-product-img" />
+          <div>
+            <p className="review-product-name">{(r as Review & { productName: string }).productName}</p>
+            <p className="review-shop-name">{(r as Review & { storeName: string }).storeName}</p>
+          </div>
         </div>
+      ),
+    },
+    {
+      key: 'userName', label: 'Khách hàng',
+      render: (_: unknown, r: Review) => (
+        <div className="review-customer">
+          <img src={(r as Review).userAvatar} alt="" className="admin-avatar admin-avatar--sm" />
+          <span className="review-customer-name">{(r as Review).userName}</span>
+          {(r as Review).isVerified && <span className="verified-badge">✓ Đã mua</span>}
+        </div>
+      ),
+    },
+    {
+      key: 'rating', label: 'Đánh giá', sortable: true, align: 'center' as const, width: '130px',
+      render: (_: unknown, r: Review) => (
+        <div className="review-rating-cell">
+          {renderStars((r as Review).rating)}
+          <span className="review-rating-num">{(r as Review).rating}/5</span>
+        </div>
+      ),
+    },
+    { key: 'comment', label: 'Nhận xét',
+      render: (_: unknown, r: Review) => (
+        <span className="review-comment">{(r as Review).comment}</span>
+      ),
+    },
+    { key: 'createdAt', label: 'Ngày', sortable: true, width: '100px',
+      render: (_: unknown, r: Review) => new Date((r as Review).createdAt).toLocaleDateString('vi-VN'),
+    },
+    {
+      key: 'isHidden', label: 'Trạng thái', align: 'center' as const, width: '110px',
+      render: (_: unknown, r: Review & { isHidden: boolean }) => (
+        <span className={`admin-status ${(r as Review & { isHidden: boolean }).isHidden ? 'admin-status--locked' : 'admin-status--active'}`}>
+          {(r as Review & { isHidden: boolean }).isHidden ? 'Đã ẩn' : 'Hiển thị'}
+        </span>
+      ),
+    },
+  ];
+
+  const handleToggle = (id: string, currentlyHidden: boolean) => {
+    setHiddenIds(prev => {
+      const next = new Set(prev);
+      if (currentlyHidden) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  return (
+    <div className="admin-page">
+      <div className="admin-page__header">
+        <div>
+          <h1 className="admin-page__title">Quản Lý Đánh Giá</h1>
+          <p className="admin-page__subtitle">Kiểm duyệt và quản lý đánh giá sản phẩm từ khách hàng</p>
+        </div>
+        <div className="admin-page-header__actions">
+          <span className="admin-page__meta">{reviews.length} đánh giá</span>
+        </div>
+      </div>
+
+      <div className="admin-section">
+        <AdminDataTable
+          columns={columns}
+          data={filtered}
+          rowKey="id"
+          filterable
+          filterOptions={STATUS_OPTIONS}
+          currentFilter={filter}
+          onFilterChange={setFilter}
+          searchable
+          searchableFields={['userName', 'comment', 'productName', 'storeName']}
+          actions={(record) => {
+            const r = record as Review & { isHidden: boolean };
+            return (
+              <>
+                <button className="btn btn-sm btn-secondary">Chi tiết</button>
+                <button
+                  className={`btn btn-sm ${r.isHidden ? 'btn-primary' : 'btn-outline'}`}
+                  onClick={() => handleToggle(r.id, r.isHidden)}
+                >
+                  {r.isHidden ? 'Hiện' : 'Ẩn'}
+                </button>
+                <button className="btn btn-sm btn-outline" style={{ color: 'var(--color-danger)' }}>Xóa</button>
+              </>
+            );
+          }}
+          emptyText="Không có đánh giá nào"
+        />
       </div>
     </div>
   );

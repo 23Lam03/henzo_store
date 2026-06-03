@@ -1,0 +1,54 @@
+.register-page {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.register-page__header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.register-page__title {
+  font-size: var(--font-size-3xl);
+  font-weight: 800;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.register-page__subtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+}
+
+.register-page__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.register-page__terms {
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.register-page__terms:hover {
+  text-decoration: underline;
+}
+
+.register-page__footer {
+  margin-top: var(--space-6);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.register-page__link {
+  color: var(--color-primary);
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.register-page__link:hover {
+  text-decoration: underline;
+}

@@ -1,32 +1,104 @@
+import { useState } from 'react';
+import { useAdmin } from '../../../contexts/AdminContext';
+import { AdminDataTable } from '../../../components/admin/AdminDataTable';
+import type { Order } from '../../../types';
+import { formatNumber } from '../../../utils';
 import './AdminOrderPage.css';
-export const AdminOrderPage = () => (
-  <div className="admin-page">
-    <h1 className="admin-page__title">Quản Lý Đơn Hàng</h1>
-    <p className="admin-page__subtitle">Xem và xử lý các đơn hàng từ khách hàng</p>
-    <div className="card" style={{ padding: 24 }}>
-      <table className="admin-table">
-        <thead>
-          <tr>
-            <th>Mã đơn</th><th>Khách hàng</th><th>Tổng tiền</th><th>Trạng thái</th><th>Ngày đặt</th><th>Thao tác</th>
-          </tr>
-        </thead>
-        <tbody>
-          {[
-            { id: 'HDN-20250103-001', customer: 'Nguyễn Văn A', amount: '42,990,000đ', status: 'Đang xử lý', date: '03/01/2025' },
-            { id: 'HDN-20250103-002', customer: 'Trần Thị B', amount: '18,990,000đ', status: 'Đã xác nhận', date: '03/01/2025' },
-            { id: 'HDN-20250102-003', customer: 'Lê Văn C', amount: '89,990,000đ', status: 'Đang vận chuyển', date: '02/01/2025' },
-          ].map((o, i) => (
-            <tr key={i}>
-              <td><code style={{ fontSize: 'var(--font-size-xs)' }}>{o.id}</code></td>
-              <td>{o.customer}</td>
-              <td style={{ fontWeight: 700, color: 'var(--color-danger)' }}>{o.amount}</td>
-              <td><span className="badge badge-primary">{o.status}</span></td>
-              <td>{o.date}</td>
-              <td><button className="btn btn-secondary btn-sm">Xem</button></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+
+const STATUS_OPTIONS = [
+  { label: 'Tất cả', value: 'all' },
+  { label: 'Chờ xác nhận', value: 'pending' },
+  { label: 'Đã xác nhận', value: 'confirmed' },
+  { label: 'Đang xử lý', value: 'processing' },
+  { label: 'Đang giao', value: 'shipping' },
+  { label: 'Hoàn thành', value: 'delivered' },
+  { label: 'Đã hủy', value: 'cancelled' },
+];
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'Chờ xác nhận',
+  confirmed: 'Đã xác nhận',
+  processing: 'Đang xử lý',
+  shipping: 'Đang giao',
+  delivered: 'Hoàn thành',
+  cancelled: 'Đã hủy',
+};
+
+export const AdminOrderPage = () => {
+  const { orders, updateOrderStatus } = useAdmin();
+  const [filter, setFilter] = useState('all');
+
+  const filtered = filter === 'all' ? orders : orders.filter(o => o.status === filter);
+
+  const columns = [
+    { key: 'orderNumber', label: 'Mã đơn hàng', sortable: true, width: '160px',
+      render: (_: unknown, r: Order) => <code className="order-id-code">{(r as Order).orderNumber}</code>,
+    },
+    { key: 'id', label: 'ID', width: '100px', render: (_: unknown, r: Order) => <span className="text-muted">#{(r as Order).id.replace('order-', '')}</span> },
+    { key: 'shippingAddress', label: 'Địa chỉ giao hàng',
+      render: (_: unknown, r: Order) => <span className="address-text">{(r as Order).shippingAddress}</span>,
+    },
+    { key: 'paymentMethod', label: 'Thanh toán', align: 'center' as const, width: '120px',
+      render: (_: unknown, r: Order) => <span className="badge badge-secondary">{(r as Order).paymentMethod}</span>,
+    },
+    { key: 'totalPrice', label: 'Tổng tiền', sortable: true, align: 'right' as const, width: '140px',
+      render: (_: unknown, r: Order) => <span className="order-amount">{formatNumber((r as Order).totalPrice)}đ</span>,
+    },
+    {
+      key: 'status', label: 'Trạng thái', align: 'center' as const, width: '140px',
+      render: (_: unknown, r: Order) => {
+        const s = (r as Order).status;
+        return <span className={`admin-status admin-status--${s}`}>{STATUS_LABELS[s]}</span>;
+      },
+    },
+    { key: 'createdAt', label: 'Ngày đặt', sortable: true, width: '120px',
+      render: (_: unknown, r: Order) => new Date((r as Order).createdAt).toLocaleDateString('vi-VN'),
+    },
+  ];
+
+  return (
+    <div className="admin-page">
+      <div className="admin-page__header">
+        <div>
+          <h1 className="admin-page__title">Quản Lý Đơn Hàng</h1>
+          <p className="admin-page__subtitle">Xem và xử lý các đơn hàng từ khách hàng trên toàn hệ thống</p>
+        </div>
+        <div className="admin-page-header__actions">
+          <span className="admin-page__meta">{formatNumber(orders.length)} đơn hàng</span>
+        </div>
+      </div>
+
+      <div className="admin-section">
+        <AdminDataTable
+          columns={columns}
+          data={filtered}
+          rowKey="id"
+          filterable
+          filterOptions={STATUS_OPTIONS}
+          currentFilter={filter}
+          onFilterChange={setFilter}
+          searchable
+          searchableFields={['orderNumber', 'shippingAddress']}
+          actions={(record) => (
+            <>
+              <button className="btn btn-sm btn-secondary">Chi tiết</button>
+              <select
+                className="order-status-select"
+                value={(record as Order).status}
+                onChange={(e) => updateOrderStatus((record as Order).id, e.target.value as Order['status'])}
+              >
+                <option value="pending">Chờ xác nhận</option>
+                <option value="confirmed">Đã xác nhận</option>
+                <option value="processing">Đang xử lý</option>
+                <option value="shipping">Đang giao</option>
+                <option value="delivered">Hoàn thành</option>
+                <option value="cancelled">Đã hủy</option>
+              </select>
+            </>
+          )}
+          emptyText="Không có đơn hàng nào"
+        />
+      </div>
     </div>
-  </div>
-);
+  );
+};

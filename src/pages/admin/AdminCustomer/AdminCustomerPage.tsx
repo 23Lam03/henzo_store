@@ -1,21 +1,79 @@
-export const AdminCustomerPage = () => (
-  <div className="admin-page">
-    <h1 className="admin-page__title">Quản Lý Khách Hàng</h1>
-    <p className="admin-page__subtitle">Xem và quản lý thông tin khách hàng</p>
-    <div className="card" style={{ padding: 24 }}>
-      {[
-        { name: 'Nguyễn Văn A', email: 'nguyen.van.a@email.com', orders: 12, spent: '125,000,000đ' },
-        { name: 'Trần Thị B', email: 'tran.thi.b@email.com', orders: 8, spent: '89,000,000đ' },
-        { name: 'Lê Văn C', email: 'le.van.c@email.com', orders: 5, spent: '456,000,000đ' },
-      ].map((c, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 0', borderBottom: '1px solid var(--color-border)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i}`} alt={c.name} style={{ width: 40, height: 40, borderRadius: '50%' }} />
-            <div><strong style={{ display: 'block', fontSize: 'var(--font-size-base)' }}>{c.name}</strong><span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-muted)' }}>{c.email}</span></div>
+import { useState } from 'react';
+import { useAdmin } from '../../../contexts/AdminContext';
+import { AdminDataTable } from '../../../components/admin/AdminDataTable';
+import type { User } from '../../../types';
+import { formatNumber } from '../../../utils';
+import './AdminCustomerPage.css';
+
+const STATUS_OPTIONS = [
+  { label: 'Tất cả', value: 'all' },
+  { label: 'Hoạt động', value: 'active' },
+  { label: 'Bị khóa', value: 'locked' },
+];
+
+export const AdminCustomerPage = () => {
+  const { customers } = useAdmin();
+  const [filter] = useState('all');
+
+  const columns = [
+    {
+      key: 'id', label: 'Mã KH', width: '120px',
+      render: (_: unknown, r: User) => <code className="customer-id">{(r as User).id.replace('customer-', 'CUS')}</code>,
+    },
+    {
+      key: 'name', label: 'Khách hàng', sortable: true,
+      render: (_: unknown, r: User) => (
+        <div className="customer-cell">
+          <img src={(r as User).avatar} alt="" className="admin-avatar admin-avatar--sm" />
+          <div>
+            <p className="customer-name">{(r as User).name}</p>
+            <p className="customer-email">{(r as User).email}</p>
           </div>
-          <div style={{ textAlign: 'right' }}><div style={{ fontWeight: 700, color: 'var(--color-danger)' }}>{c.spent}</div><div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>{c.orders} đơn hàng</div></div>
         </div>
-      ))}
+      ),
+    },
+    { key: 'phone', label: 'Điện thoại', render: (_: unknown, r: User) => <span>{(r as User).phone}</span> },
+    { key: 'address', label: 'Địa chỉ', render: (_: unknown, r: User) => <span className="text-muted">{(r as User).address || '—'}</span> },
+    { key: 'createdAt', label: 'Ngày đăng ký', sortable: true, width: '140px',
+      render: (_: unknown, r: User) => new Date((r as User).createdAt).toLocaleDateString('vi-VN'),
+    },
+    {
+      key: 'role', label: 'Trạng thái', align: 'center' as const, width: '130px',
+      render: () => <span className="admin-status admin-status--active">Hoạt động</span>,
+    },
+  ];
+
+  return (
+    <div className="admin-page">
+      <div className="admin-page__header">
+        <div>
+          <h1 className="admin-page__title">Quản Lý Khách Hàng</h1>
+          <p className="admin-page__subtitle">Xem và quản lý tài khoản khách hàng trên hệ thống</p>
+        </div>
+        <div className="admin-page-header__actions">
+          <span className="admin-page__meta">{formatNumber(customers.length)} khách hàng</span>
+        </div>
+      </div>
+
+      <div className="admin-section">
+        <AdminDataTable
+          columns={columns}
+          data={customers}
+          rowKey="id"
+          filterable
+          filterOptions={STATUS_OPTIONS}
+          currentFilter={filter}
+          searchable
+          searchableFields={['name', 'email', 'phone', 'address']}
+          actions={() => (
+            <>
+              <button className="btn btn-sm btn-secondary">Chi tiết</button>
+              <button className="btn btn-sm btn-outline">Khóa</button>
+            </>
+          )}
+          emptyText="Không có khách hàng nào"
+        />
+      </div>
     </div>
-  </div>
-);
+  );
+};

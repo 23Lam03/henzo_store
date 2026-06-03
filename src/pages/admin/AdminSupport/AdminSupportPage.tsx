@@ -1,36 +1,186 @@
 import { useState } from 'react';
-import { Breadcrumb } from '../../../components/breadcrumb';
+import { useAdmin } from '../../../contexts/AdminContext';
+import { AdminDataTable } from '../../../components/admin/AdminDataTable';
+import { MOCK_ADMIN_STORES } from '../../../data/adminData';
+import type { SupportTicket } from '../../../types';
+import { formatNumber } from '../../../utils';
 import './AdminSupportPage.css';
 
-const TICKETS = [
-  { id: 'TK001', from: 'Shop Henzo Tech', type: 'Hỗ trợ kỹ thuật', subject: 'Lỗi hiển thị sản phẩm trên app', status: 'Đang xử lý', priority: 'Cao', date: '2025-06-03' },
-  { id: 'TK002', from: 'Nguyễn Văn Khách', type: 'Khiếu nại', subject: 'Đơn hàng chưa được giao sau 7 ngày', status: 'Mới', priority: 'Cao', date: '2025-06-02' },
-  { id: 'TK003', from: 'Shop TechPro', type: 'Yêu cầu hỗ trợ', subject: 'Hướng dẫn cập nhật thông tin cửa hàng', status: 'Đang xử lý', priority: 'Thấp', date: '2025-06-01' },
+const STATUS_OPTIONS = [
+  { label: 'Tất cả', value: 'all' },
+  { label: 'Mới', value: 'open' },
+  { label: 'Đang xử lý', value: 'pending' },
+  { label: 'Đã giải quyết', value: 'resolved' },
+  { label: 'Đã đóng', value: 'closed' },
 ];
 
+const PRIORITY_OPTIONS = [
+  { label: 'Tất cả', value: 'all' },
+  { label: 'Cao', value: 'high' },
+  { label: 'Trung bình', value: 'medium' },
+  { label: 'Thấp', value: 'low' },
+];
+
+const TYPE_OPTIONS = [
+  { label: 'Tất cả', value: 'all' },
+  { label: 'Hỗ trợ kỹ thuật', value: 'Hỗ trợ kỹ thuật' },
+  { label: 'Khiếu nại', value: 'Khiếu nại' },
+  { label: 'Yêu cầu hoàn tiền', value: 'Yêu cầu hoàn tiền' },
+  { label: 'Tư vấn sản phẩm', value: 'Tư vấn sản phẩm' },
+];
+
+const STATUS_LABELS: Record<string, string> = {
+  open: 'Mới', pending: 'Đang xử lý', resolved: 'Đã giải quyết', closed: 'Đã đóng',
+};
+const PRIORITY_LABELS: Record<string, string> = { high: 'Cao', medium: 'Trung bình', low: 'Thấp' };
+
+const getStoreName = (ticketId: string) => {
+  const idx = parseInt(ticketId.replace(/\D/g, '')) || 0;
+  const isShop = parseInt(ticketId.replace(/\D/g, '')) % 3 !== 2;
+  return isShop ? MOCK_ADMIN_STORES[idx % MOCK_ADMIN_STORES.length]?.name : null;
+};
+
 export const AdminSupportPage = () => {
-  const [tickets] = useState(TICKETS);
+  const { tickets } = useAdmin();
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [priorityFilter, setPriorityFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+
+  const TICKET_TYPES = ['Hỗ trợ kỹ thuật', 'Khiếu nại', 'Yêu cầu hoàn tiền', 'Tư vấn sản phẩm', 'Lỗi giao hàng', 'Bảo hành'];
+
+  const enrichedTickets: (SupportTicket & { senderName: string; typeLabel: string })[] = tickets.map((t, i) => ({
+    ...t,
+    senderName: getStoreName(t.id) || `Khách hàng #${i}`,
+    typeLabel: TICKET_TYPES[i % TICKET_TYPES.length],
+  }));
+
+  const filtered = enrichedTickets.filter(t =>
+    (statusFilter === 'all' || t.status === statusFilter) &&
+    (priorityFilter === 'all' || t.priority === priorityFilter) &&
+    (typeFilter === 'all' || t.typeLabel === typeFilter)
+  );
+
+  const openCount = tickets.filter(t => t.status === 'open').length;
+  const pendingCount = tickets.filter(t => t.status === 'pending').length;
+
+  const columns = [
+    { key: 'id', label: 'Mã ticket', width: '90px',
+      render: (_: unknown, r: SupportTicket & { senderName: string; typeLabel: string }) => <code className="ticket-id">{(r as SupportTicket).id}</code>,
+    },
+    {
+      key: 'senderName', label: 'Người gửi', sortable: true,
+      render: (_: unknown, r: SupportTicket & { senderName: string }) => (
+        <div className="sender-cell">
+          <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${(r as SupportTicket).id}`} alt="" className="admin-avatar admin-avatar--sm" />
+          <div>
+            <p className="sender-name">{(r as SupportTicket & { senderName: string }).senderName}</p>
+            <p className="sender-type">{(r as SupportTicket & { senderName: string; typeLabel: string }).typeLabel}</p>
+          </div>
+        </div>
+      ),
+    },
+    { key: 'subject', label: 'Chủ đề', render: (_: unknown, r: SupportTicket) => <span className="ticket-subject">{(r as SupportTicket).subject}</span> },
+    {
+      key: 'priority', label: 'Ưu tiên', align: 'center' as const, width: '100px',
+      render: (_: unknown, r: SupportTicket) => {
+        const p = (r as SupportTicket).priority;
+        return <span className={`admin-status ${p === 'high' ? 'admin-status--cancelled' : p === 'medium' ? 'admin-status--pending' : 'admin-status--active'}`}>{PRIORITY_LABELS[p]}</span>;
+      },
+    },
+    {
+      key: 'status', label: 'Trạng thái', align: 'center' as const, width: '130px',
+      render: (_: unknown, r: SupportTicket) => {
+        const s = (r as SupportTicket).status;
+        return <span className={`admin-status ${s === 'open' ? 'admin-status--new' : s === 'pending' ? 'admin-status--pending' : s === 'resolved' ? 'admin-status--completed' : 'admin-status--locked'}`}>{STATUS_LABELS[s]}</span>;
+      },
+    },
+    { key: 'createdAt', label: 'Ngày gửi', sortable: true, width: '120px',
+      render: (_: unknown, r: SupportTicket) => new Date((r as SupportTicket).createdAt).toLocaleDateString('vi-VN'),
+    },
+  ];
 
   return (
-    <div className="admin-support-page">
-      <Breadcrumb />
-      <h1 className="page-heading">Quản Lý Hỗ Trợ</h1>
-      <div className="card">
-        <div className="support-table">
-          <div className="support-table__head"><span>Mã</span><span>Người gửi</span><span>Loại</span><span>Chủ đề</span><span>Ưu tiên</span><span>Ngày</span><span>Trạng thái</span><span></span></div>
-          {tickets.map(t => (
-            <div key={t.id} className="support-table__row">
-              <code className="support-table__id">{t.id}</code>
-              <span className="support-table__from">{t.from}</span>
-              <span className="badge badge-secondary">{t.type}</span>
-              <span className="support-table__subject">{t.subject}</span>
-              <span className={`badge ${t.priority === 'Cao' ? 'badge-danger' : 'badge-secondary'}`}>{t.priority}</span>
-              <span className="support-table__date">{new Date(t.date).toLocaleDateString('vi-VN')}</span>
-              <span className={`badge ${t.status === 'Mới' ? 'badge-primary' : 'badge-warning'}`}>{t.status}</span>
-              <button className="btn btn-sm btn-primary">Xem</button>
-            </div>
-          ))}
+    <div className="admin-page">
+      <div className="admin-page__header">
+        <div>
+          <h1 className="admin-page__title">Quản Lý Hỗ Trợ</h1>
+          <p className="admin-page__subtitle">Xử lý các yêu cầu hỗ trợ từ cửa hàng và khách hàng</p>
         </div>
+        <div className="admin-page-header__actions">
+          <span className="admin-page__meta">{formatNumber(tickets.length)} ticket</span>
+        </div>
+      </div>
+
+      <div className="admin-stats admin-stats--3">
+        <div className="admin-stat-card">
+          <div className="admin-stat-card__icon" style={{ background: 'rgba(6, 182, 212, 0.1)', color: '#06B6D4' }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <div className="admin-stat-card__info">
+            <p className="admin-stat-card__label">Ticket mới</p>
+            <p className="admin-stat-card__value">{openCount}</p>
+            <span className="admin-stat-card__change admin-stat-card__change--up">Cần xử lý ngay</span>
+          </div>
+        </div>
+        <div className="admin-stat-card">
+          <div className="admin-stat-card__icon" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B' }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          </div>
+          <div className="admin-stat-card__info">
+            <p className="admin-stat-card__label">Đang xử lý</p>
+            <p className="admin-stat-card__value">{pendingCount}</p>
+            <span className="admin-stat-card__change admin-stat-card__change--up">Trong tiến trình</span>
+          </div>
+        </div>
+        <div className="admin-stat-card">
+          <div className="admin-stat-card__icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10B981' }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div className="admin-stat-card__info">
+            <p className="admin-stat-card__label">Đã giải quyết</p>
+            <p className="admin-stat-card__value">{tickets.filter(t => t.status === 'resolved' || t.status === 'closed').length}</p>
+            <span className="admin-stat-card__change admin-stat-card__change--up">Tổng</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="admin-section">
+        <div className="support-filter-bar">
+          <div className="support-filter-group">
+            <label>Trạng thái:</label>
+            <select className="admin-form-select support-filter-select" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+              {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
+          <div className="support-filter-group">
+            <label>Ưu tiên:</label>
+            <select className="admin-form-select support-filter-select" value={priorityFilter} onChange={e => setPriorityFilter(e.target.value)}>
+              {PRIORITY_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
+          <div className="support-filter-group">
+            <label>Loại:</label>
+            <select className="admin-form-select support-filter-select" value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
+              {TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
+        </div>
+        <AdminDataTable
+          columns={columns}
+          data={filtered}
+          rowKey="id"
+          searchable
+          searchableFields={['subject', 'senderName', 'message']}
+          actions={(record) => (
+            <>
+              <button className="btn btn-sm btn-primary">Trả lời</button>
+              {(record as SupportTicket).status !== 'resolved' && (record as SupportTicket).status !== 'closed' && (
+                <button className="btn btn-sm btn-secondary">Giải quyết</button>
+              )}
+            </>
+          )}
+          emptyText="Không có ticket nào"
+        />
       </div>
     </div>
   );
