@@ -219,7 +219,7 @@ export const AdminLayout = () => {
                         <img src={user.avatar} alt={user.name} className="admin-layout__user-dropdown__avatar" />
                         <div>
                           <p className="admin-layout__user-dropdown__name">{user.name}</p>
-                          <p className="admin-layout__user-dropdown__role">{user.role === 'ADMIN' ? 'Quản trị viên' : user.role === 'SUPER_ADMIN' ? 'Super Admin' : user.role}</p>
+                          <p className="admin-layout__user-dropdown__role">{user.role === 'ADMIN' ? 'Quản trị viên' : user.role === 'SHOP' ? 'Cửa hàng' : user.role}</p>
                         </div>
                       </>
                     )}

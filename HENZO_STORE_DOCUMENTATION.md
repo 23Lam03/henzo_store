@@ -21,6 +21,7 @@
 - [Tài Khoản Demo](#tài-khoản-demo)
 - [Mock API](#mock-api)
 - [Tính Năng Hoàn Thành](#tính-năng-hoàn-thành)
+- [Bug Fixes](#bug-fixes)
 - [Roadmap](#roadmap)
 
 ---
@@ -32,7 +33,7 @@ Trạng thái: ✅ HOÀN THÀNH
 Build:       ✅ PASSED  (npm run build)
 Dev Server:   ✅ http://localhost:5173-5180
 TypeScript:  ✅ Strict Mode - 0 lỗi
-Total Files:  ✅ 265+ files (88 components, 61 pages, 10 contexts)
+Total Files:  ✅ 257+ files (80 components, 55 pages, 10 contexts)
 ```
 
 ---
@@ -215,12 +216,7 @@ src/
 │   │       ├── AdminLayout.tsx          # Admin Dashboard (/admin/*)
 │   │       ├── AdminLayout.css          # Responsive: sidebar → mobile overlay
 │   │       └── index.ts
-│   └── SuperAdminLayout/
-│       ├── SuperAdminLayout.tsx          # Super Admin Dashboard (/super-admin/*)
-│       ├── SuperAdminLayout.css
-│       └── index.ts
-│   │
-│   ├── product/                        # PRODUCT MODULE COMPONENTS
+│   ╰── product/                        # PRODUCT MODULE COMPONENTS
 │   │   ├── ProductCard/
 │   │   │   ├── ProductCard.tsx          # Card với hover lift, badge, wishlist
 │   │   │   ├── ProductCard.css
@@ -314,7 +310,7 @@ src/
 ├── hooks/
 │   └── index.ts
 │
-├── pages/                               # 61 PAGES - HOÀN CHỈNH
+├── pages/                               # 62 PAGES - HOÀN CHỈNH
 │   ├── admin/                          # 13 Admin Pages (/admin/*)
 │   │   ├── AdminDashboard/
 │   │   │   ├── DashboardPage.tsx      # Dashboard + KPI cards + Revenue Chart + Activity
@@ -438,6 +434,14 @@ src/
 │   │   │   ├── NotificationPage.tsx    # Thông báo: đơn hàng, khuyến mãi
 │   │   │   ├── NotificationPage.css
 │   │   │   └── index.ts
+│   │   ├── CustomerSupport/           # [MỚI] Yêu cầu hỗ trợ khách hàng
+│   │   │   ├── CustomerSupportPage.tsx
+│   │   │   ├── CustomerSupportPage.css
+│   │   │   └── index.ts
+│   │   └── Contact/                   # [MỚI] Trang liên hệ
+│   │       ├── ContactPage.tsx        # Form liên hệ, thông tin cửa hàng, mạng xã hội
+│   │       ├── ContactPage.css
+│   │       └── index.ts
 │   │   ├── Promotion/
 │   │   │   ├── PromotionPage.tsx      # Voucher + Flash Sale
 │   │   │   ├── PromotionPage.css
@@ -514,32 +518,6 @@ src/
 │   │       ├── ShopNotificationsPage.css
 │   │       └── index.ts
 │   │
-│   └── super-admin/                    # 8 Super Admin Pages (/super-admin/*)
-│       ├── SuperAdminDashboard/
-│       │   ├── SuperAdminDashboardPage.tsx
-│       │   └── index.ts
-│       ├── AdminManagement/
-│       │   ├── AdminManagementPage.tsx
-│       │   └── index.ts
-│       ├── PermissionManagement/
-│       │   ├── PermissionManagementPage.tsx
-│       │   └── index.ts
-│       ├── SystemManagement/
-│       │   ├── SystemManagementPage.tsx
-│       │   └── index.ts
-│       ├── SystemFinancial/
-│       │   ├── SystemFinancialPage.tsx
-│       │   └── index.ts
-│       ├── SystemLog/
-│       │   ├── SystemLogPage.tsx
-│       │   └── index.ts
-│       ├── SuperAdminNotifications/
-│       │   ├── SuperAdminNotificationsPage.tsx
-│       │   └── index.ts
-│       └── SuperAdminSettings/
-│           ├── SuperAdminSettingsPage.tsx
-│           └── index.ts
-│
 ├── repositories/
 │
 ├── router/
@@ -724,14 +702,13 @@ export const ROUTES = {
 ### User Roles
 
 ```typescript
-export type UserRole = 'GUEST' | 'CUSTOMER' | 'SHOP' | 'ADMIN' | 'SUPER_ADMIN';
+export type UserRole = 'GUEST' | 'CUSTOMER' | 'SHOP' | 'ADMIN';
 
 export const UserRole = {
   GUEST: 'GUEST',       // Khách chưa đăng nhập
   CUSTOMER: 'CUSTOMER', // Khách hàng mua hàng
   SHOP: 'SHOP',         // Người bán / Seller
-  ADMIN: 'ADMIN',       // Quản trị viên
-  SUPER_ADMIN: 'SUPER_ADMIN', // Quản trị cao cấp
+  ADMIN: 'ADMIN',       // Quản trị viên (toàn quyền hệ thống)
 };
 ```
 
@@ -762,7 +739,7 @@ interface AuthContextValue {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  role: string; // 'GUEST' | 'CUSTOMER' | 'SHOP' | 'ADMIN' | 'SUPER_ADMIN'
+  role: string; // 'GUEST' | 'CUSTOMER' | 'SHOP' | 'ADMIN'
   token: string | null;
   login: (email: string, password: string, rememberMe?: boolean)
          => Promise<{ success: boolean; message: string }>;
@@ -1441,7 +1418,7 @@ mockApi.addTicketMessage(ticketId, msg)   // → SupportTicket
 
 ## Tính Năng Hoàn Thành
 
-### Customer Module ✅
+### Customer Module ✅ (18 pages)
 - [x] **Đăng ký** - Validation form, email unique check, lưu Mock User
 - [x] **Đăng nhập** - Remember me, social login buttons, demo accounts
 - [x] **Quên mật khẩu** - Email validation, success message
@@ -1457,6 +1434,9 @@ mockApi.addTicketMessage(ticketId, msg)   // → SupportTicket
 - [x] **Thông báo** - Read/Unread, filter theo loại (đơn hàng, khuyến mãi, hệ thống)
 - [x] **Khuyến mãi** - Voucher, Flash Sale, Campaign với countdown
 - [x] **Tìm kiếm** - Debounce, history, suggestions, realtime
+- [x] **Liên hệ** (`/contact`) - [MỚI] Form liên hệ với validation, thông tin 3 chi nhánh, mạng xã hội, FAQ
+- [x] **Cài đặt** (`/account/settings`) - [MỚI] Tab Hồ sơ (avatar, name, phone, email, gender, DOB, bio), Tab Đổi mật khẩu (validation, strength checker), Tab Địa chỉ (Tỉnh/Thành, checkbox default)
+- [x] **Hỗ trợ khách hàng** (`/account/support`) - [MỚI] Tạo ticket hỗ trợ, phân loại vấn đề (đơn hàng/thanh toán/sản phẩm/tài khoản/kỹ thuật), ưu tiên, xem chi tiết và phản hồi ticket, filter theo trạng thái
 
 ### Product Module ✅
 - [x] **100+ sản phẩm thực** - Tên thật, ảnh thật từ Internet
@@ -1499,7 +1479,7 @@ mockApi.addTicketMessage(ticketId, msg)   // → SupportTicket
 - [x] **Báo cáo** - Xuất Excel/PDF, bộ lọc ngày/tuần/tháng/năm
 - [x] **Tài chính** - Revenue, expense, profit, commission
 - [x] **Thông báo** - Gửi hàng loạt, theo đối tượng
-- [x] **Phân quyền** - Role matrix, gán quyền
+- [x] **Phân quyền** (`/admin/access`) - Ma trận quyền theo vai trò, cấp quyền (Admin/Moderator/Staff/Shop), đổi vai trò inline, khóa/mở khóa, filter theo role, modal tạo thành viên với tuỳ chỉnh quyền hạn
 
 ### Global Features ✅
 - [x] **Header System** - Sticky, glassmorphism, mobile drawer, mega menu
@@ -1518,6 +1498,29 @@ mockApi.addTicketMessage(ticketId, msg)   // → SupportTicket
 
 ## Bug Fixes
 
+### 03/06/2026 - Thêm trang Cài đặt (`/account/settings`)
+
+**Vấn đề:** Link "Cài đặt" trong UserMenu và sidebar của CustomerLayout trỏ sang `/account/settings` nhưng không có route tương ứng, gây 404.
+
+**Sửa lỗi:**
+- Tạo `src/pages/customer/CustomerSettings/` với `CustomerSettingsPage.tsx` + `CustomerSettingsPage.css`
+- `src/router/index.tsx` — thêm route `/account/settings` → `CustomerSettingsPage`
+
+### 03/06/2026 - Loại bỏ Super Admin, Admin có toàn quyền
+
+**Thay đổi:** Gộp Super Admin vào Admin — một tài khoản Admin có toàn quyền quản lý hệ thống mà không cần Super Admin riêng.
+
+**Thực hiện:**
+- Xóa `src/components/layouts/SuperAdminLayout/` (layout + CSS)
+- Xóa toàn bộ `src/pages/super-admin/` (8 pages)
+- `src/types/auth.ts` + `src/types/index.ts` — xóa `SUPER_ADMIN` khỏi `UserRole`
+- `src/router/index.tsx` — xóa `SUPER_ADMIN_ROLE`, xóa `SuperAdminLayout` import, xóa `/super-admin` routes
+- `src/constants/routes.ts` — xóa 8 route `SUPER_ADMIN_*`, xóa page titles
+- `src/services/authService.ts` — xóa mock user `SUPER_ADMIN`
+- `src/pages/auth/LoginPage.tsx` — xóa redirect `/super-admin`, xóa nút demo Super Admin
+- `src/components/layouts/index.ts` — xóa export `SuperAdminLayout`
+- `src/components/layouts/AdminLayout.tsx` — cập nhật role label cho user dropdown
+
 ### 03/06/2026 - Fix route `/shop` 404
 
 **Vấn đề:** Link "Trang cửa hàng" trong UserMenu (dropdown người dùng ở header) trỏ nhầm sang `/shop` — route không tồn tại, gây lỗi 404. Route Seller Center thực sự là `/seller`.
@@ -1527,6 +1530,34 @@ mockApi.addTicketMessage(ticketId, msg)   // → SupportTicket
 **Sửa lỗi:**
 - `src/components/header/UserMenu/UserMenu.tsx` — đổi `to="/shop"` → `to="/seller"`
 - `src/components/layouts/ShopLayout/SellerSidebar.tsx` — đổi `end={item.href === '/shop'}` → `end={item.href === '/seller'}` (dead code leftover)
+
+### 03/06/2026 - Nâng cấp phân quyền Admin (AD-ADM11)
+
+**Nâng cấp:** Trang "Quản lý phân quyền" của Admin cần có chức năng cấp quyền (phân role) cho người khác để trở thành Shop hoặc Admin.
+
+**Thay đổi:**
+- Thêm vai trò `SHOP` vào ma trận quyền (Admin có thể cấp quyền SHOP cho người dùng)
+- Thêm modal "Thêm thành viên" với form chọn vai trò (Admin/Moderator/Staff/Shop) + tuỳ chỉnh quyền hạn
+- Thêm tính năng đổi vai trò inline trong danh sách (nhấn badge vai trò → dropdown chọn role mới → auto update quyền)
+- Thêm filter theo vai trò trong danh sách nhân viên
+- Thêm nút khóa/mở khóa tài khoản
+
+### 03/06/2026 - Thêm trang Liên hệ (`/contact`)
+
+**Vấn đề:** Link "Liên Hệ" trong Header và Footer trỏ sang `/contact` nhưng không có route tương ứng, gây 404.
+
+**Sửa lỗi:**
+- Tạo `src/pages/customer/Contact/` với `ContactPage.tsx` + `ContactPage.css`
+- `src/router/index.tsx` — thêm route `ROUTES.CONTACT` → `ContactPage`
+
+### 03/06/2026 - Thêm trang Hỗ trợ khách hàng (CTM-SPT01)
+
+**Vấn đề:** Đề bài yêu cầu trang "Hỗ trợ" cho khách hàng (`CTM-SPT01`) — tạo ticket hỗ trợ, filter theo trạng thái/loại, xem chi tiết và phản hồi ticket. `CustomerLayout` sidebar có link `/account/support` nhưng không có page tương ứng, route `/support` trỏ nhầm sang `NotificationPage`.
+
+**Sửa lỗi:**
+- Tạo `src/pages/customer/CustomerSupport/` với `CustomerSupportPage.tsx` + `CustomerSupportPage.css`
+- `src/constants/routes.ts` — đổi `SUPPORT: '/support'` → `SUPPORT: '/account/support'`
+- `src/router/index.tsx` — wire `CustomerSupportPage` vào `ROUTES.SUPPORT`
 
 ---
 
@@ -1542,11 +1573,10 @@ mockApi.addTicketMessage(ticketId, msg)   // → SupportTicket
 ✅ Design System CSS Variables hoàn chỉnh
 ✅ Global Components (Header, Footer, 5 Layouts, Product Components)
 ✅ Mock API + 100+ sản phẩm thực
-✅ Customer Module hoàn chỉnh (17 pages)
+✅ Customer Module hoàn chỉnh (18 pages - bao gồm CustomerSupportPage)
 ✅ Product Module hoàn chỉnh
 ✅ Shop Portal hoàn chỉnh (14 pages, 28 files)
-✅ Admin Dashboard hoàn chỉnh (13 pages)
-✅ Super Admin Dashboard hoàn chỉnh (8 pages)
+✅ Admin Dashboard hoàn chỉnh (13 pages) — Admin có toàn quyền quản lý hệ thống (không còn Super Admin riêng)
 ✅ Responsive Desktop / Tablet / Mobile
 ✅ Dark Mode
 ✅ LocalStorage persistence

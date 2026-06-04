@@ -4,14 +4,13 @@ import { ProtectedRoute } from '../guards';
 import { PermissionRoute } from '../guards';
 import { ROUTES } from '../constants/routes';
 import { RouteLoader } from '../components/common/RouteLoader/RouteLoader';
-import { MainLayout, ShopLayout, AdminLayout, CustomerLayout, AuthLayout, SuperAdminLayout } from '../components/layouts';
+import { MainLayout, ShopLayout, AdminLayout, CustomerLayout, AuthLayout } from '../components/layouts';
 import type { UserRole } from '../types';
 
 // ─── Role Constants ───────────────────────────────────────────────────────────
 const CUSTOMER_ROLE: UserRole[] = ['CUSTOMER' as UserRole];
 const SHOP_ROLE: UserRole[] = ['SHOP' as UserRole, 'ADMIN' as UserRole];
-const ADMIN_ROLE: UserRole[] = ['ADMIN' as UserRole, 'SUPER_ADMIN' as UserRole];
-const SUPER_ADMIN_ROLE: UserRole[] = ['SUPER_ADMIN' as UserRole];
+const ADMIN_ROLE: UserRole[] = ['ADMIN' as UserRole];
 
 // ─── Lazy Page Loading ────────────────────────────────────────────────────────
 const load = <T extends object>(fn: () => Promise<T>, key: keyof T) =>
@@ -41,9 +40,12 @@ const AccountPage = load(() => import('../pages/customer/Account/AccountPage'), 
 const OrderHistoryPage = load(() => import('../pages/customer/Orders/OrderHistoryPage'), 'OrderHistoryPage');
 const OrderDetailPage = load(() => import('../pages/customer/Orders/OrderDetailPage'), 'OrderDetailPage');
 const NotificationPage = load(() => import('../pages/customer/Notifications/NotificationPage'), 'NotificationPage');
+const CustomerSupportPage = load(() => import('../pages/customer/CustomerSupport/CustomerSupportPage'), 'CustomerSupportPage');
 const PromotionPage = load(() => import('../pages/customer/Promotion/PromotionPage'), 'PromotionPage');
 const SearchPage = load(() => import('../pages/customer/Search/SearchPage'), 'SearchPage');
 const RecentlyViewedPage = load(() => import('../pages/customer/RecentlyViewed/RecentlyViewedPage'), 'RecentlyViewedPage');
+const ContactPage = load(() => import('../pages/customer/Contact/ContactPage'), 'ContactPage');
+const CustomerSettingsPage = load(() => import('../pages/customer/CustomerSettings/CustomerSettingsPage'), 'CustomerSettingsPage');
 
 // Shop pages
 const ShopDashboardPage = load(() => import('../pages/shop/ShopDashboard/ShopDashboardPage'), 'ShopDashboardPage');
@@ -75,16 +77,6 @@ const AdminReviewPage = load(() => import('../pages/admin/AdminReview/AdminRevie
 const AdminPromotionPage = load(() => import('../pages/admin/AdminPromotion/AdminPromotionPage'), 'AdminPromotionPage');
 const AdminAccessPage = load(() => import('../pages/admin/AdminAccess/AdminAccessPage'), 'AdminAccessPage');
 const AdminFinancePage = load(() => import('../pages/admin/AdminFinance/AdminFinancePage'), 'AdminFinancePage');
-
-// Super Admin pages
-const SuperAdminDashboardPage = load(() => import('../pages/super-admin/SuperAdminDashboard/SuperAdminDashboardPage'), 'SuperAdminDashboardPage');
-const AdminManagementPage = load(() => import('../pages/super-admin/AdminManagement/AdminManagementPage'), 'AdminManagementPage');
-const PermissionManagementPage = load(() => import('../pages/super-admin/PermissionManagement/PermissionManagementPage'), 'PermissionManagementPage');
-const SystemManagementPage = load(() => import('../pages/super-admin/SystemManagement/SystemManagementPage'), 'SystemManagementPage');
-const SystemFinancialPage = load(() => import('../pages/super-admin/SystemFinancial/SystemFinancialPage'), 'SystemFinancialPage');
-const SystemLogPage = load(() => import('../pages/super-admin/SystemLog/SystemLogPage'), 'SystemLogPage');
-const SuperAdminNotificationsPage = load(() => import('../pages/super-admin/SuperAdminNotifications/SuperAdminNotificationsPage'), 'SuperAdminNotificationsPage');
-const SuperAdminSettingsPage = load(() => import('../pages/super-admin/SuperAdminSettings/SuperAdminSettingsPage'), 'SuperAdminSettingsPage');
 
 // Error pages
 const NotFoundPage = load(() => import('../pages/errors/ErrorPages'), 'NotFoundPage');
@@ -120,6 +112,7 @@ export const router = createBrowserRouter([
       { path: ROUTES.SEARCH, element: <Page><SearchPage /></Page> },
       { path: ROUTES.COMPARE, element: <Page><ComparePage /></Page> },
       { path: ROUTES.PROMOTIONS, element: <Page><PromotionPage /></Page> },
+      { path: ROUTES.CONTACT, element: <Page><ContactPage /></Page> },
       { path: ROUTES.WISHLIST, element: <Page><WishlistPage /></Page> },
       { path: ROUTES.CART, element: <Page><CartPage /></Page> },
       { path: ROUTES.RECENTLY_VIEWED, element: <Page><RecentlyViewedPage /></Page> },
@@ -174,7 +167,17 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <PermissionRoute allowedRoles={CUSTOMER_ROLE}>
-              <Page><NotificationPage /></Page>
+              <Page><CustomerSupportPage /></Page>
+            </PermissionRoute>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: ROUTES.ACCOUNT_SETTINGS,
+        element: (
+          <ProtectedRoute>
+            <PermissionRoute allowedRoles={CUSTOMER_ROLE}>
+              <Page><CustomerSettingsPage /></Page>
             </PermissionRoute>
           </ProtectedRoute>
         ),
@@ -236,28 +239,6 @@ export const router = createBrowserRouter([
       { path: 'notifications', element: <Page><AdminNotificationPage /></Page> },
       { path: 'access', element: <Page><AdminAccessPage /></Page> },
       { path: 'finance', element: <Page><AdminFinancePage /></Page> },
-    ],
-  },
-
-  // ─── Super Admin Routes (/super-admin/*) ─────────────────────────────────────
-  {
-    path: '/super-admin',
-    element: (
-      <ProtectedRoute>
-        <PermissionRoute allowedRoles={SUPER_ADMIN_ROLE}>
-          <SuperAdminLayout />
-        </PermissionRoute>
-      </ProtectedRoute>
-    ),
-    children: [
-      { index: true, element: <Page><SuperAdminDashboardPage /></Page> },
-      { path: 'admins', element: <Page><AdminManagementPage /></Page> },
-      { path: 'permissions', element: <Page><PermissionManagementPage /></Page> },
-      { path: 'system', element: <Page><SystemManagementPage /></Page> },
-      { path: 'financial', element: <Page><SystemFinancialPage /></Page> },
-      { path: 'logs', element: <Page><SystemLogPage /></Page> },
-      { path: 'notifications', element: <Page><SuperAdminNotificationsPage /></Page> },
-      { path: 'settings', element: <Page><SuperAdminSettingsPage /></Page> },
     ],
   },
 

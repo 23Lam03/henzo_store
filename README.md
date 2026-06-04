@@ -375,14 +375,13 @@ export const ROUTES = {
 ### User Roles (`src/types/auth.ts`)
 
 ```typescript
-export type UserRole = 'GUEST' | 'CUSTOMER' | 'SHOP' | 'ADMIN' | 'SUPER_ADMIN';
+export type UserRole = 'GUEST' | 'CUSTOMER' | 'SHOP' | 'ADMIN';
 
 export const UserRole = {
   GUEST: 'GUEST',
   CUSTOMER: 'CUSTOMER',
   SHOP: 'SHOP',
-  ADMIN: 'ADMIN',
-  SUPER_ADMIN: 'SUPER_ADMIN',
+  ADMIN: 'ADMIN',       // toàn quyền hệ thống
 };
 ```
 

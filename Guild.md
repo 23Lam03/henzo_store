@@ -64,7 +64,7 @@ src/
 ### User Roles
 
 ```typescript
-type UserRole = 'GUEST' | 'CUSTOMER' | 'SHOP' | 'ADMIN' | 'SUPER_ADMIN';
+type UserRole = 'GUEST' | 'CUSTOMER' | 'SHOP' | 'ADMIN';
 ```
 
 ### Route Constants
@@ -97,7 +97,7 @@ interface AuthContextValue {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  role: string;  // 'GUEST' | 'CUSTOMER' | 'SHOP' | 'ADMIN' | 'SUPER_ADMIN'
+  role: string;  // 'GUEST' | 'CUSTOMER' | 'SHOP' | 'ADMIN'
   token: string | null;
   login: (email, password, rememberMe?) => Promise<{ success, message }>;
   register: (data) => Promise<{ success, message }>;

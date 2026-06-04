@@ -160,7 +160,6 @@ export const Header = () => {
                   />
                 )}
               </div>
-              <Link to="/products" className="header__nav-link">Sản Phẩm</Link>
               <Link to="/promotions" className="header__nav-link">Khuyến Mãi</Link>
               <Link to="/contact" className="header__nav-link">Liên Hệ</Link>
             </nav>

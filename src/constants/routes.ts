@@ -26,6 +26,7 @@ export const ROUTES = {
   // Customer (protected - CUSTOMER)
   ACCOUNT: '/account',
   ACCOUNT_DASHBOARD: '/account/dashboard',
+  ACCOUNT_SETTINGS: '/account/settings',
   ORDERS: '/orders',
   ORDER_DETAIL: '/orders/:id',
   CART: '/cart',
@@ -36,7 +37,7 @@ export const ROUTES = {
   ADDRESSES: '/addresses',
   PAYMENTS: '/payments',
   NOTIFICATIONS: '/notifications',
-  SUPPORT: '/support',
+  SUPPORT: '/account/support',
 
   // Shop (protected - SHOP, ADMIN)
   SHOP_DASHBOARD: '/seller',
@@ -55,7 +56,7 @@ export const ROUTES = {
   SHOP_SHIPPING: '/seller/shipping',
   SHOP_NOTIFICATIONS: '/seller/notifications',
 
-  // Admin (protected - ADMIN, SUPER_ADMIN)
+  // Admin (protected - ADMIN — toàn quyền quản lý)
   ADMIN_DASHBOARD: '/admin',
   ADMIN_PRODUCTS: '/admin/products',
   ADMIN_ORDERS: '/admin/orders',
@@ -69,16 +70,6 @@ export const ROUTES = {
   ADMIN_NOTIFICATIONS: '/admin/notifications',
   ADMIN_ACCESS: '/admin/access',
   ADMIN_FINANCE: '/admin/finance',
-
-  // Super Admin (protected - SUPER_ADMIN)
-  SUPER_ADMIN_DASHBOARD: '/super-admin',
-  SUPER_ADMIN_ADMINS: '/super-admin/admins',
-  SUPER_ADMIN_PERMISSIONS: '/super-admin/permissions',
-  SUPER_ADMIN_SYSTEM: '/super-admin/system',
-  SUPER_ADMIN_FINANCIAL: '/super-admin/financial',
-  SUPER_ADMIN_LOGS: '/super-admin/logs',
-  SUPER_ADMIN_NOTIFICATIONS: '/super-admin/notifications',
-  SUPER_ADMIN_SETTINGS: '/super-admin/settings',
 
   // Errors
   NOT_FOUND: '/404',
@@ -114,6 +105,7 @@ export const PAGE_TITLES: Record<string, string> = {
   // Customer
   [ROUTES.ACCOUNT]: 'Tài Khoản',
   [ROUTES.ACCOUNT_DASHBOARD]: 'Tài Khoản',
+  [ROUTES.ACCOUNT_SETTINGS]: 'Cài Đặt',
   [ROUTES.ORDERS]: 'Đơn Hàng',
   [ROUTES.ORDER_DETAIL]: 'Chi Tiết Đơn Hàng',
   [ROUTES.CART]: 'Giỏ Hàng',
@@ -157,16 +149,6 @@ export const PAGE_TITLES: Record<string, string> = {
   [ROUTES.ADMIN_NOTIFICATIONS]: 'Quản Lý Thông Báo',
   [ROUTES.ADMIN_ACCESS]: 'Phân Quyền',
   [ROUTES.ADMIN_FINANCE]: 'Tài Chính Hệ Thống',
-
-  // Super Admin
-  [ROUTES.SUPER_ADMIN_DASHBOARD]: 'Dashboard Super Admin',
-  [ROUTES.SUPER_ADMIN_ADMINS]: 'Quản Lý Quản Trị Viên',
-  [ROUTES.SUPER_ADMIN_PERMISSIONS]: 'Quản Lý Phân Quyền',
-  [ROUTES.SUPER_ADMIN_SYSTEM]: 'Quản Lý Hệ Thống',
-  [ROUTES.SUPER_ADMIN_FINANCIAL]: 'Tài Chính Hệ Thống',
-  [ROUTES.SUPER_ADMIN_LOGS]: 'Nhật Ký Hệ Thống',
-  [ROUTES.SUPER_ADMIN_NOTIFICATIONS]: 'Quản Lý Thông Báo',
-  [ROUTES.SUPER_ADMIN_SETTINGS]: 'Cài Đặt Hệ Thống',
 
   // Errors
   [ROUTES.NOT_FOUND]: '404 - Không Tìm Thấy',

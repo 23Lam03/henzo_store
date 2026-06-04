@@ -1,12 +1,11 @@
 // ─── User Roles ────────────────────────────────────────────────────────────────
-export type UserRole = 'GUEST' | 'CUSTOMER' | 'SHOP' | 'ADMIN' | 'SUPER_ADMIN';
+export type UserRole = 'GUEST' | 'CUSTOMER' | 'SHOP' | 'ADMIN';
 
 export const UserRole = {
   GUEST: 'GUEST' as UserRole,
   CUSTOMER: 'CUSTOMER' as UserRole,
   SHOP: 'SHOP' as UserRole,
   ADMIN: 'ADMIN' as UserRole,
-  SUPER_ADMIN: 'SUPER_ADMIN' as UserRole,
 };
 
 // ─── User ──────────────────────────────────────────────────────────────────
