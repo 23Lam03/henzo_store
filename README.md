@@ -103,71 +103,71 @@ npx tsc --noEmit
 
 ```
 src/
-├── App.tsx                    # Root component
-├── main.tsx                   # Entry point
-├── index.css                  # CSS entry (redirects to global)
+├── App.tsx                    # Component gốc (root)
+├── main.tsx                  # Điểm khởi chạy ứng dụng
+├── index.css                 # File CSS gốc (chuyển hướng sang global)
 │
 ├── components/
-│   ├── breadcrumb/           # Breadcrumb navigation
-│   ├── common/               # Shared components
-│   │   ├── BackToTop/        # Back to top button
-│   │   ├── Loading/          # Loading spinner
-│   │   ├── ProductCard/      # Product card component
-│   │   └── RouteLoader/      # Route transition loader
-│   ├── footer/Footer/        # Footer
-│   ├── header/               # Header system
-│   │   ├── Header/           # Main header
-│   │   ├── MegaMenu/         # Category mega menu
-│   │   ├── MiniCart/         # Mini cart dropdown
-│   │   ├── NotificationCenter/ # Notification center
-│   │   ├── SearchBar/        # Global search bar
-│   │   └── UserMenu/         # User account menu
-│   ├── layouts/              # Layout wrappers
-│   │   ├── AdminLayout/       # Admin dashboard layout
-│   │   ├── AuthLayout/       # Login/Register layout
-│   │   ├── CustomerLayout/    # Customer account layout
-│   │   ├── MainLayout/        # Public pages layout
-│   │   └── ShopLayout/       # Shop portal layout
-│   ├── product/              # Product-related components
-│   │   ├── Pagination/       # Pagination
-│   │   ├── ProductCompare/    # Product comparison
-│   │   ├── ProductFilter/     # Filter sidebar
-│   │   ├── ProductGallery/    # Image gallery
-│   │   ├── ProductGrid/      # Product grid
-│   │   ├── ProductReview/     # Reviews display
-│   │   ├── ProductSort/       # Sort options
-│   │   └── ProductSpecification/ # Specs table
-│   └── sidebar/              # Sidebar navigation
+│   ├── breadcrumb/           # Thanh điều hướng breadcrumb
+│   ├── common/               # Các component dùng chung
+│   │   ├── BackToTop/        # Nút quay về đầu trang
+│   │   ├── Loading/          # Biểu tượng loading
+│   │   ├── ProductCard/      # Component thẻ sản phẩm
+│   │   └── RouteLoader/      # Loader khi chuyển route
+│   ├── footer/Footer/        # Footer (chân trang)
+│   ├── header/               # Hệ thống header
+│   │   ├── Header/           # Header chính
+│   │   ├── MegaMenu/         # Menu danh mục dạng mega
+│   │   ├── MiniCart/         # Giỏ hàng thu nhỏ dạng dropdown
+│   │   ├── NotificationCenter/ # Trung tâm thông báo
+│   │   ├── SearchBar/        # Thanh tìm kiếm toàn cục
+│   │   └── UserMenu/         # Menu tài khoản người dùng
+│   ├── layouts/              # Các layout bao bọc trang
+│   │   ├── AdminLayout/       # Layout trang quản trị
+│   │   ├── AuthLayout/       # Layout đăng nhập / đăng ký
+│   │   ├── CustomerLayout/    # Layout trang tài khoản khách hàng
+│   │   ├── MainLayout/        # Layout trang công khai
+│   │   └── ShopLayout/        # Layout portal người bán
+│   ├── product/              # Các component liên quan sản phẩm
+│   │   ├── Pagination/       # Phân trang
+│   │   ├── ProductCompare/    # So sánh sản phẩm
+│   │   ├── ProductFilter/     # Bộ lọc sản phẩm
+│   │   ├── ProductGallery/    # Thư viện hình ảnh sản phẩm
+│   │   ├── ProductGrid/      # Lưới hiển thị sản phẩm
+│   │   ├── ProductReview/     # Hiển thị đánh giá sản phẩm
+│   │   ├── ProductSort/       # Tuỳ chọn sắp xếp
+│   │   └── ProductSpecification/ # Bảng thông số kỹ thuật
+│   └── sidebar/              # Thanh điều hướng sidebar
 │
 ├── constants/
-│   ├── index.ts             # Colors, breakpoints, categories, etc.
-│   └── routes.ts             # Route constants + page titles
+│   ├── index.ts             # Màu sắc, breakpoint, danh mục, v.v.
+│   └── routes.ts            # Hằng số route + tiêu đề trang
 │
-├── contexts/                 # React Context providers
-│   ├── AuthContext/          # Authentication state
-│   ├── CartContext/          # Shopping cart state
-│   ├── CompareContext/       # Product comparison state
-│   ├── NotificationContext/   # Notification state
-│   ├── RecentlyViewedContext/ # Recently viewed products
-│   ├── SearchContext/        # Search state + history
-│   ├── ThemeContext/         # Dark/Light mode
-│   └── WishlistContext/      # Wishlist state
+├── contexts/                # React Context providers
+│   ├── AuthContext/          # Trạng thái xác thực
+│   ├── CartContext/          # Trạng thái giỏ hàng
+│   ├── CompareContext/       # Trạng thái so sánh sản phẩm
+│   ├── NotificationContext/   # Trạng thái thông báo
+│   ├── RecentlyViewedContext/ # Sản phẩm đã xem gần đây
+│   ├── SearchContext/        # Trạng thái tìm kiếm + lịch sử
+│   ├── ThemeContext/         # Chế độ sáng / tối
+│   └── WishlistContext/      # Danh sách yêu thích
 │
 ├── data/
-│   └── products.ts           # Mock product data (100+ products)
+│   └── products.ts           # Dữ liệu sản phẩm mock (100+ sản phẩm)
 │
 ├── guards/
-│   ├── PermissionRoute.tsx   # Role-based route guard
-│   └── ProtectedRoute.tsx    # Auth-protected route
+│   ├── PermissionRoute.tsx   # Guard phân quyền theo vai trò
+│   └── ProtectedRoute.tsx    # Guard bảo vệ route theo đăng nhập
 │
 ├── hooks/                   # Custom React hooks
 │
 ├── pages/
-│   ├── admin/               # Admin dashboard pages
-│   │   ├── AdminAccess/      # Phân quyền người dùng
+│   ├── admin/               # Trang quản trị hệ thống
+│   │   ├── AdminAccess/      # Quản lý phân quyền người dùng
 │   │   ├── AdminCustomer/    # Quản lý khách hàng
-│   │   ├── AdminDashboard/   # Dashboard tổng quan
-│   │   ├── AdminFinance/     # Tài chính hệ thống
+│   │   ├── AdminDashboard/   # Bảng điều khiển tổng quan
+│   │   ├── AdminFinance/     # Quản lý tài chính hệ thống
 │   │   ├── AdminNotification/ # Quản lý thông báo
 │   │   ├── AdminOrder/       # Quản lý đơn hàng
 │   │   ├── AdminPayment/     # Quản lý thanh toán
@@ -178,66 +178,64 @@ src/
 │   │   ├── AdminStore/       # Quản lý cửa hàng
 │   │   └── AdminSupport/     # Quản lý hỗ trợ
 │   │
-│   ├── auth/                # Authentication pages
+│   ├── auth/                # Trang xác thực
 │   │   ├── ForgotPasswordPage/ # Quên mật khẩu
-│   │   ├── LoginPage/        # Đăng nhập
-│   │   └── RegisterPage/      # Đăng ký
+│   │   ├── LoginPage/        # Trang đăng nhập
+│   │   └── RegisterPage/     # Trang đăng ký
 │   │
-│   ├── customer/            # Customer-facing pages
+│   ├── customer/            # Trang người dùng (khách hàng)
 │   │   ├── Account/          # Tài khoản cá nhân
-│   │   ├── Brand/           # Chi tiết thương hiệu
+│   │   ├── Brand/           # Trang chi tiết thương hiệu
 │   │   ├── Cart/            # Giỏ hàng
-│   │   ├── Category/        # Chi tiết danh mục
+│   │   ├── Category/        # Trang danh mục
 │   │   ├── Checkout/        # Thanh toán
 │   │   ├── Compare/         # So sánh sản phẩm
 │   │   ├── Home/            # Trang chủ
 │   │   ├── Notifications/    # Trung tâm thông báo
-│   │   ├── Orders/          # Lịch sử + chi tiết đơn hàng
+│   │   ├── Orders/          # Lịch sử và chi tiết đơn hàng
 │   │   ├── ProductDetail/   # Chi tiết sản phẩm
 │   │   ├── ProductList/      # Danh sách sản phẩm
 │   │   ├── Promotion/        # Khuyến mãi & voucher
-│   │   ├── RecentlyViewed/   # Sản phẩm đã xem
+│   │   ├── RecentlyViewed/   # Sản phẩm đã xem gần đây
 │   │   ├── Search/          # Trang tìm kiếm
 │   │   ├── Shipping/         # Theo dõi vận chuyển
 │   │   └── Wishlist/        # Danh sách yêu thích
 │   │
-│   ├── errors/              # Error pages
-│   │   └── ErrorPages.tsx    # 404, 403, 500 pages
+│   ├── errors/              # Trang lỗi
+│   │   └── ErrorPages.tsx    # 404, 403, 500
 │   │
-│   └── shop/                # Shop seller portal
+│   └── shop/                # Cổng người bán (seller portal)
 │       ├── CreateProduct/     # Tạo sản phẩm mới
-│       ├── ShopDashboard/   # Dashboard seller
+│       ├── ShopDashboard/     # Bảng điều khiển người bán
 │       ├── ShopFinance/      # Tài chính cửa hàng
-│       ├── ShopInventory/    # Quản lý kho hàng
+│       ├── ShopInventory/    # Quản lý kho
 │       ├── ShopOrderList/    # Quản lý đơn hàng
-│       ├── ShopPayment/      # Thanh toán seller
+│       ├── ShopPayment/      # Thanh toán người bán
 │       ├── ShopProductList/  # Danh sách sản phẩm
 │       ├── ShopProfile/      # Cài đặt cửa hàng
 │       ├── ShopPromotions/   # Quản lý khuyến mãi
 │       ├── ShopReports/      # Báo cáo
-│       ├── ShopReviews/       # Quản lý đánh giá
+│       ├── ShopReviews/      # Quản lý đánh giá
 │       ├── ShopShipping/     # Quản lý vận chuyển
 │       └── ShopSupport/      # Hỗ trợ khách hàng
 │
 ├── router/
-│   └── index.tsx             # React Router configuration
+│   └── index.tsx             # Cấu hình React Router
 │
 ├── services/
-│   ├── authService.ts       # Authentication service
+│   ├── authService.ts       # Dịch vụ xác thực
 │   └── mock/
-│       └── api.ts           # Mock API endpoints
+│       └── api.ts           # API giả lập (mock)
 │
 ├── styles/
-│   └── global.css           # Design system CSS variables
+│   └── global.css           # CSS hệ thống (design tokens / variables)
 │
 ├── types/
-│   ├── auth.ts             # Auth types (UserRole enum, User, etc.)
-│   └── index.ts            # All shared types
+│   ├── auth.ts             # Kiểu dữ liệu auth (UserRole, User, ...)
+│   └── index.ts            # Các kiểu dữ liệu dùng chung
 │
 └── utils/
-    └── index.ts            # Utility functions (formatPrice, debounce, etc.)
-```
-
+    └── index.ts            # Hàm tiện ích (format tiền, debounce, ...)
 ---
 
 ## Routing System
