@@ -1,4 +1,4 @@
-// ─── Theme Colors ─────────────────────────────────────────────────────────────
+// ─── Màu sắc giao diện ─────────────────────────────────────────────────────────
 export const COLORS = {
   primary: '#4F46E5',
   primaryHover: '#4338CA',
@@ -17,7 +17,7 @@ export const COLORS = {
   textMuted: '#9CA3AF',
 } as const;
 
-// ─── Breakpoints ──────────────────────────────────────────────────────────────
+// ─── Điểm ngắt responsive ─────────────────────────────────────────────────────
 export const BREAKPOINTS = {
   mobile: '480px',
   tablet: '768px',
@@ -26,7 +26,7 @@ export const BREAKPOINTS = {
   ultra: '1536px',
 } as const;
 
-// ─── Layout Dimensions ─────────────────────────────────────────────────────────
+// ─── Kích thước bố cục ────────────────────────────────────────────────────────
 export const LAYOUT = {
   headerHeight: '72px',
   headerMobileHeight: '64px',
@@ -36,7 +36,7 @@ export const LAYOUT = {
   footerHeight: '420px',
 } as const;
 
-// ─── Animation Durations ───────────────────────────────────────────────────────
+// ─── Thời lượng hiệu ứng ──────────────────────────────────────────────────────
 export const ANIMATION = {
   fast: '150ms',
   normal: '250ms',
@@ -44,31 +44,33 @@ export const ANIMATION = {
   megaMenu: '300ms',
 } as const;
 
-// ─── LocalStorage Keys ─────────────────────────────────────────────────────────
+// ─── Các khóa lưu trong localStorage ──────────────────────────────────────────
 export const STORAGE_KEYS = {
   theme: 'henzo_theme',
   auth: 'henzo_auth',
   cart: 'henzo_cart',
   wishlist: 'henzo_wishlist',
   notifications: 'henzo_notifications',
+  reviews: 'henzo_reviews',
   searchHistory: 'henzo_search_history',
   sidebarCollapsed: 'henzo_sidebar_collapsed',
+  orders: 'henzo_orders',
 } as const;
 
-// ─── Pagination Defaults ───────────────────────────────────────────────────────
+// ─── Cấu hình phân trang mặc định ─────────────────────────────────────────────
 export const PAGINATION = {
   defaultPageSize: 12,
   pageSizeOptions: [12, 24, 48, 96],
 } as const;
 
-// ─── API Mock Delays ──────────────────────────────────────────────────────────
+// ─── Thời gian trễ của API giả lập ────────────────────────────────────────────
 export const API_DELAY = {
   fast: 200,
   normal: 400,
   slow: 800,
 } as const;
 
-// ─── Product Categories ────────────────────────────────────────────────────────
+// ─── Danh mục sản phẩm ─────────────────────────────────────────────────────────
 export const CATEGORIES = [
   {
     id: 'cat-1',
@@ -176,7 +178,7 @@ export const CATEGORIES = [
   },
 ] as const;
 
-// ─── Popular Keywords ─────────────────────────────────────────────────────────
+// ─── Từ khóa phổ biến ─────────────────────────────────────────────────────────
 export const POPULAR_KEYWORDS = [
   'iPhone 16 Pro Max',
   'MacBook Pro M4',
@@ -188,7 +190,7 @@ export const POPULAR_KEYWORDS = [
   'Apple Watch Ultra 3',
 ];
 
-// ─── Navigation Links ─────────────────────────────────────────────────────────
+// ─── Liên kết điều hướng ──────────────────────────────────────────────────────
 export const FOOTER_LINKS = {
   about: [
     { label: 'Về chúng tôi', href: '/about' },
@@ -215,7 +217,7 @@ export const FOOTER_LINKS = {
   ],
 };
 
-// ─── Company Info ──────────────────────────────────────────────────────────────
+// ─── Thông tin công ty ────────────────────────────────────────────────────────
 export const COMPANY_INFO = {
   name: 'Công ty TNHH Henzo Store',
   hotline: '1900 1234',
@@ -224,7 +226,7 @@ export const COMPANY_INFO = {
   taxId: '0123456789',
 };
 
-// ─── Order Status Labels ───────────────────────────────────────────────────────
+// ─── Nhãn trạng thái đơn hàng ─────────────────────────────────────────────────
 export const ORDER_STATUS_LABELS: Record<string, string> = {
   pending: 'Chờ xác nhận',
   confirmed: 'Đã xác nhận',

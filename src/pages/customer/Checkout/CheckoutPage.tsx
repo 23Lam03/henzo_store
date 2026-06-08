@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useCart, useAuth } from '../../../contexts';
+import { useCart, useAuth, useOrder } from '../../../contexts';
 import { ROUTES } from '../../../constants/routes';
 import './CheckoutPage.css';
 
@@ -13,14 +13,16 @@ const DISTRICTS: Record<string, string[]> = {
 };
 
 export const CheckoutPage = () => {
-  const { items } = useCart();
+  const { items, clearSelectedItems } = useCart();
   const { user } = useAuth();
+  const { createOrder } = useOrder();
   const [step, setStep] = useState(1);
   const [payment, setPayment] = useState('COD');
   const [province, setProvince] = useState('');
   const [district, setDistrict] = useState('');
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
+  const [createdOrderId, setCreatedOrderId] = useState('');
   const [form, setForm] = useState({
     name: user?.name || '',
     phone: user?.phone || '',
@@ -51,8 +53,17 @@ export const CheckoutPage = () => {
       setErrors({});
       setStep(2);
     } else {
-      const num = `HDN-${Date.now()}`;
-      setOrderNumber(num);
+      const shippingAddress = `${form.address}, ${district}, ${province}`;
+      const order = createOrder({
+        items: selectedItems,
+        totalPrice: total + shipping,
+        shippingAddress,
+        paymentMethod: payment,
+      });
+
+      clearSelectedItems();
+      setCreatedOrderId(order.id);
+      setOrderNumber(order.orderNumber);
       setOrderPlaced(true);
     }
   };
@@ -70,11 +81,11 @@ export const CheckoutPage = () => {
           <h2>Đặt hàng thành công!</h2>
           <p>Mã đơn hàng của bạn: <strong>{orderNumber}</strong></p>
           <p className="checkout-success__detail">
-            Cảm ơn bạn đã đặt hàng tại HenzoStore. Đơn hàng sẽ được xử lý trong thời gian sớm nhất.
+            Cảm ơn bạn đã đặt hàng tại HenzoStore. Đơn hàng đã được ghi nhận với trạng thái chờ xác nhận.
           </p>
           <div className="checkout-success__actions">
-            <Link to={ROUTES.ORDERS} className="btn btn-primary">Xem đơn hàng</Link>
-            <Link to="/" className="btn btn-secondary">Tiếp tục mua sắm</Link>
+            <Link to={createdOrderId ? ROUTES.ORDER_DETAIL.replace(':id', createdOrderId) : ROUTES.ORDERS} className="btn btn-primary">Xem chi tiết đơn</Link>
+            <Link to={ROUTES.ORDERS} className="btn btn-secondary">Lịch sử đơn hàng</Link>
           </div>
         </div>
       </div>
@@ -104,7 +115,6 @@ export const CheckoutPage = () => {
 
         <div className="checkout-page__layout">
           <div className="checkout-page__main">
-            {/* Steps */}
             <div className="checkout-steps">
               <div className={`checkout-step ${step >= 1 ? 'active' : ''}`}>
                 <span className="checkout-step__num">1</span>

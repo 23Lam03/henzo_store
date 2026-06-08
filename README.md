@@ -35,12 +35,6 @@
 | Storage | LocalStorage | - |
 | API | Mock API (async/await) | - |
 
-### Không sử dụng
-
-```
-❌ TailwindCSS     ❌ Bootstrap      ❌ Material UI
-❌ Ant Design     ❌ Chakra UI       ❌ Styled Components
-```
 
 ---
 
@@ -54,14 +48,6 @@
 - Phụ kiện công nghệ (Chuột, Bàn phím, Tai nghe, Màn hình, Camera, Loa...)
 - Đồng hồ thông minh, Máy tính bảng, Thiết bị mạng
 
-### Yêu cầu kỹ thuật
-
-- Responsive hoàn toàn: Desktop, Tablet, Mobile
-- 100% tiếng Việt
-- Không có trang trắng
-- Không placeholder image
-- CSS thuần (Pure CSS)
-- Enterprise Architecture
 
 ---
 
@@ -781,6 +767,34 @@ mockApi.createSupportTicket(data)       // → SupportTicket
 - [ ] Mobile app (React Native)
 - [ ] AI-powered recommendations
 - [ ] Advanced caching strategy
+
+---
+
+## Cập nhật mới nhất
+
+### Đồng bộ đơn hàng giữa customer và shop
+- Khi customer đặt hàng, đơn sẽ được lưu vào `localStorage` với key `henzo_orders`.
+- Đơn mới tự động xuất hiện ở khu vực quản lý đơn hàng của shop.
+- Khi shop cập nhật trạng thái đơn hàng, customer sẽ thấy trạng thái mới tương ứng ở:
+  - trang tài khoản
+  - lịch sử đơn hàng
+  - chi tiết đơn hàng
+  - trang theo dõi vận chuyển
+- Mỗi lần shop đổi trạng thái đơn, customer sẽ nhận được thông báo mới trong hệ thống.
+
+### Theo dõi đơn hàng của customer
+- Bổ sung route theo dõi đơn hàng: `/account/orders/:id/tracking`.
+- Trang theo dõi vận chuyển giờ đọc dữ liệu đơn hàng thật theo `id` thay vì dùng dữ liệu mock cố định.
+- Customer có thể bấm nút **Theo dõi** từ lịch sử đơn hàng để xem tiến trình giao hàng.
+
+### Hệ thống đánh giá đã được đồng bộ
+- Bổ sung `ReviewProvider` để quản lý đánh giá tập trung.
+- Đánh giá của customer được lưu vào `localStorage` với key `henzo_reviews`.
+- Sau khi gửi đánh giá từ lịch sử đơn hàng:
+  - đánh giá vẫn được giữ lại sau khi tải lại trang
+  - trang chi tiết sản phẩm hiển thị ngay đánh giá mới, số lượng đánh giá và điểm trung bình được cập nhật
+  - phía shop cũng nhìn thấy đánh giá đó trong trang quản lý review
+- Review của shop được đồng bộ qua vùng lưu trữ `henzo_seller_reviews` để phục vụ giao diện seller.
 
 ---
 

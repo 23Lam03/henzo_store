@@ -1,6 +1,6 @@
-// ─── Route Constants ──────────────────────────────────────────────────────────
+// ─── Khai báo route ───────────────────────────────────────────────────────────
 export const ROUTES = {
-  // Public
+  // Công khai
   HOME: '/',
   PRODUCTS: '/products',
   PRODUCT_DETAIL: '/products/:slug',
@@ -18,17 +18,17 @@ export const ROUTES = {
   ABOUT: '/about',
   FAQ: '/faq',
 
-  // Auth
+  // Xác thực
   LOGIN: '/login',
   REGISTER: '/register',
   FORGOT_PASSWORD: '/forgot-password',
 
-  // Customer (protected - CUSTOMER)
+  // Khách hàng (được bảo vệ - CUSTOMER)
   ACCOUNT: '/account',
   ACCOUNT_DASHBOARD: '/account/dashboard',
   ACCOUNT_SETTINGS: '/account/settings',
-  ORDERS: '/orders',
-  ORDER_DETAIL: '/orders/:id',
+  ORDERS: '/account/orders',
+  ORDER_DETAIL: '/account/orders/:id',
   CART: '/cart',
   CHECKOUT: '/checkout',
   WISHLIST: '/wishlist',
@@ -38,8 +38,9 @@ export const ROUTES = {
   PAYMENTS: '/payments',
   NOTIFICATIONS: '/notifications',
   SUPPORT: '/account/support',
+  ORDER_TRACKING: '/account/orders/:id/tracking',
 
-  // Shop (protected - SHOP, ADMIN)
+  // Shop (được bảo vệ - SHOP, ADMIN)
   SHOP_DASHBOARD: '/seller',
   SHOP_PRODUCTS: '/seller/products',
   SHOP_PRODUCT_CREATE: '/seller/products/create',
@@ -56,7 +57,7 @@ export const ROUTES = {
   SHOP_SHIPPING: '/seller/shipping',
   SHOP_NOTIFICATIONS: '/seller/notifications',
 
-  // Admin (protected - ADMIN — toàn quyền quản lý)
+  // Quản trị viên (được bảo vệ - ADMIN, toàn quyền quản lý)
   ADMIN_DASHBOARD: '/admin',
   ADMIN_PRODUCTS: '/admin/products',
   ADMIN_ORDERS: '/admin/orders',
@@ -71,15 +72,15 @@ export const ROUTES = {
   ADMIN_ACCESS: '/admin/access',
   ADMIN_FINANCE: '/admin/finance',
 
-  // Errors
+  // Trang lỗi
   NOT_FOUND: '/404',
   FORBIDDEN: '/403',
   SERVER_ERROR: '/500',
 } as const;
 
-// ─── Page Title Mapping ─────────────────────────────────────────────────────
+// ─── Ánh xạ tiêu đề trang ─────────────────────────────────────────────────────
 export const PAGE_TITLES: Record<string, string> = {
-  // Public
+  // Công khai
   [ROUTES.HOME]: 'Trang Chủ',
   [ROUTES.PRODUCTS]: 'Sản Phẩm',
   [ROUTES.PRODUCT_DETAIL]: 'Chi Tiết Sản Phẩm',
@@ -97,12 +98,12 @@ export const PAGE_TITLES: Record<string, string> = {
   [ROUTES.ABOUT]: 'Giới Thiệu',
   [ROUTES.FAQ]: 'Câu Hỏi Thường Gặp',
 
-  // Auth
+  // Xác thực
   [ROUTES.LOGIN]: 'Đăng Nhập',
   [ROUTES.REGISTER]: 'Đăng Ký',
   [ROUTES.FORGOT_PASSWORD]: 'Quên Mật Khẩu',
 
-  // Customer
+  // Khách hàng
   [ROUTES.ACCOUNT]: 'Tài Khoản',
   [ROUTES.ACCOUNT_DASHBOARD]: 'Tài Khoản',
   [ROUTES.ACCOUNT_SETTINGS]: 'Cài Đặt',
@@ -117,8 +118,9 @@ export const PAGE_TITLES: Record<string, string> = {
   [ROUTES.PAYMENTS]: 'Thanh Toán',
   [ROUTES.NOTIFICATIONS]: 'Thông Báo',
   [ROUTES.SUPPORT]: 'Hỗ Trợ',
+  [ROUTES.ORDER_TRACKING]: 'Theo Dõi Đơn Hàng',
 
-  // Shop Seller
+  // Shop
   [ROUTES.SHOP_DASHBOARD]: 'Dashboard Shop',
   [ROUTES.SHOP_PRODUCTS]: 'Quản Lý Sản Phẩm',
   [ROUTES.SHOP_PRODUCT_CREATE]: 'Thêm Sản Phẩm',
@@ -135,7 +137,7 @@ export const PAGE_TITLES: Record<string, string> = {
   [ROUTES.SHOP_SHIPPING]: 'Vận Chuyển',
   [ROUTES.SHOP_NOTIFICATIONS]: 'Thông Báo',
 
-  // Admin
+  // Quản trị viên
   [ROUTES.ADMIN_DASHBOARD]: 'Dashboard Admin',
   [ROUTES.ADMIN_PRODUCTS]: 'Quản Lý Sản Phẩm',
   [ROUTES.ADMIN_ORDERS]: 'Quản Lý Đơn Hàng',
@@ -150,7 +152,7 @@ export const PAGE_TITLES: Record<string, string> = {
   [ROUTES.ADMIN_ACCESS]: 'Phân Quyền',
   [ROUTES.ADMIN_FINANCE]: 'Tài Chính Hệ Thống',
 
-  // Errors
+  // Trang lỗi
   [ROUTES.NOT_FOUND]: '404 - Không Tìm Thấy',
   [ROUTES.FORBIDDEN]: '403 - Không Có Quyền Truy Cập',
   [ROUTES.SERVER_ERROR]: '500 - Lỗi Hệ Thống',

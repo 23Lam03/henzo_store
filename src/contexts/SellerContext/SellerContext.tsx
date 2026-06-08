@@ -1,5 +1,5 @@
 import {
-  createContext, useContext, useState, useCallback, type ReactNode
+  createContext, useContext, useState, useCallback, type ReactNode, useMemo, useEffect
 } from 'react';
 import type {
   SellerStore, SellerOrder, SellerPayment, SellerReview,
@@ -7,12 +7,18 @@ import type {
   SellerShipping, SellerNotification, SellerDashboardStats,
   DailyRevenue, MonthlyData, OrderStatus
 } from '../../types/seller';
+import type { Order as CustomerOrder } from '../../types';
 import {
   currentStore, mockSellerOrders, mockSellerPayments, mockSellerReviews,
   mockSellerPromotions, mockSellerTickets, mockSellerInventory,
   mockSellerShippings, mockSellerNotifications, mockDailyRevenue,
   mockMonthlyData, mockSellerProducts
 } from '../../data/sellerData';
+import { STORAGE_KEYS } from '../../constants';
+import { getStorageItem, setStorageItem } from '../../utils';
+import type { Notification } from '../../types';
+
+const SELLER_REVIEWS_STORAGE_KEY = 'henzo_seller_reviews';
 
 interface SellerContextValue {
   store: SellerStore;
@@ -28,7 +34,6 @@ interface SellerContextValue {
   dailyRevenue: DailyRevenue[];
   monthlyData: MonthlyData[];
 
-  // Actions
   updateOrderStatus: (orderId: string, status: OrderStatus) => void;
   updateReviewVisibility: (reviewId: string, hidden: boolean) => void;
   respondToReview: (reviewId: string, response: string) => void;
@@ -45,6 +50,7 @@ interface SellerContextValue {
 }
 
 const SellerContext = createContext<SellerContextValue | null>(null);
+const SELLER_ORDERS_STORAGE_KEY = 'henzo_seller_orders';
 
 export const useSeller = () => {
   const ctx = useContext(SellerContext);
@@ -78,20 +84,176 @@ const calculateStats = (orders: SellerOrder[]) => {
   } satisfies SellerDashboardStats;
 };
 
+const mapCustomerStatusToSellerStatus = (status: CustomerOrder['status']): OrderStatus => {
+  switch (status) {
+    case 'pending': return 'pending';
+    case 'confirmed': return 'confirmed';
+    case 'processing': return 'preparing';
+    case 'shipping': return 'delivering';
+    case 'delivered': return 'delivered';
+    case 'cancelled': return 'cancelled';
+    default: return 'pending';
+  }
+};
+
+const mapPaymentMethod = (paymentMethod: string): SellerOrder['paymentMethod'] => {
+  switch (paymentMethod.toLowerCase()) {
+    case 'cod': return 'cod';
+    case 'vnpay': return 'vnpay';
+    case 'momo': return 'momo';
+    case 'zalopay': return 'zalopay';
+    default: return 'banking';
+  }
+};
+
+const toSellerOrder = (order: CustomerOrder): SellerOrder => ({
+  id: order.id,
+  orderCode: order.orderNumber,
+  customerName: 'Khách hàng Henzo',
+  customerPhone: 'Chưa cập nhật',
+  customerAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=henzo-customer',
+  items: order.items.reduce((sum, item) => sum + item.quantity, 0) || 1,
+  totalAmount: order.totalPrice,
+  shippingFee: 0,
+  discount: 0,
+  finalAmount: order.totalPrice,
+  status: mapCustomerStatusToSellerStatus(order.status),
+  paymentMethod: mapPaymentMethod(order.paymentMethod),
+  paymentStatus: order.paymentMethod === 'COD' ? 'unpaid' : 'paid',
+  shippingAddress: order.shippingAddress,
+  note: '',
+  createdAt: order.createdAt,
+  updatedAt: order.updatedAt,
+  estimatedDelivery: new Date(new Date(order.createdAt).getTime() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+  trackingNumber: `HNZ${order.id.replace(/[^a-zA-Z0-9]/g, '').toUpperCase()}`,
+  shippingPartner: 'Giao Hàng Nhanh',
+  storeId: currentStore.id,
+  products: order.items.map(item => ({
+    productId: item.product.id,
+    productName: item.product.name,
+    productImage: item.product.images[0],
+    quantity: item.quantity,
+    unitPrice: item.product.price,
+    totalPrice: item.product.price * item.quantity,
+    sku: item.product.id.toUpperCase(),
+    options: {},
+  })),
+});
+
+const mergeOrders = (baseOrders: SellerOrder[], customerOrders: CustomerOrder[]) => {
+  const customerOrderMap = new Map(customerOrders.map(order => [order.id, toSellerOrder(order)]));
+  const mergedBase = baseOrders.map(order => customerOrderMap.get(order.id) ?? order);
+  const existingIds = new Set(mergedBase.map(order => order.id));
+  const appended = [...customerOrderMap.values()].filter(order => !existingIds.has(order.id));
+  return [...appended, ...mergedBase].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
+};
+
+const CUSTOMER_STATUS_LABELS: Record<CustomerOrder['status'], string> = {
+  pending: 'Chờ xác nhận',
+  confirmed: 'Đã xác nhận',
+  processing: 'Đang xử lý',
+  shipping: 'Đang giao',
+  delivered: 'Đã giao',
+  cancelled: 'Đã hủy',
+};
+
+const pushCustomerOrderNotification = (order: CustomerOrder, status: CustomerOrder['status']) => {
+  const notifications = getStorageItem<Notification[]>(STORAGE_KEYS.notifications, []);
+  const title = `Đơn hàng ${order.orderNumber} đã cập nhật`;
+  const message = `Đơn hàng ${order.orderNumber} hiện ở trạng thái ${CUSTOMER_STATUS_LABELS[status]}.`;
+
+  const nextNotifications: Notification[] = [
+    {
+      id: `notif-${Date.now()}`,
+      type: 'order',
+      title,
+      message,
+      isRead: false,
+      createdAt: new Date().toISOString(),
+      link: `/account/orders/${order.id}`,
+    },
+    ...notifications,
+  ];
+
+  setStorageItem(STORAGE_KEYS.notifications, nextNotifications);
+};
+
 export const SellerProvider = ({ children }: { children: ReactNode }) => {
-  const [orders, setOrders] = useState<SellerOrder[]>(mockSellerOrders);
+  const [orders, setOrders] = useState<SellerOrder[]>(() => {
+    const customerOrders = getStorageItem<CustomerOrder[]>(STORAGE_KEYS.orders, []);
+    const savedSellerOrders = getStorageItem<SellerOrder[]>(SELLER_ORDERS_STORAGE_KEY, mockSellerOrders);
+    return mergeOrders(savedSellerOrders, customerOrders);
+  });
   const [payments] = useState<SellerPayment[]>(mockSellerPayments);
-  const [reviews, setReviews] = useState<SellerReview[]>(mockSellerReviews);
+  const [reviews, setReviews] = useState<SellerReview[]>(() => getStorageItem<SellerReview[]>(SELLER_REVIEWS_STORAGE_KEY, mockSellerReviews));
   const [promotions, setPromotions] = useState<SellerPromotion[]>(mockSellerPromotions);
   const [tickets, setTickets] = useState<SellerSupportTicket[]>(mockSellerTickets);
   const [inventory, setInventory] = useState<SellerInventoryItem[]>(mockSellerInventory);
   const [shippings] = useState<SellerShipping[]>(mockSellerShippings);
   const [notifications, setNotifications] = useState<SellerNotification[]>(mockSellerNotifications);
 
+  useEffect(() => {
+    setStorageItem(SELLER_ORDERS_STORAGE_KEY, orders);
+  }, [orders]);
+
+  useEffect(() => {
+    setStorageItem(SELLER_REVIEWS_STORAGE_KEY, reviews);
+  }, [reviews]);
+
+  useEffect(() => {
+    const syncOrders = () => {
+      const customerOrders = getStorageItem<CustomerOrder[]>(STORAGE_KEYS.orders, []);
+      setOrders(prev => mergeOrders(prev, customerOrders));
+    };
+
+    syncOrders();
+    window.addEventListener('storage', syncOrders);
+    return () => window.removeEventListener('storage', syncOrders);
+  }, []);
+
+  useEffect(() => {
+    const syncReviews = () => {
+      setReviews(getStorageItem<SellerReview[]>(SELLER_REVIEWS_STORAGE_KEY, mockSellerReviews));
+    };
+
+    syncReviews();
+    window.addEventListener('storage', syncReviews);
+    window.addEventListener('focus', syncReviews);
+    return () => {
+      window.removeEventListener('storage', syncReviews);
+      window.removeEventListener('focus', syncReviews);
+    };
+  }, []);
+
   const stats = calculateStats(orders);
 
   const updateOrderStatus = useCallback((orderId: string, status: OrderStatus) => {
-    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status, updatedAt: new Date().toISOString() } : o));
+    setOrders(prev => {
+      const nextOrders = prev.map(o => o.id === orderId ? { ...o, status, updatedAt: new Date().toISOString() } : o);
+
+      const customerStatusMap: Record<OrderStatus, CustomerOrder['status']> = {
+        pending: 'pending',
+        confirmed: 'confirmed',
+        preparing: 'processing',
+        shipped: 'shipping',
+        delivering: 'shipping',
+        delivered: 'delivered',
+        cancelled: 'cancelled',
+        returned: 'cancelled',
+      };
+
+      const customerOrders = getStorageItem<CustomerOrder[]>(STORAGE_KEYS.orders, []);
+      const updatedCustomerOrders = customerOrders.map(order => {
+        if (order.id !== orderId) return order;
+        const nextCustomerStatus = customerStatusMap[status];
+        const updatedOrder = { ...order, status: nextCustomerStatus, updatedAt: new Date().toISOString() };
+        pushCustomerOrderNotification(updatedOrder, nextCustomerStatus);
+        return updatedOrder;
+      });
+      setStorageItem(STORAGE_KEYS.orders, updatedCustomerOrders);
+
+      return nextOrders;
+    });
   }, []);
 
   const updateReviewVisibility = useCallback((reviewId: string, hidden: boolean) => {
@@ -158,34 +320,59 @@ export const SellerProvider = ({ children }: { children: ReactNode }) => {
   const getOrderById = useCallback((id: string) => orders.find(o => o.id === id), [orders]);
   const getProductById = useCallback((id: string) => mockSellerProducts.find(p => p.id === id), []);
 
+  const value = useMemo(() => ({
+    store: currentStore,
+    stats,
+    orders,
+    payments,
+    reviews,
+    promotions,
+    tickets,
+    inventory,
+    shippings,
+    notifications,
+    dailyRevenue: mockDailyRevenue,
+    monthlyData: mockMonthlyData,
+    updateOrderStatus,
+    updateReviewVisibility,
+    respondToReview,
+    updatePromotionStatus,
+    createPromotion,
+    updateTicketStatus,
+    addTicketMessage,
+    updateInventoryStock,
+    markNotificationRead,
+    markAllNotificationsRead,
+    deleteNotification,
+    getOrderById,
+    getProductById,
+  }), [
+    stats,
+    orders,
+    payments,
+    reviews,
+    promotions,
+    tickets,
+    inventory,
+    shippings,
+    notifications,
+    updateOrderStatus,
+    updateReviewVisibility,
+    respondToReview,
+    updatePromotionStatus,
+    createPromotion,
+    updateTicketStatus,
+    addTicketMessage,
+    updateInventoryStock,
+    markNotificationRead,
+    markAllNotificationsRead,
+    deleteNotification,
+    getOrderById,
+    getProductById,
+  ]);
+
   return (
-    <SellerContext.Provider value={{
-      store: currentStore,
-      stats,
-      orders,
-      payments,
-      reviews,
-      promotions,
-      tickets,
-      inventory,
-      shippings,
-      notifications,
-      dailyRevenue: mockDailyRevenue,
-      monthlyData: mockMonthlyData,
-      updateOrderStatus,
-      updateReviewVisibility,
-      respondToReview,
-      updatePromotionStatus,
-      createPromotion,
-      updateTicketStatus,
-      addTicketMessage,
-      updateInventoryStock,
-      markNotificationRead,
-      markAllNotificationsRead,
-      deleteNotification,
-      getOrderById,
-      getProductById,
-    }}>
+    <SellerContext.Provider value={value}>
       {children}
     </SellerContext.Provider>
   );

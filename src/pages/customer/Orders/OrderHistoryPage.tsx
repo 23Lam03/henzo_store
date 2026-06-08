@@ -1,44 +1,86 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth, useOrder, useReview } from '../../../contexts';
+import { ROUTES } from '../../../constants/routes';
 import './OrderHistoryPage.css';
+
+type ReviewFormState = {
+  orderId: string;
+  productId: string;
+  productName: string;
+  productImage: string;
+};
 
 const fmt = (p: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(p);
 
-const MOCK_ORDERS = [
-  { id: 'order-1', number: 'HDN-20250603-001', date: '2025-06-03T10:00:00Z', total: 39980000, status: 'confirmed', items: 2 },
-  { id: 'order-2', number: 'HDN-20250528-042', date: '2025-05-28T14:00:00Z', total: 56990000, status: 'delivered', items: 1 },
-  { id: 'order-3', number: 'HDN-20250515-008', date: '2025-05-15T09:00:00Z', total: 24990000, status: 'delivered', items: 1 },
-  { id: 'order-4', number: 'HDN-20250420-015', date: '2025-04-20T11:00:00Z', total: 18990000, status: 'cancelled', items: 1 },
-  { id: 'order-5', number: 'HDN-20250410-003', date: '2025-04-10T08:00:00Z', total: 34990000, status: 'delivered', items: 2 },
-];
-
 const STATUS_LABELS: Record<string, string> = {
-  pending: 'Chờ xác nhận', confirmed: 'Đã xác nhận', processing: 'Đang xử lý',
-  shipping: 'Đang giao', delivered: 'Đã giao', cancelled: 'Đã hủy',
+  pending: 'Chờ xác nhận',
+  confirmed: 'Đã xác nhận',
+  processing: 'Đang xử lý',
+  shipping: 'Đang giao',
+  delivered: 'Đã giao',
+  cancelled: 'Đã hủy',
 };
 
 const STATUS_CLASSES: Record<string, string> = {
-  pending: 'badge-warning', confirmed: 'badge-primary', processing: 'badge-accent',
-  shipping: 'badge-accent', delivered: 'badge-success', cancelled: 'badge-danger',
+  pending: 'badge-warning',
+  confirmed: 'badge-primary',
+  processing: 'badge-accent',
+  shipping: 'badge-accent',
+  delivered: 'badge-success',
+  cancelled: 'badge-danger',
 };
 
 export const OrderHistoryPage = () => {
+  const { user } = useAuth();
+  const { orders } = useOrder();
+  const { createReview, hasReviewedProduct } = useReview();
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [reviewTarget, setReviewTarget] = useState<ReviewFormState | null>(null);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
 
-  const filtered = MOCK_ORDERS.filter(o => {
-    if (filter !== 'all' && o.status !== filter) return false;
-    if (search && !o.number.toLowerCase().includes(search.toLowerCase())) return false;
+  const filtered = orders.filter(order => {
+    if (filter !== 'all' && order.status !== filter) return false;
+    if (search && !order.orderNumber.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
 
   const filterBtns = [
     { id: 'all', label: 'Tất cả' },
+    { id: 'pending', label: 'Chờ xác nhận' },
     { id: 'confirmed', label: 'Đã xác nhận' },
     { id: 'shipping', label: 'Đang giao' },
     { id: 'delivered', label: 'Đã giao' },
     { id: 'cancelled', label: 'Đã hủy' },
   ];
+
+  const openReview = (orderId: string, productId: string, productName: string, productImage: string) => {
+    setReviewTarget({ orderId, productId, productName, productImage });
+    setRating(5);
+    setComment('');
+  };
+
+  const submitReview = () => {
+    if (!reviewTarget || !comment.trim()) return;
+
+    createReview({
+      orderId: reviewTarget.orderId,
+      productId: reviewTarget.productId,
+      productName: reviewTarget.productName,
+      productImage: reviewTarget.productImage,
+      userId: user?.id || 'user-1',
+      userName: user?.name || 'Khách hàng',
+      userAvatar: user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=henzo-customer',
+      rating,
+      comment,
+    });
+
+    setReviewTarget(null);
+    setComment('');
+    setRating(5);
+  };
 
   return (
     <div className="order-history-page">
@@ -70,35 +112,73 @@ export const OrderHistoryPage = () => {
           </div>
         ) : (
           <div className="order-list">
-            {filtered.map(order => (
-              <div key={order.id} className="order-card card">
-                <div className="order-card__header">
-                  <div className="order-card__info">
-                    <span className="order-card__num">{order.number}</span>
-                    <span className="order-card__date">
-                      Đặt ngày {new Date(order.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+            {filtered.map(order => {
+              const firstProduct = order.items[0]?.product;
+              const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0) || 1;
+              const reviewDisabled = !firstProduct || hasReviewedProduct(order.id, firstProduct.id);
+
+              return (
+                <div key={order.id} className="order-card card">
+                  <div className="order-card__header">
+                    <div className="order-card__info">
+                      <span className="order-card__num">{order.orderNumber}</span>
+                      <span className="order-card__date">
+                        Đặt ngày {new Date(order.createdAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                      </span>
+                    </div>
+                    <div className="order-card__meta">
+                      <span className={`badge ${STATUS_CLASSES[order.status]}`}>{STATUS_LABELS[order.status]}</span>
+                      <span className="order-card__items">{totalItems} sản phẩm</span>
+                    </div>
+                  </div>
+                  <div className="order-card__footer">
+                    <span className="order-card__total">
+                      Tổng: <strong>{fmt(order.totalPrice)}</strong>
                     </span>
-                  </div>
-                  <div className="order-card__meta">
-                    <span className={`badge ${STATUS_CLASSES[order.status]}`}>{STATUS_LABELS[order.status]}</span>
-                    <span className="order-card__items">{order.items} sản phẩm</span>
-                  </div>
-                </div>
-                <div className="order-card__footer">
-                  <span className="order-card__total">
-                    Tổng: <strong>{fmt(order.total)}</strong>
-                  </span>
-                  <div className="order-card__actions">
-                    <Link to={`/orders/${order.id}`} className="btn btn-secondary btn-sm">Chi tiết</Link>
-                    {order.status === 'delivered' && <button className="btn btn-outline btn-sm">Đánh giá</button>}
-                    {order.status === 'shipping' && <button className="btn btn-primary btn-sm">Theo dõi</button>}
+                    <div className="order-card__actions">
+                      <Link to={ROUTES.ORDER_DETAIL.replace(':id', order.id)} className="btn btn-secondary btn-sm">Chi tiết</Link>
+                      {order.status === 'delivered' && firstProduct && (
+                        <button className="btn btn-outline btn-sm" onClick={() => openReview(order.id, firstProduct.id, firstProduct.name, firstProduct.images[0])} disabled={reviewDisabled}>
+                          {reviewDisabled ? 'Đã đánh giá' : 'Đánh giá'}
+                        </button>
+                      )}
+                      {order.status === 'shipping' && (
+                        <Link to={ROUTES.ORDER_TRACKING.replace(':id', order.id)} className="btn btn-primary btn-sm">Theo dõi</Link>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
+
+      {reviewTarget && (
+        <div className="admin-modal-overlay" onClick={() => setReviewTarget(null)}>
+          <div className="admin-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 560 }}>
+            <div className="admin-modal__header">
+              <h3 className="admin-modal__title">Đánh giá sản phẩm</h3>
+              <button className="admin-modal__close" onClick={() => setReviewTarget(null)}>×</button>
+            </div>
+            <div className="admin-modal__body">
+              <p style={{ marginBottom: 12 }}>Sản phẩm: <strong>{reviewTarget.productName}</strong></p>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <button key={i} type="button" className="btn btn-ghost btn-sm" onClick={() => setRating(i + 1)}>
+                    <span style={{ color: i < rating ? '#F59E0B' : '#CBD5E1', fontSize: 20 }}>★</span>
+                  </button>
+                ))}
+              </div>
+              <textarea className="input" rows={5} placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..." value={comment} onChange={e => setComment(e.target.value)} />
+            </div>
+            <div className="admin-modal__footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 20 }}>
+              <button className="btn btn-secondary" onClick={() => setReviewTarget(null)}>Hủy</button>
+              <button className="btn btn-primary" onClick={submitReview} disabled={!comment.trim()}>Gửi đánh giá</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

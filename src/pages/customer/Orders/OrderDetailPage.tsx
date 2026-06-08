@@ -1,35 +1,85 @@
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import { useOrder } from '../../../contexts';
 import { ROUTES } from '../../../constants/routes';
 import './OrderDetailPage.css';
 
 const fmt = (p: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(p);
 
-const MOCK_ORDER = {
-  id: 'order-1',
-  number: 'HDN-20250603-001',
-  date: '2025-06-03T10:00:00Z',
-  status: 'confirmed',
-  paymentMethod: 'VNPay',
-  shippingAddress: '123 Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh',
-  items: [
-    { id: 1, name: 'iPhone 16 Pro Max 256GB', brand: 'Apple', price: 34990000, originalPrice: 37990000, qty: 1, image: 'https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=200' },
-    { id: 2, name: 'AirPods Pro 2', brand: 'Apple', price: 4990000, originalPrice: 5490000, qty: 1, image: 'https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?w=200' },
-  ],
-  subtotal: 39980000,
-  shipping: 0,
-  discount: 0,
-  total: 39980000,
+const formatDateTime = (date: string) => new Intl.DateTimeFormat('vi-VN', {
+  hour: '2-digit',
+  minute: '2-digit',
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+}).format(new Date(date));
+
+const addHours = (date: string, hours: number) => {
+  const d = new Date(date);
+  d.setHours(d.getHours() + hours);
+  return d.toISOString();
 };
 
-const TIMELINE = [
-  { step: 'order', label: 'Đặt hàng', time: '10:00 - 03/06/2025', done: true },
-  { step: 'confirm', label: 'Xác nhận', time: '10:30 - 03/06/2025', done: true },
-  { step: 'process', label: 'Đang xử lý', time: '', done: false },
-  { step: 'shipping', label: 'Đang giao', time: '', done: false },
-  { step: 'delivered', label: 'Giao thành công', time: '', done: false },
-];
+const TIMELINE_STEPS = [
+  { step: 'order', label: 'Đặt hàng' },
+  { step: 'confirmed', label: 'Xác nhận đơn' },
+  { step: 'processing', label: 'Đang xử lý' },
+  { step: 'shipping', label: 'Đang giao' },
+  { step: 'delivered', label: 'Giao thành công' },
+] as const;
+
+const STATUS_PROGRESS = {
+  pending: 1,
+  confirmed: 2,
+  processing: 3,
+  shipping: 4,
+  delivered: 5,
+  cancelled: 1,
+} as const;
+
+const buildTimeline = (createdAt: string, status: keyof typeof STATUS_PROGRESS) => {
+  if (status === 'cancelled') {
+    return [
+      { step: 'order', label: 'Đặt hàng', time: formatDateTime(createdAt), done: true },
+      { step: 'cancelled', label: 'Đã hủy đơn', time: formatDateTime(addHours(createdAt, 2)), done: true },
+    ];
+  }
+
+  const progress = STATUS_PROGRESS[status];
+
+  return TIMELINE_STEPS.map((item, index) => {
+    const stepNumber = index + 1;
+    return {
+      ...item,
+      done: stepNumber <= progress,
+      time: stepNumber <= progress ? formatDateTime(addHours(createdAt, index === 0 ? 0 : index)) : '',
+    };
+  });
+};
 
 export const OrderDetailPage = () => {
+  const { id } = useParams();
+  const { getOrderById } = useOrder();
+  const order = id ? getOrderById(id) : undefined;
+
+  if (!order) {
+    return (
+      <div className="order-detail-page">
+        <div className="container">
+          <div className="order-detail-page__breadcrumb">
+            <Link to={ROUTES.ORDERS}>← Lịch sử đơn hàng</Link>
+          </div>
+          <div className="card" style={{ padding: '32px' }}>
+            <h2>Không tìm thấy đơn hàng</h2>
+            <p>Đơn hàng này không tồn tại hoặc đã bị xóa.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const timeline = buildTimeline(order.createdAt, order.status);
+  const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0) || 1;
+
   return (
     <div className="order-detail-page">
       <div className="container">
@@ -37,16 +87,15 @@ export const OrderDetailPage = () => {
           <Link to={ROUTES.ORDERS}>← Lịch sử đơn hàng</Link>
         </div>
 
-        <h1 className="order-detail-page__title">Chi tiết đơn hàng {MOCK_ORDER.number}</h1>
+        <h1 className="order-detail-page__title">Chi tiết đơn hàng {order.orderNumber}</h1>
 
         <div className="order-detail-layout">
           <div className="order-detail-main">
-            {/* Timeline */}
             <div className="order-timeline card">
               <h3>Trạng thái đơn hàng</h3>
               <div className="timeline">
-                {TIMELINE.map((t, i) => (
-                  <div key={t.step} className={`timeline-item ${t.done ? 'done' : ''} ${i === TIMELINE.length - 1 ? 'last' : ''}`}>
+                {timeline.map((t, i) => (
+                  <div key={t.step} className={`timeline-item ${t.done ? 'done' : ''} ${i === timeline.length - 1 ? 'last' : ''}`}>
                     <div className="timeline-item__dot">
                       {t.done && (
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
@@ -63,40 +112,46 @@ export const OrderDetailPage = () => {
               </div>
             </div>
 
-            {/* Items */}
             <div className="order-items card">
-              <h3>Sản phẩm đã đặt</h3>
-              {MOCK_ORDER.items.map(item => (
-                <div key={item.id} className="order-item">
-                  <img src={item.image} alt={item.name} />
-                  <div className="order-item__info">
-                    <span className="order-item__brand">{item.brand}</span>
-                    <span className="order-item__name">{item.name}</span>
-                    <span className="order-item__qty">x{item.qty}</span>
-                  </div>
-                  <span className="order-item__price">{fmt(item.price * item.qty)}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
+                <h3>Sản phẩm đã đặt ({totalItems})</h3>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {order.status === 'shipping' && (
+                    <Link to={ROUTES.ORDER_TRACKING.replace(':id', order.id)} className="btn btn-primary btn-sm">Theo dõi đơn hàng</Link>
+                  )}
+                  {order.status === 'delivered' && order.items[0]?.product && (
+                    <Link to={ROUTES.PRODUCT_DETAIL.replace(':slug', order.items[0].product.slug)} className="btn btn-outline btn-sm">Đánh giá sản phẩm</Link>
+                  )}
                 </div>
-              ))}
+              </div>
+
+              {order.items.length > 0 ? order.items.map(item => (
+                <div key={item.product.id} className="order-item">
+                  <img src={item.product.images[0]} alt={item.product.name} />
+                  <div className="order-item__info">
+                    <span className="order-item__brand">{item.product.brand}</span>
+                    <span className="order-item__name">{item.product.name}</span>
+                    <span className="order-item__qty">x{item.quantity}</span>
+                  </div>
+                  <span className="order-item__price">{fmt(item.product.price * item.quantity)}</span>
+                </div>
+              )) : (
+                <p>Đơn hàng mẫu chưa có chi tiết sản phẩm.</p>
+              )}
             </div>
           </div>
 
           <div className="order-detail-sidebar">
             <div className="order-summary card">
               <h3>Tổng cộng</h3>
-              <div className="order-summary__row"><span>Tạm tính</span><span>{fmt(MOCK_ORDER.subtotal)}</span></div>
-              <div className="order-summary__row"><span>Phí vận chuyển</span><span>{MOCK_ORDER.shipping === 0 ? 'Miễn phí' : fmt(MOCK_ORDER.shipping)}</span></div>
-              {MOCK_ORDER.discount > 0 && (
-                <div className="order-summary__row order-summary__row--discount"><span>Giảm giá</span><span>-{fmt(MOCK_ORDER.discount)}</span></div>
-              )}
-              <div className="order-summary__divider" />
-              <div className="order-summary__row order-summary__row--total"><span>Tổng</span><span>{fmt(MOCK_ORDER.total)}</span></div>
+              <div className="order-summary__row order-summary__row--total"><span>Tổng</span><span>{fmt(order.totalPrice)}</span></div>
             </div>
 
             <div className="order-info card">
               <h3>Thông tin đơn hàng</h3>
-              <div className="order-info__row"><span>Ngày đặt</span><span>{new Date(MOCK_ORDER.date).toLocaleDateString('vi-VN')}</span></div>
-              <div className="order-info__row"><span>Phương thức</span><span>{MOCK_ORDER.paymentMethod}</span></div>
-              <div className="order-info__row"><span>Địa chỉ giao</span><span>{MOCK_ORDER.shippingAddress}</span></div>
+              <div className="order-info__row"><span>Ngày đặt</span><span>{new Date(order.createdAt).toLocaleDateString('vi-VN')}</span></div>
+              <div className="order-info__row"><span>Phương thức</span><span>{order.paymentMethod}</span></div>
+              <div className="order-info__row"><span>Địa chỉ giao</span><span>{order.shippingAddress}</span></div>
             </div>
           </div>
         </div>

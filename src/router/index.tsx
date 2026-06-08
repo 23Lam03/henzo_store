@@ -7,19 +7,19 @@ import { RouteLoader } from '../components/common/RouteLoader/RouteLoader';
 import { MainLayout, ShopLayout, AdminLayout, CustomerLayout, AuthLayout } from '../components/layouts';
 import type { UserRole } from '../types';
 
-// ─── Role Constants ───────────────────────────────────────────────────────────
+// ─── Các vai trò trong hệ thống ───────────────────────────────────────────────
 const CUSTOMER_ROLE: UserRole[] = ['CUSTOMER' as UserRole];
 const SHOP_ROLE: UserRole[] = ['SHOP' as UserRole, 'ADMIN' as UserRole];
 const ADMIN_ROLE: UserRole[] = ['ADMIN' as UserRole];
 
-// ─── Lazy Page Loading ────────────────────────────────────────────────────────
+// ─── Tải trang theo cơ chế lazy loading ───────────────────────────────────────
 const load = <T extends object>(fn: () => Promise<T>, key: keyof T) =>
   lazy(async () => {
     const mod = await fn();
     return { default: mod[key] as unknown as React.ComponentType };
   });
 
-// Public pages
+// Các trang công khai
 const HomePage = load(() => import('../pages/customer/Home/HomePage'), 'HomePage');
 const ProductListPage = load(() => import('../pages/customer/ProductList/ProductListPage'), 'ProductListPage');
 const ProductDetailPage = load(() => import('../pages/customer/ProductDetail/ProductDetailPage'), 'ProductDetailPage');
@@ -27,12 +27,12 @@ const CategoryPage = load(() => import('../pages/customer/Category/CategoryPage'
 const BrandPage = load(() => import('../pages/customer/Brand/BrandPage'), 'BrandPage');
 const ComparePage = load(() => import('../pages/customer/Compare/ComparePage'), 'ComparePage');
 
-// Auth pages
+// Các trang xác thực
 const LoginPage = load(() => import('../pages/auth/LoginPage/LoginPage'), 'LoginPage');
 const RegisterPage = load(() => import('../pages/auth/RegisterPage/RegisterPage'), 'RegisterPage');
 const ForgotPasswordPage = load(() => import('../pages/auth/ForgotPasswordPage/ForgotPasswordPage'), 'ForgotPasswordPage');
 
-// Customer pages
+// Các trang khách hàng
 const CartPage = load(() => import('../pages/customer/Cart/CartPage'), 'CartPage');
 const CheckoutPage = load(() => import('../pages/customer/Checkout/CheckoutPage'), 'CheckoutPage');
 const WishlistPage = load(() => import('../pages/customer/Wishlist/WishlistPage'), 'WishlistPage');
@@ -40,6 +40,7 @@ const AccountPage = load(() => import('../pages/customer/Account/AccountPage'), 
 const OrderHistoryPage = load(() => import('../pages/customer/Orders/OrderHistoryPage'), 'OrderHistoryPage');
 const OrderDetailPage = load(() => import('../pages/customer/Orders/OrderDetailPage'), 'OrderDetailPage');
 const NotificationPage = load(() => import('../pages/customer/Notifications/NotificationPage'), 'NotificationPage');
+const ShippingTrackingPage = load(() => import('../pages/customer/Shipping/ShippingTrackingPage'), 'ShippingTrackingPage');
 const CustomerSupportPage = load(() => import('../pages/customer/CustomerSupport/CustomerSupportPage'), 'CustomerSupportPage');
 const PromotionPage = load(() => import('../pages/customer/Promotion/PromotionPage'), 'PromotionPage');
 const SearchPage = load(() => import('../pages/customer/Search/SearchPage'), 'SearchPage');
@@ -47,7 +48,7 @@ const RecentlyViewedPage = load(() => import('../pages/customer/RecentlyViewed/R
 const ContactPage = load(() => import('../pages/customer/Contact/ContactPage'), 'ContactPage');
 const CustomerSettingsPage = load(() => import('../pages/customer/CustomerSettings/CustomerSettingsPage'), 'CustomerSettingsPage');
 
-// Shop pages
+// Các trang shop
 const ShopDashboardPage = load(() => import('../pages/shop/ShopDashboard/ShopDashboardPage'), 'ShopDashboardPage');
 const ShopProductListPage = load(() => import('../pages/shop/ShopProductList/ShopProductListPage'), 'ShopProductListPage');
 const CreateProductPage = load(() => import('../pages/shop/CreateProduct/CreateProductPage'), 'CreateProductPage');
@@ -63,7 +64,7 @@ const ShopProfilePage = load(() => import('../pages/shop/ShopProfile/ShopProfile
 const ShopShippingPage = load(() => import('../pages/shop/ShopShipping/ShopShippingPage'), 'ShopShippingPage');
 const ShopNotificationsPage = load(() => import('../pages/shop/ShopNotifications/ShopNotificationsPage'), 'ShopNotificationsPage');
 
-// Admin pages
+// Các trang quản trị viên
 const AdminDashboardPage = load(() => import('../pages/admin/AdminDashboard/DashboardPage'), 'AdminDashboardPage');
 const AdminProductPage = load(() => import('../pages/admin/AdminProduct/AdminProductPage'), 'AdminProductPage');
 const AdminOrderPage = load(() => import('../pages/admin/AdminOrder/AdminOrderPage'), 'AdminOrderPage');
@@ -78,19 +79,19 @@ const AdminPromotionPage = load(() => import('../pages/admin/AdminPromotion/Admi
 const AdminAccessPage = load(() => import('../pages/admin/AdminAccess/AdminAccessPage'), 'AdminAccessPage');
 const AdminFinancePage = load(() => import('../pages/admin/AdminFinance/AdminFinancePage'), 'AdminFinancePage');
 
-// Error pages
+// Các trang lỗi
 const NotFoundPage = load(() => import('../pages/errors/ErrorPages'), 'NotFoundPage');
 const ForbiddenPage = load(() => import('../pages/errors/ErrorPages'), 'ForbiddenPage');
 const ServerErrorPage = load(() => import('../pages/errors/ErrorPages'), 'ServerErrorPage');
 
-// ─── Page Wrapper ─────────────────────────────────────────────────────────────
+// ─── Thành phần bao cho từng trang ────────────────────────────────────────────
 const Page = ({ children }: { children: ReactNode }) => (
   <Suspense fallback={<RouteLoader />}>{children}</Suspense>
 );
 
-// ─── Router ──────────────────────────────────────────────────────────────────
+// ─── Cấu hình router ──────────────────────────────────────────────────────────
 export const router = createBrowserRouter([
-  // ─── Auth Routes ────────────────────────────────────────────────────────────
+  // ─── Tuyến xác thực ─────────────────────────────────────────────────────────
   {
     element: <AuthLayout />,
     children: [
@@ -100,7 +101,7 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // ─── Public Routes ──────────────────────────────────────────────────────────
+  // ─── Tuyến công khai ────────────────────────────────────────────────────────
   {
     element: <MainLayout />,
     children: [
@@ -120,7 +121,7 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // ─── Customer Routes ────────────────────────────────────────────────────────
+  // ─── Tuyến khách hàng ───────────────────────────────────────────────────────
   {
     element: <CustomerLayout />,
     children: [
@@ -182,10 +183,20 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: ROUTES.ORDER_TRACKING,
+        element: (
+          <ProtectedRoute>
+            <PermissionRoute allowedRoles={CUSTOMER_ROLE}>
+              <Page><ShippingTrackingPage /></Page>
+            </PermissionRoute>
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
 
-  // ─── Shop Routes (/seller/*) ─────────────────────────────────────────────────
+  // ─── Tuyến shop (/seller/*) ────────────────────────────────────────────────
   {
     path: '/seller',
     element: (
@@ -215,7 +226,7 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // ─── Admin Routes (/admin/*) ─────────────────────────────────────────────────
+  // ─── Tuyến quản trị (/admin/*) ─────────────────────────────────────────────
   {
     path: '/admin',
     element: (
@@ -242,11 +253,11 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // ─── Error Routes ───────────────────────────────────────────────────────────
+  // ─── Tuyến lỗi ──────────────────────────────────────────────────────────────
   { path: ROUTES.NOT_FOUND, element: <Page><NotFoundPage /></Page> },
   { path: ROUTES.FORBIDDEN, element: <Page><ForbiddenPage /></Page> },
   { path: ROUTES.SERVER_ERROR, element: <Page><ServerErrorPage /></Page> },
 
-  // ─── Catch-all ─────────────────────────────────────────────────────────────
+  // ─── Tuyến bắt tất cả ───────────────────────────────────────────────────────
   { path: '*', element: <Navigate to={ROUTES.NOT_FOUND} replace /> },
 ]);

@@ -17,6 +17,7 @@ interface NotificationContextValue {
   isLoading: boolean;
   markAsRead: (id: string) => void;
   markAllAsRead: () => void;
+  addNotification: (notification: Omit<Notification, 'id' | 'createdAt' | 'isRead'>) => void;
   refresh: () => Promise<void>;
 }
 
@@ -45,6 +46,18 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     mockApi.markAllNotificationsRead();
   }, []);
 
+  const addNotification = useCallback((notification: Omit<Notification, 'id' | 'createdAt' | 'isRead'>) => {
+    setNotifications(prev => [
+      {
+        ...notification,
+        id: `notif-${Date.now()}`,
+        createdAt: new Date().toISOString(),
+        isRead: false,
+      },
+      ...prev,
+    ]);
+  }, []);
+
   const refresh = useCallback(async () => {
     setIsLoading(true);
     const data = await mockApi.getNotifications('user-1');
@@ -58,6 +71,19 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  useEffect(() => {
+    const syncNotifications = () => {
+      setNotifications(getStorageItem<Notification[]>(STORAGE_KEYS.notifications, []));
+    };
+
+    window.addEventListener('storage', syncNotifications);
+    window.addEventListener('focus', syncNotifications);
+    return () => {
+      window.removeEventListener('storage', syncNotifications);
+      window.removeEventListener('focus', syncNotifications);
+    };
+  }, []);
+
   return (
     <NotificationContext.Provider
       value={{
@@ -66,6 +92,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         isLoading,
         markAsRead,
         markAllAsRead,
+        addNotification,
         refresh,
       }}
     >

@@ -1,39 +1,50 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../../contexts';
+import { useAuth, useOrder } from '../../../contexts';
 import { ROUTES } from '../../../constants/routes';
 import './AccountPage.css';
 
 const fmt = (p: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(p);
 
-const MOCK_STATS = {
-  totalOrders: 12,
-  pendingOrders: 1,
-  completedOrders: 10,
-  totalSpent: 156789000,
-  vouchers: 5,
-  points: 1250,
-};
-
-const MOCK_ORDERS = [
-  { id: 'order-1', number: 'HDN-20250603-001', date: '2025-06-03', total: 39980000, status: 'confirmed', items: 2 },
-  { id: 'order-2', number: 'HDN-20250528-042', date: '2025-05-28', total: 56990000, status: 'delivered', items: 1 },
-  { id: 'order-3', number: 'HDN-20250515-008', date: '2025-05-15', total: 24990000, status: 'delivered', items: 1 },
-];
-
 const STATUS_LABELS: Record<string, string> = {
-  pending: 'Chờ xác nhận', confirmed: 'Đã xác nhận', processing: 'Đang xử lý',
-  shipping: 'Đang giao', delivered: 'Đã giao', cancelled: 'Đã hủy',
+  pending: 'Chờ xác nhận',
+  confirmed: 'Đã xác nhận',
+  processing: 'Đang xử lý',
+  shipping: 'Đang giao',
+  delivered: 'Đã giao',
+  cancelled: 'Đã hủy',
 };
 
 const STATUS_CLASSES: Record<string, string> = {
-  pending: 'badge-warning', confirmed: 'badge-primary', processing: 'badge-accent',
-  shipping: 'badge-accent', delivered: 'badge-success', cancelled: 'badge-danger',
+  pending: 'badge-warning',
+  confirmed: 'badge-primary',
+  processing: 'badge-accent',
+  shipping: 'badge-accent',
+  delivered: 'badge-success',
+  cancelled: 'badge-danger',
 };
 
 export const AccountPage = () => {
   const { user } = useAuth();
+  const { orders } = useOrder();
   const [activeTab, setActiveTab] = useState('overview');
+
+  const recentOrders = useMemo(() => orders.slice(0, 3), [orders]);
+  const stats = useMemo(() => {
+    const totalOrders = orders.length;
+    const pendingOrders = orders.filter(order => ['pending', 'confirmed', 'processing', 'shipping'].includes(order.status)).length;
+    const completedOrders = orders.filter(order => order.status === 'delivered').length;
+    const totalSpent = orders.reduce((sum, order) => sum + order.totalPrice, 0);
+
+    return {
+      totalOrders,
+      pendingOrders,
+      completedOrders,
+      totalSpent,
+      vouchers: 5,
+      points: 1250,
+    };
+  }, [orders]);
 
   const tabs = [
     { id: 'overview', label: 'Tổng quan' },
@@ -82,10 +93,10 @@ export const AccountPage = () => {
               <div className="account-overview">
                 <div className="account-stats">
                   {[
-                    { label: 'Tổng đơn hàng', value: MOCK_STATS.totalOrders, icon: '📦', color: 'var(--color-primary)' },
-                    { label: 'Đơn đang xử lý', value: MOCK_STATS.pendingOrders, icon: '⏳', color: 'var(--color-warning)' },
-                    { label: 'Đã hoàn thành', value: MOCK_STATS.completedOrders, icon: '✅', color: 'var(--color-success)' },
-                    { label: 'Tổng chi tiêu', value: fmt(MOCK_STATS.totalSpent), icon: '💰', color: 'var(--color-accent)' },
+                    { label: 'Tổng đơn hàng', value: stats.totalOrders, icon: '📦', color: 'var(--color-primary)' },
+                    { label: 'Đơn đang xử lý', value: stats.pendingOrders, icon: '⏳', color: 'var(--color-warning)' },
+                    { label: 'Đã hoàn thành', value: stats.completedOrders, icon: '✅', color: 'var(--color-success)' },
+                    { label: 'Tổng chi tiêu', value: fmt(stats.totalSpent), icon: '💰', color: 'var(--color-accent)' },
                   ].map((stat, i) => (
                     <div key={i} className="stat-card card">
                       <span className="stat-card__icon" style={{ background: `${stat.color}18` }}>{stat.icon}</span>
@@ -103,15 +114,15 @@ export const AccountPage = () => {
                     <Link to={ROUTES.ORDERS} className="btn btn-ghost btn-sm">Xem tất cả</Link>
                   </div>
                   <div className="recent-orders__list">
-                    {MOCK_ORDERS.map(order => (
+                    {recentOrders.map(order => (
                       <div key={order.id} className="recent-order">
                         <div className="recent-order__info">
-                          <span className="recent-order__num">{order.number}</span>
-                          <span className="recent-order__date">{new Date(order.date).toLocaleDateString('vi-VN')}</span>
+                          <span className="recent-order__num">{order.orderNumber}</span>
+                          <span className="recent-order__date">{new Date(order.createdAt).toLocaleDateString('vi-VN')}</span>
                         </div>
                         <span className={`badge ${STATUS_CLASSES[order.status]}`}>{STATUS_LABELS[order.status]}</span>
-                        <span className="recent-order__total">{fmt(order.total)}</span>
-                        <Link to={`/orders/${order.id}`} className="btn btn-ghost btn-sm">Chi tiết</Link>
+                        <span className="recent-order__total">{fmt(order.totalPrice)}</span>
+                        <Link to={ROUTES.ORDER_DETAIL.replace(':id', order.id)} className="btn btn-ghost btn-sm">Chi tiết</Link>
                       </div>
                     ))}
                   </div>
@@ -170,21 +181,21 @@ export const AccountPage = () => {
             {activeTab === 'orders' && (
               <div className="account-orders">
                 <h2 className="account-section-title">Lịch sử đơn hàng</h2>
-                {MOCK_ORDERS.map(order => (
+                {orders.map(order => (
                   <div key={order.id} className="order-card card">
                     <div className="order-card__header">
                       <div className="order-card__info">
-                        <span className="order-card__num">{order.number}</span>
-                        <span className="order-card__date">Ngày đặt: {new Date(order.date).toLocaleDateString('vi-VN')}</span>
+                        <span className="order-card__num">{order.orderNumber}</span>
+                        <span className="order-card__date">Ngày đặt: {new Date(order.createdAt).toLocaleDateString('vi-VN')}</span>
                       </div>
                       <span className={`badge ${STATUS_CLASSES[order.status]}`}>{STATUS_LABELS[order.status]}</span>
                     </div>
                     <div className="order-card__body">
-                      <p>{order.items} sản phẩm</p>
-                      <span className="order-card__total">Tổng: <strong>{fmt(order.total)}</strong></span>
+                      <p>{order.items.reduce((sum, item) => sum + item.quantity, 0) || 1} sản phẩm</p>
+                      <span className="order-card__total">Tổng: <strong>{fmt(order.totalPrice)}</strong></span>
                     </div>
                     <div className="order-card__actions">
-                      <Link to={`/orders/${order.id}`} className="btn btn-secondary btn-sm">Chi tiết</Link>
+                      <Link to={ROUTES.ORDER_DETAIL.replace(':id', order.id)} className="btn btn-secondary btn-sm">Chi tiết</Link>
                       {order.status === 'delivered' && <button className="btn btn-outline btn-sm">Đánh giá</button>}
                     </div>
                   </div>

@@ -22,6 +22,7 @@ interface CartContextValue {
   toggleSelect: (productId: string) => void;
   selectAll: (selected: boolean) => void;
   clearCart: () => void;
+  clearSelectedItems: () => void;
   getItemCount: () => number;
 }
 
@@ -91,6 +92,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setItems([]);
   }, []);
 
+  const clearSelectedItems = useCallback(() => {
+    setItems(prev => prev.filter(item => !item.selected));
+  }, []);
+
   const getItemCount = useCallback(() => {
     return items.reduce((sum, item) => sum + item.quantity, 0);
   }, [items]);
@@ -109,6 +114,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         toggleSelect,
         selectAll,
         clearCart,
+        clearSelectedItems,
         getItemCount,
       }}
     >
