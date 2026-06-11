@@ -6,7 +6,7 @@ import { ProductGallery } from '../../../components/product/ProductGallery';
 import { ProductSpecification } from '../../../components/product/ProductSpecification';
 import { ProductReview } from '../../../components/product/ProductReview';
 import { ProductCard } from '../../../components/common/ProductCard';
-import { useCart, useReview } from '../../../contexts';
+import { useCart, useReview, useAuth } from '../../../contexts';
 import { useWishlist } from '../../../contexts/WishlistContext';
 import { useCompare } from '../../../contexts/CompareContext';
 import { useRecentlyViewed } from '../../../contexts/RecentlyViewedContext';
@@ -19,6 +19,7 @@ export const ProductDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { addItem } = useCart();
+  const { isAuthenticated } = useAuth();
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlist();
   const { addItem: addToCompare, isInCompare, removeItem: removeFromCompare } = useCompare();
   const { addItem: addToRecentlyViewed } = useRecentlyViewed();
@@ -74,6 +75,10 @@ export const ProductDetailPage = () => {
   const isOutOfStock = product.stock === 0;
 
   const handleAddToCart = () => {
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: `/products/${slug}` } });
+      return;
+    }
     addItem(product, quantity);
   };
 

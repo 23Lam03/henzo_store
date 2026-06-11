@@ -16,7 +16,7 @@ interface CartContextValue {
   totalPrice: number;
   totalOriginalPrice: number;
   savings: number;
-  addItem: (product: Product, quantity?: number) => void;
+  addItem: (product: Product, quantity?: number) => boolean;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   toggleSelect: (productId: string) => void;
@@ -28,14 +28,67 @@ interface CartContextValue {
 
 const CartContext = createContext<CartContextValue | null>(null);
 
-export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [items, setItems] = useState<CartItem[]>(() =>
-    getStorageItem<CartItem[]>(STORAGE_KEYS.cart, [])
-  );
+const getUserIdFromStorage = (): string | null => {
+  try {
+    const userStr = localStorage.getItem('henzo_auth_user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      return user?.id || null;
+    }
+    const sessionUser = sessionStorage.getItem('henzo_auth_user');
+    if (sessionUser) {
+      const user = JSON.parse(sessionUser);
+      return user?.id || null;
+    }
+  } catch { /* ignore */ }
+  return null;
+};
 
+const getCartStorageKey = (userId: string | null) =>
+  userId ? `${STORAGE_KEYS.cart}_${userId}` : STORAGE_KEYS.cart;
+
+const loadCart = (userId: string | null): CartItem[] => {
+  const key = getCartStorageKey(userId);
+  return getStorageItem<CartItem[]>(key, []);
+};
+
+const saveCart = (userId: string | null, items: CartItem[]) => {
+  const key = getCartStorageKey(userId);
+  setStorageItem(key, items);
+};
+
+export const CartProvider = ({ children }: { children: ReactNode }) => {
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(() => getUserIdFromStorage());
+
+  // Load cart whenever auth userId changes
   useEffect(() => {
-    setStorageItem(STORAGE_KEYS.cart, items);
-  }, [items]);
+    const userId = getUserIdFromStorage();
+    setCurrentUserId(userId);
+    const stored = loadCart(userId);
+    setItems(stored);
+  }, []);
+
+  // Re-check auth on storage events (cross-tab logout/login)
+  useEffect(() => {
+    const handleStorage = () => {
+      const userId = getUserIdFromStorage();
+      setCurrentUserId(userId);
+      setItems(loadCart(userId));
+    };
+
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener('henzo-auth-change', handleStorage);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('henzo-auth-change', handleStorage);
+    };
+  }, []);
+
+  // Persist cart on change
+  useEffect(() => {
+    saveCart(currentUserId, items);
+  }, [items, currentUserId]);
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items
@@ -46,7 +99,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     .reduce((sum, item) => sum + item.product.originalPrice * item.quantity, 0);
   const savings = totalOriginalPrice - totalPrice;
 
-  const addItem = useCallback((product: Product, quantity = 1) => {
+  const addItem = useCallback((product: Product, quantity = 1): boolean => {
     setItems(prev => {
       const existing = prev.find(i => i.product.id === product.id);
       if (existing) {
@@ -58,6 +111,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }
       return [...prev, { product, quantity, selected: true }];
     });
+    return true;
   }, []);
 
   const removeItem = useCallback((productId: string) => {

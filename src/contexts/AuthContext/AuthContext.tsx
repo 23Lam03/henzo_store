@@ -119,6 +119,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem(STORAGE_USER);
     sessionStorage.removeItem(STORAGE_TOKEN);
     sessionStorage.removeItem(STORAGE_USER);
+    // clear guest cart on logout
+    localStorage.removeItem('henzo_cart');
+    window.dispatchEvent(new Event('henzo-auth-change'));
   }, []);
 
   const updateUser = useCallback((data: Partial<User>) => {

@@ -47,6 +47,23 @@
 .product-list-page__sidebar {
   position: sticky;
   top: 100px;
+  max-height: calc(100vh - 104px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.product-list-page__sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.product-list-page__sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.product-list-page__sidebar::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
 }
 
 .product-list-page__main {

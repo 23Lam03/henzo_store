@@ -92,7 +92,7 @@ const IconCompare = () => (
 export const Header = () => {
   const scrollY = useScrollY();
   const { width } = useWindowSize();
-  const { items: cartItems } = useCart();
+  const { totalItems: cartCount } = useCart();
   const { count: wishlistCount } = useWishlist();
   const { unreadCount } = useNotification();
   const { theme, toggleTheme } = useTheme();
@@ -124,8 +124,6 @@ export const Header = () => {
   useClickOutside(notifRef as React.RefObject<HTMLElement>, () => setShowNotifications(false));
   useClickOutside(userMenuRef as React.RefObject<HTMLElement>, () => setShowUserMenu(false));
   useClickOutside(mobileMenuRef as React.RefObject<HTMLElement>, () => setShowMobileMenu(false));
-
-  const cartCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
     <>

@@ -64,6 +64,9 @@
   margin-bottom: var(--space-2);
 }
 
+.cart-select-all input[type="checkbox"],
+.cart-select-all .checkbox-custom { display: none; }
+
 .cart-select-all {
   display: flex;
   align-items: center;
@@ -75,7 +78,35 @@
   color: var(--color-text-primary);
 }
 
-.cart-select-all input[type="checkbox"] { display: none; }
+.cart-select-all .checkbox-custom {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.cart-select-all input[type="checkbox"]:checked + .checkbox-custom {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.cart-select-all input[type="checkbox"]:checked + .checkbox-custom::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 6px;
+  width: 5px;
+  height: 9px;
+  border: 2px solid #fff;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
 
 .cart-item {
   display: grid;
@@ -98,7 +129,42 @@
   align-items: center;
 }
 
-.cart-item__check input[type="checkbox"] { display: none; }
+.cart-item__check input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.cart-item__check .checkbox-custom {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.cart-item__check input[type="checkbox"]:checked + .checkbox-custom {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.cart-item__check input[type="checkbox"]:checked + .checkbox-custom::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 6px;
+  width: 5px;
+  height: 9px;
+  border: 2px solid #fff;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
 
 .cart-item__image {
   width: 100px;

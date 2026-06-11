@@ -1,6 +1,7 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../../contexts/CartContext';
 import { useWishlist } from '../../../contexts/WishlistContext';
+import { useAuth } from '../../../contexts/AuthContext';
 import { formatPrice } from '../../../utils';
 import type { Product } from '../../../types';
 import './ProductCard.css';
@@ -13,11 +14,17 @@ interface ProductCardProps {
 export const ProductCard = ({ product, viewMode = 'grid' }: ProductCardProps) => {
   const { addItem } = useCart();
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlist();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const inWishlist = isInWishlist(product.id);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: window.location.pathname } });
+      return;
+    }
     addItem(product, 1);
   };
 
