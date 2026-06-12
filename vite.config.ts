@@ -4,6 +4,7 @@ import babel from '@rolldown/plugin-babel'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/henzo_store/',
   plugins: [
     react(),
     babel({ presets: [reactCompilerPreset()] })

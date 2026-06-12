@@ -53,10 +53,6 @@ const initStaff: StaffMember[] = [
   { id: '7', name: 'Đỗ Thị Mai', email: 'maidt@henzo.com', role: 'SHOP', roleColor: '#F59E0B', roleBg: 'rgba(245,158,11,0.1)', permissions: ROLE_PERMS.SHOP, lastLogin: '2025-05-30 11:00', status: 'locked' },
 ];
 
-const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString('vi-VN', {
-  day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
-});
-
 export const AdminAccessPage = () => {
   const [staffList, setStaffList] = useState<StaffMember[]>(initStaff);
   const [selectedRole, setSelectedRole] = useState('ADMIN');

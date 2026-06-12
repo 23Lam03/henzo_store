@@ -41,7 +41,7 @@ export const ShippingTrackingPage = () => {
       { step: 'ordered', label: 'Đơn hàng đã đặt', time: formatDateTime(order.createdAt), location: 'Hệ thống HenzoStore', done: currentStep >= 1, current: currentStep === 1 },
       { step: 'confirmed', label: 'Đã xác nhận', time: currentStep >= 2 ? formatDateTime(addHours(order.createdAt, 1)) : '', location: currentStep >= 2 ? 'Trung tâm xác nhận đơn hàng' : '', done: currentStep >= 2, current: currentStep === 2 },
       { step: 'processing', label: 'Đang chuẩn bị', time: currentStep >= 3 ? formatDateTime(addHours(order.createdAt, 2)) : '', location: currentStep >= 3 ? 'Kho xử lý đơn hàng' : '', done: currentStep >= 3, current: currentStep === 3 },
-      { step: 'handover', label: 'Bàn giao vận chuyển', time: currentStep >= 4 ? formatDateTime(addHours(order.createdAt, 4)) : '', location: currentStep >= 4 ? 'Bưu cục tiếp nhận' : '', done: currentStep >= 4, current: currentStep === 4 },
+      { step: 'handover', label: 'Bàn giao vận chuyển', time: (currentStep as number) >= 4 ? formatDateTime(addHours(order.createdAt, 4)) : '', location: (currentStep as number) >= 4 ? 'Bưu cục tiếp nhận' : '', done: (currentStep as number) >= 4, current: (currentStep as number) === 4 },
       { step: 'shipping', label: 'Đang vận chuyển', time: currentStep >= 5 ? formatDateTime(addHours(order.createdAt, 6)) : '', location: currentStep >= 5 ? 'Trung tâm phân loại' : '', done: currentStep > 5, current: currentStep === 5 },
       { step: 'delivered', label: 'Giao thành công', time: currentStep >= 6 ? formatDateTime(addHours(order.createdAt, 24)) : '', location: currentStep >= 6 ? order.shippingAddress : '', done: currentStep >= 6, current: currentStep === 6 },
     ];

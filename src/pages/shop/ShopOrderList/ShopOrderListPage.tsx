@@ -4,7 +4,6 @@ import type { SellerOrder } from '../../../types/seller';
 import './ShopOrderListPage.css';
 
 const formatVND = (n: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(n);
-const formatNum = (n: number) => new Intl.NumberFormat('vi-VN').format(n);
 
 const STATUS_TABS = [
   { key: 'all', label: 'Tất cả' },

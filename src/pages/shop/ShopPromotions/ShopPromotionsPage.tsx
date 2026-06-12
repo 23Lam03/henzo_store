@@ -42,6 +42,9 @@ export const ShopPromotionsPage = () => {
     createPromotion({
       ...editingPromo,
       storeId: 'store-0001',
+      status: 'active' as const,
+      targetProducts: [],
+      targetCategories: [],
     });
     setShowModal(false);
     setEditingPromo(EMPTY_FORM);

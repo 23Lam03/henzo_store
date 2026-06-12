@@ -8,7 +8,7 @@ const formatNum = (n: number) => new Intl.NumberFormat('vi-VN').format(n);
 type ReportTab = 'revenue' | 'orders' | 'customers' | 'products';
 
 export const ShopReportsPage = () => {
-  const { dailyRevenue, monthlyData, orders } = useSeller();
+  const { monthlyData, orders } = useSeller();
   const [tab, setTab] = useState<ReportTab>('revenue');
 
   const totalRevenue = monthlyData.reduce((s, d) => s + d.revenue, 0);

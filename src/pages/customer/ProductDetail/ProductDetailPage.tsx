@@ -205,7 +205,7 @@ export const ProductDetailPage = () => {
 
       <div className="product-detail__tab-content">
         {activeTab === 'description' && <div className="product-detail__description">{product.description}</div>}
-        {activeTab === 'specs' && <ProductSpecification specifications={product.specifications} />}
+        {activeTab === 'specs' && <ProductSpecification product={product} />}
         {activeTab === 'reviews' && <ProductReview reviews={reviews} productId={product.id} />}
       </div>
 
