@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAdmin } from '../../../contexts/AdminContext';
 import { AdminDataTable } from '../../../components/admin/AdminDataTable';
+import { ConfirmModal } from '../../../components/common/ConfirmModal';
 import type { Order } from '../../../types';
 import { formatNumber } from '../../../utils';
 import './AdminOrderPage.css';
@@ -25,10 +27,19 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export const AdminOrderPage = () => {
+  const navigate = useNavigate();
   const { orders, updateOrderStatus } = useAdmin();
   const [filter, setFilter] = useState('all');
 
+  const [pendingAction, setPendingAction] = useState<{ orderId: string; newStatus: Order['status'] } | null>(null);
+
   const filtered = filter === 'all' ? orders : orders.filter(o => o.status === filter);
+
+  const confirmStatusChange = () => {
+    if (!pendingAction) return;
+    updateOrderStatus(pendingAction.orderId, pendingAction.newStatus);
+    setPendingAction(null);
+  };
 
   const columns = [
     { key: 'orderNumber', label: 'Mã đơn hàng', sortable: true, width: '160px',
@@ -79,24 +90,38 @@ export const AdminOrderPage = () => {
           onFilterChange={setFilter}
           searchable
           searchableFields={['orderNumber', 'shippingAddress']}
-          actions={(record) => (
-            <>
-              <button className="btn btn-sm btn-secondary">Chi tiết</button>
-              <select
-                className="order-status-select"
-                value={(record as Order).status}
-                onChange={(e) => updateOrderStatus((record as Order).id, e.target.value as Order['status'])}
-              >
-                <option value="pending">Chờ xác nhận</option>
-                <option value="confirmed">Đã xác nhận</option>
-                <option value="processing">Đang xử lý</option>
-                <option value="shipping">Đang giao</option>
-                <option value="delivered">Hoàn thành</option>
-                <option value="cancelled">Đã hủy</option>
-              </select>
-            </>
-          )}
+          actions={(record) => {
+            const isCancelled = (record as Order).status === 'cancelled';
+            return (
+              <>
+                <button className="btn btn-sm btn-secondary" onClick={() => navigate(`/admin/orders/${(record as Order).id}`)}>Chi tiết</button>
+                {!isCancelled && (
+                  <select
+                    className="order-status-select"
+                    value={(record as Order).status}
+                    onChange={(e) => setPendingAction({ orderId: (record as Order).id, newStatus: e.target.value as Order['status'] })}
+                  >
+                    <option value="pending">Chờ xác nhận</option>
+                    <option value="confirmed">Đã xác nhận</option>
+                    <option value="processing">Đang xử lý</option>
+                    <option value="shipping">Đang giao</option>
+                    <option value="delivered">Hoàn thành</option>
+                    <option value="cancelled">Đã hủy</option>
+                  </select>
+                )}
+              </>
+            );
+          }}
           emptyText="Không có đơn hàng nào"
+        />
+
+        <ConfirmModal
+          open={!!pendingAction}
+          title="Xác nhận thay đổi trạng thái"
+          message={`Bạn có chắc muốn cập nhật trạng thái đơn hàng này thành "${pendingAction ? STATUS_LABELS[pendingAction.newStatus] : ''}" không?`}
+          confirmLabel="Xác nhận"
+          onConfirm={confirmStatusChange}
+          onCancel={() => setPendingAction(null)}
         />
       </div>
     </div>

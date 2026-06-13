@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAdmin } from '../../../contexts/AdminContext';
 import { AdminDataTable } from '../../../components/admin/AdminDataTable';
 import type { User } from '../../../types';
@@ -12,6 +13,7 @@ const STATUS_OPTIONS = [
 ];
 
 export const AdminCustomerPage = () => {
+  const navigate = useNavigate();
   const { customers } = useAdmin();
   const [filter] = useState('all');
 
@@ -65,10 +67,10 @@ export const AdminCustomerPage = () => {
           currentFilter={filter}
           searchable
           searchableFields={['name', 'email', 'phone', 'address']}
-          actions={() => (
+          actions={(record) => (
             <>
-              <button className="btn btn-sm btn-secondary">Chi tiết</button>
-              <button className="btn btn-sm btn-outline">Khóa</button>
+              <button className="btn btn-sm btn-secondary" onClick={() => navigate(`/admin/customers/${(record as User).id}`)}>Chi tiết</button>
+              <button className="btn btn-sm btn-outline" onClick={() => navigate(`/admin/customers/${(record as User).id}`)}>Khóa</button>
             </>
           )}
           emptyText="Không có khách hàng nào"

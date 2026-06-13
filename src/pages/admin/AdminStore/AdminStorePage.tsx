@@ -1,8 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAdmin } from '../../../contexts/AdminContext';
 import { AdminDataTable } from '../../../components/admin/AdminDataTable';
 import type { Store } from '../../../types';
 import { formatNumber } from '../../../utils';
+import { useToast } from '../../../contexts';
+import { ConfirmModal } from '../../../components/common/ConfirmModal';
 import './AdminStorePage.css';
 
 const STATUS_OPTIONS = [
@@ -13,8 +16,10 @@ const STATUS_OPTIONS = [
 
 export const AdminStorePage = () => {
   const { stores } = useAdmin();
+  const toast = useToast();
   const [filter, setFilter] = useState('all');
   const [detail, setDetail] = useState<Store | null>(null);
+  const [pendingConfirm, setPendingConfirm] = useState<{ id: string; action: 'verify' | 'unverify' | 'delete' } | null>(null);
 
   const filtered = filter === 'verified' ? stores.filter(s => s.isVerified) :
                   filter === 'unverified' ? stores.filter(s => !s.isVerified) : stores;
@@ -73,7 +78,7 @@ export const AdminStorePage = () => {
         </div>
         <div className="admin-page-header__actions">
           <span className="admin-page__meta">{formatNumber(stores.length)} cửa hàng</span>
-          <button className="btn btn-primary">
+          <button className="btn btn-primary" onClick={() => navigate('/admin/stores/create')}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Thêm cửa hàng
           </button>
@@ -94,7 +99,7 @@ export const AdminStorePage = () => {
           actions={(record) => (
             <>
               <button className="btn btn-sm btn-secondary" onClick={() => setDetail(record as Store)}>Chi tiết</button>
-              <button className="btn btn-sm btn-outline">Sửa</button>
+              <button className="btn btn-sm btn-outline" onClick={() => navigate(`/admin/stores/edit/${(record as Store).id}`)}>Sửa</button>
             </>
           )}
           emptyText="Không có cửa hàng nào"
@@ -157,14 +162,14 @@ export const AdminStorePage = () => {
               </div>
 
               <div className="admin-detail-actions">
-                <button className="btn btn-primary btn-full">
+                <button className="btn btn-primary btn-full" onClick={() => navigate(`/admin/stores/edit/${detail.id}`)}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   Chỉnh sửa
                 </button>
-                <button className={`btn ${detail.isVerified ? 'btn-outline' : 'btn-primary'} btn-full`}>
+                <button className={`btn ${detail.isVerified ? 'btn-outline' : 'btn-primary'} btn-full`} onClick={() => setPendingConfirm({ id: detail.id, action: detail.isVerified ? 'unverify' : 'verify' })}>
                   {detail.isVerified ? 'Hủy xác minh' : 'Xác minh cửa hàng'}
                 </button>
-                <button className="btn btn-danger-outline btn-full">
+                <button className="btn btn-danger-outline btn-full" onClick={() => setPendingConfirm({ id: detail.id, action: 'delete' })}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
                   Xóa cửa hàng
                 </button>
@@ -173,6 +178,28 @@ export const AdminStorePage = () => {
           </div>
         </>
       )}
+
+      <ConfirmModal
+        open={!!pendingConfirm}
+        title={pendingConfirm?.action === 'delete' ? 'Xóa cửa hàng' : pendingConfirm?.action === 'verify' ? 'Xác minh cửa hàng' : 'Hủy xác minh'}
+        message={
+          pendingConfirm?.action === 'delete'
+            ? 'Bạn có chắc muốn xóa cửa hàng này? Hành động này không thể hoàn tác.'
+            : pendingConfirm?.action === 'verify'
+            ? 'Xác minh cửa hàng này để hiển thị trên hệ thống?'
+            : 'Hủy xác minh cửa hàng này?'
+        }
+        confirmLabel={pendingConfirm?.action === 'delete' ? 'Xóa' : 'Xác nhận'}
+        variant={pendingConfirm?.action === 'delete' ? 'danger' : 'primary'}
+        onConfirm={() => {
+          if (pendingConfirm) {
+            if (pendingConfirm.action === 'delete') toast({ title: 'Đã xóa cửa hàng', variant: 'success' });
+            else toast({ title: 'Đã cập nhật trạng thái', variant: 'success' });
+            setPendingConfirm(null);
+          }
+        }}
+        onCancel={() => setPendingConfirm(null)}
+      />
     </div>
   );
 };

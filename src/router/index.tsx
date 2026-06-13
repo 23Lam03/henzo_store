@@ -68,6 +68,7 @@ const ShopNotificationsPage = load(() => import('../pages/shop/ShopNotifications
 const AdminDashboardPage = load(() => import('../pages/admin/AdminDashboard/DashboardPage'), 'AdminDashboardPage');
 const AdminProductPage = load(() => import('../pages/admin/AdminProduct/AdminProductPage'), 'AdminProductPage');
 const AdminOrderPage = load(() => import('../pages/admin/AdminOrder/AdminOrderPage'), 'AdminOrderPage');
+const AdminOrderDetailPage = load(() => import('../pages/admin/AdminOrderDetail/AdminOrderDetailPage'), 'AdminOrderDetailPage');
 const AdminCustomerPage = load(() => import('../pages/admin/AdminCustomer/AdminCustomerPage'), 'AdminCustomerPage');
 const AdminStorePage = load(() => import('../pages/admin/AdminStore/AdminStorePage'), 'AdminStorePage');
 const AdminPaymentPage = load(() => import('../pages/admin/AdminPayment/AdminPaymentPage'), 'AdminPaymentPage');
@@ -90,174 +91,183 @@ const Page = ({ children }: { children: ReactNode }) => (
 );
 
 // ─── Cấu hình router ──────────────────────────────────────────────────────────
-export const router = createBrowserRouter([
-  // ─── Tuyến xác thực ─────────────────────────────────────────────────────────
-  {
-    element: <AuthLayout />,
-    children: [
-      { path: ROUTES.LOGIN, element: <Page><LoginPage /></Page> },
-      { path: ROUTES.REGISTER, element: <Page><RegisterPage /></Page> },
-      { path: ROUTES.FORGOT_PASSWORD, element: <Page><ForgotPasswordPage /></Page> },
-    ],
-  },
+// basename phải khớp với base trong vite.config.ts: base: '/henzo_store/'
+const routerBasename = import.meta.env.BASE_URL || '/henzo_store/';
 
-  // ─── Tuyến công khai ────────────────────────────────────────────────────────
-  {
-    element: <MainLayout />,
-    children: [
-      { index: true, element: <Page><HomePage /></Page> },
-      { path: ROUTES.PRODUCTS, element: <Page><ProductListPage /></Page> },
-      { path: ROUTES.PRODUCT_DETAIL, element: <Page><ProductDetailPage /></Page> },
-      { path: ROUTES.CATEGORY_DETAIL, element: <Page><CategoryPage /></Page> },
-      { path: ROUTES.BRAND_DETAIL, element: <Page><BrandPage /></Page> },
-      { path: ROUTES.SEARCH, element: <Page><SearchPage /></Page> },
-      { path: ROUTES.COMPARE, element: <Page><ComparePage /></Page> },
-      { path: ROUTES.PROMOTIONS, element: <Page><PromotionPage /></Page> },
-      { path: ROUTES.CONTACT, element: <Page><ContactPage /></Page> },
-      { path: ROUTES.WISHLIST, element: <Page><WishlistPage /></Page> },
-      { path: ROUTES.CART, element: <Page><CartPage /></Page> },
-      { path: ROUTES.RECENTLY_VIEWED, element: <Page><RecentlyViewedPage /></Page> },
-      { path: ROUTES.ORDER_DETAIL, element: <Page><OrderDetailPage /></Page> },
-    ],
-  },
+export const router = createBrowserRouter(
+  [
+    // ─── Tuyến xác thực ─────────────────────────────────────────────────────────
+    {
+      element: <AuthLayout />,
+      children: [
+        { path: ROUTES.LOGIN, element: <Page><LoginPage /></Page> },
+        { path: ROUTES.REGISTER, element: <Page><RegisterPage /></Page> },
+        { path: ROUTES.FORGOT_PASSWORD, element: <Page><ForgotPasswordPage /></Page> },
+      ],
+    },
 
-  // ─── Tuyến khách hàng ───────────────────────────────────────────────────────
-  {
-    element: <CustomerLayout />,
-    children: [
-      {
-        path: ROUTES.ACCOUNT,
-        element: (
-          <ProtectedRoute>
-            <PermissionRoute allowedRoles={CUSTOMER_ROLE}>
-              <Page><AccountPage /></Page>
-            </PermissionRoute>
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: ROUTES.ORDERS,
-        element: (
-          <ProtectedRoute>
-            <PermissionRoute allowedRoles={CUSTOMER_ROLE}>
-              <Page><OrderHistoryPage /></Page>
-            </PermissionRoute>
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: ROUTES.CHECKOUT,
-        element: (
-          <ProtectedRoute>
-            <Page><CheckoutPage /></Page>
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: ROUTES.NOTIFICATIONS,
-        element: (
-          <ProtectedRoute>
-            <PermissionRoute allowedRoles={CUSTOMER_ROLE}>
-              <Page><NotificationPage /></Page>
-            </PermissionRoute>
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: ROUTES.SUPPORT,
-        element: (
-          <ProtectedRoute>
-            <PermissionRoute allowedRoles={CUSTOMER_ROLE}>
-              <Page><CustomerSupportPage /></Page>
-            </PermissionRoute>
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: ROUTES.ACCOUNT_SETTINGS,
-        element: (
-          <ProtectedRoute>
-            <PermissionRoute allowedRoles={CUSTOMER_ROLE}>
-              <Page><CustomerSettingsPage /></Page>
-            </PermissionRoute>
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: ROUTES.ORDER_TRACKING,
-        element: (
-          <ProtectedRoute>
-            <PermissionRoute allowedRoles={CUSTOMER_ROLE}>
-              <Page><ShippingTrackingPage /></Page>
-            </PermissionRoute>
-          </ProtectedRoute>
-        ),
-      },
-    ],
-  },
+    // ─── Tuyến công khai ────────────────────────────────────────────────────────
+    {
+      element: <MainLayout />,
+      children: [
+        { index: true, element: <Page><HomePage /></Page> },
+        { path: ROUTES.PRODUCTS, element: <Page><ProductListPage /></Page> },
+        { path: ROUTES.PRODUCT_DETAIL, element: <Page><ProductDetailPage /></Page> },
+        { path: ROUTES.CATEGORY_DETAIL, element: <Page><CategoryPage /></Page> },
+        { path: ROUTES.BRAND_DETAIL, element: <Page><BrandPage /></Page> },
+        { path: ROUTES.SEARCH, element: <Page><SearchPage /></Page> },
+        { path: ROUTES.COMPARE, element: <Page><ComparePage /></Page> },
+        { path: ROUTES.PROMOTIONS, element: <Page><PromotionPage /></Page> },
+        { path: ROUTES.CONTACT, element: <Page><ContactPage /></Page> },
+        { path: ROUTES.WISHLIST, element: <Page><WishlistPage /></Page> },
+        { path: ROUTES.CART, element: <Page><CartPage /></Page> },
+        { path: ROUTES.RECENTLY_VIEWED, element: <Page><RecentlyViewedPage /></Page> },
+        { path: ROUTES.ORDER_DETAIL, element: <Page><OrderDetailPage /></Page> },
+      ],
+    },
 
-  // ─── Tuyến shop (/seller/*) ────────────────────────────────────────────────
-  {
-    path: '/seller',
-    element: (
-      <ProtectedRoute>
-        <PermissionRoute allowedRoles={SHOP_ROLE}>
-          <ShopLayout />
-        </PermissionRoute>
-      </ProtectedRoute>
-    ),
-    children: [
-      { index: true, element: <Page><ShopDashboardPage /></Page> },
-      { path: 'dashboard', element: <Page><ShopDashboardPage /></Page> },
-      { path: 'products', element: <Page><ShopProductListPage /></Page> },
-      { path: 'products/create', element: <Page><CreateProductPage /></Page> },
-      { path: 'products/edit/:id', element: <Page><CreateProductPage /></Page> },
-      { path: 'orders', element: <Page><ShopOrderListPage /></Page> },
-      { path: 'inventory', element: <Page><ShopInventoryPage /></Page> },
-      { path: 'reviews', element: <Page><ShopReviewsPage /></Page> },
-      { path: 'promotions', element: <Page><ShopPromotionsPage /></Page> },
-      { path: 'reports', element: <Page><ShopReportsPage /></Page> },
-      { path: 'finance', element: <Page><ShopFinancePage /></Page> },
-      { path: 'payments', element: <Page><ShopPaymentPage /></Page> },
-      { path: 'support', element: <Page><ShopSupportPage /></Page> },
-      { path: 'shipping', element: <Page><ShopShippingPage /></Page> },
-      { path: 'profile', element: <Page><ShopProfilePage /></Page> },
-      { path: 'notifications', element: <Page><ShopNotificationsPage /></Page> },
-    ],
-  },
+    // ─── Tuyến khách hàng ───────────────────────────────────────────────────────
+    {
+      element: <CustomerLayout />,
+      children: [
+        {
+          path: ROUTES.ACCOUNT,
+          element: (
+            <ProtectedRoute>
+              <PermissionRoute allowedRoles={CUSTOMER_ROLE}>
+                <Page><AccountPage /></Page>
+              </PermissionRoute>
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: ROUTES.ORDERS,
+          element: (
+            <ProtectedRoute>
+              <PermissionRoute allowedRoles={CUSTOMER_ROLE}>
+                <Page><OrderHistoryPage /></Page>
+              </PermissionRoute>
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: ROUTES.CHECKOUT,
+          element: (
+            <ProtectedRoute>
+              <Page><CheckoutPage /></Page>
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: ROUTES.NOTIFICATIONS,
+          element: (
+            <ProtectedRoute>
+              <PermissionRoute allowedRoles={CUSTOMER_ROLE}>
+                <Page><NotificationPage /></Page>
+              </PermissionRoute>
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: ROUTES.SUPPORT,
+          element: (
+            <ProtectedRoute>
+              <PermissionRoute allowedRoles={CUSTOMER_ROLE}>
+                <Page><CustomerSupportPage /></Page>
+              </PermissionRoute>
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: ROUTES.ACCOUNT_SETTINGS,
+          element: (
+            <ProtectedRoute>
+              <PermissionRoute allowedRoles={CUSTOMER_ROLE}>
+                <Page><CustomerSettingsPage /></Page>
+              </PermissionRoute>
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: ROUTES.ORDER_TRACKING,
+          element: (
+            <ProtectedRoute>
+              <PermissionRoute allowedRoles={CUSTOMER_ROLE}>
+                <Page><ShippingTrackingPage /></Page>
+              </PermissionRoute>
+            </ProtectedRoute>
+          ),
+        },
+      ],
+    },
 
-  // ─── Tuyến quản trị (/admin/*) ─────────────────────────────────────────────
-  {
-    path: '/admin',
-    element: (
-      <ProtectedRoute>
-        <PermissionRoute allowedRoles={ADMIN_ROLE}>
-          <AdminLayout />
-        </PermissionRoute>
-      </ProtectedRoute>
-    ),
-    children: [
-      { index: true, element: <Page><AdminDashboardPage /></Page> },
-      { path: 'products', element: <Page><AdminProductPage /></Page> },
-      { path: 'orders', element: <Page><AdminOrderPage /></Page> },
-      { path: 'customers', element: <Page><AdminCustomerPage /></Page> },
-      { path: 'stores', element: <Page><AdminStorePage /></Page> },
-      { path: 'payments', element: <Page><AdminPaymentPage /></Page> },
-      { path: 'reviews', element: <Page><AdminReviewPage /></Page> },
-      { path: 'promotions', element: <Page><AdminPromotionPage /></Page> },
-      { path: 'support', element: <Page><AdminSupportPage /></Page> },
-      { path: 'reports', element: <Page><AdminReportsPage /></Page> },
-      { path: 'notifications', element: <Page><AdminNotificationPage /></Page> },
-      { path: 'access', element: <Page><AdminAccessPage /></Page> },
-      { path: 'finance', element: <Page><AdminFinancePage /></Page> },
-    ],
-  },
+    // ─── Tuyến shop (/seller/*) ────────────────────────────────────────────────
+    {
+      path: '/seller',
+      element: (
+        <ProtectedRoute>
+          <PermissionRoute allowedRoles={SHOP_ROLE}>
+            <ShopLayout />
+          </PermissionRoute>
+        </ProtectedRoute>
+      ),
+      children: [
+        { index: true, element: <Page><ShopDashboardPage /></Page> },
+        { path: 'dashboard', element: <Page><ShopDashboardPage /></Page> },
+        { path: 'products', element: <Page><ShopProductListPage /></Page> },
+        { path: 'products/create', element: <Page><CreateProductPage /></Page> },
+        { path: 'products/edit/:id', element: <Page><CreateProductPage /></Page> },
+        { path: 'orders', element: <Page><ShopOrderListPage /></Page> },
+        { path: 'inventory', element: <Page><ShopInventoryPage /></Page> },
+        { path: 'reviews', element: <Page><ShopReviewsPage /></Page> },
+        { path: 'promotions', element: <Page><ShopPromotionsPage /></Page> },
+        { path: 'reports', element: <Page><ShopReportsPage /></Page> },
+        { path: 'finance', element: <Page><ShopFinancePage /></Page> },
+        { path: 'payments', element: <Page><ShopPaymentPage /></Page> },
+        { path: 'support', element: <Page><ShopSupportPage /></Page> },
+        { path: 'shipping', element: <Page><ShopShippingPage /></Page> },
+        { path: 'profile', element: <Page><ShopProfilePage /></Page> },
+        { path: 'notifications', element: <Page><ShopNotificationsPage /></Page> },
+      ],
+    },
 
-  // ─── Tuyến lỗi ──────────────────────────────────────────────────────────────
-  { path: ROUTES.NOT_FOUND, element: <Page><NotFoundPage /></Page> },
-  { path: ROUTES.FORBIDDEN, element: <Page><ForbiddenPage /></Page> },
-  { path: ROUTES.SERVER_ERROR, element: <Page><ServerErrorPage /></Page> },
+    // ─── Tuyến quản trị (/admin/*) ─────────────────────────────────────────────
+    {
+      path: '/admin',
+      element: (
+        <ProtectedRoute>
+          <PermissionRoute allowedRoles={ADMIN_ROLE}>
+            <AdminLayout />
+          </PermissionRoute>
+        </ProtectedRoute>
+      ),
+      children: [
+        { index: true, element: <Page><AdminDashboardPage /></Page> },
+        { path: 'products', element: <Page><AdminProductPage /></Page> },
+        { path: 'products/edit/:id', element: <Page><AdminProductPage /></Page> },
+        { path: 'orders', element: <Page><AdminOrderPage /></Page> },
+        { path: 'orders/:id', element: <Page><AdminOrderDetailPage /></Page> },
+        { path: 'customers', element: <Page><AdminCustomerPage /></Page> },
+        { path: 'customers/:id', element: <Page><AdminCustomerPage /></Page> },
+        { path: 'stores', element: <Page><AdminStorePage /></Page> },
+        { path: 'payments', element: <Page><AdminPaymentPage /></Page> },
+        { path: 'reviews', element: <Page><AdminReviewPage /></Page> },
+        { path: 'promotions', element: <Page><AdminPromotionPage /></Page> },
+        { path: 'support', element: <Page><AdminSupportPage /></Page> },
+        { path: 'reports', element: <Page><AdminReportsPage /></Page> },
+        { path: 'notifications', element: <Page><AdminNotificationPage /></Page> },
+        { path: 'access', element: <Page><AdminAccessPage /></Page> },
+        { path: 'finance', element: <Page><AdminFinancePage /></Page> },
+      ],
+    },
 
-  // ─── Tuyến bắt tất cả ───────────────────────────────────────────────────────
-  { path: '*', element: <Navigate to={ROUTES.NOT_FOUND} replace /> },
-]);
+    // ─── Tuyến lỗi ──────────────────────────────────────────────────────────────
+    { path: ROUTES.NOT_FOUND, element: <Page><NotFoundPage /></Page> },
+    { path: ROUTES.FORBIDDEN, element: <Page><ForbiddenPage /></Page> },
+    { path: ROUTES.SERVER_ERROR, element: <Page><ServerErrorPage /></Page> },
+
+    // ─── Tuyến bắt tất cả ─────────────────────────────────────────────────────
+    { path: '*', element: <Navigate to={ROUTES.NOT_FOUND} replace /> },
+  ],
+  { basename: routerBasename }
+);

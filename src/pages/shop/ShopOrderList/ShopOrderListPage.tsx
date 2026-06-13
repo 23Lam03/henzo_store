@@ -1,5 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useSeller } from '../../../contexts/SellerContext';
+import { useToast } from '../../../contexts';
+import { ConfirmModal } from '../../../components/common/ConfirmModal';
 import type { SellerOrder } from '../../../types/seller';
 import './ShopOrderListPage.css';
 
@@ -43,10 +45,12 @@ const NEXT_STATUS: Partial<Record<string, { next: string; label: string }>> = {
 
 export const ShopOrderListPage = () => {
   const { orders, updateOrderStatus } = useSeller();
+  const toast = useToast();
   const [tab, setTab] = useState('all');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [selectedOrder, setSelectedOrder] = useState<SellerOrder | null>(null);
+  const [pendingAdvance, setPendingAdvance] = useState<{ order: SellerOrder; next: { label: string; next: string } } | null>(null);
   const perPage = 15;
 
   const filtered = useMemo(() => {
@@ -68,9 +72,7 @@ export const ShopOrderListPage = () => {
 
   const handleAdvance = (order: SellerOrder) => {
     const next = NEXT_STATUS[order.status];
-    if (next && confirm(`${next.label} đơn hàng ${order.orderCode}?`)) {
-      updateOrderStatus(order.id, next.next as any);
-    }
+    if (next) { setPendingAdvance({ order, next }); }
   };
 
   const orderStatuses = STATUS_TABS.slice(1, STATUS_TABS.length - 2).map(t => t.key);
@@ -312,6 +314,21 @@ export const ShopOrderListPage = () => {
           </div>
         </>
       )}
+
+      <ConfirmModal
+        open={!!pendingAdvance}
+        title={pendingAdvance ? `${pendingAdvance.next.label} đơn hàng` : ''}
+        message={pendingAdvance ? `Bạn có chắc muốn cập nhật trạng thái đơn hàng ${pendingAdvance.order.orderCode}?` : ''}
+        confirmLabel="Xác nhận"
+        onConfirm={() => {
+          if (pendingAdvance) {
+            updateOrderStatus(pendingAdvance.order.id, pendingAdvance.next.next as any);
+            toast({ title: 'Cập nhật thành công', message: `Đơn hàng ${pendingAdvance.order.orderCode} đã được cập nhật`, variant: 'success' });
+            setPendingAdvance(null);
+          }
+        }}
+        onCancel={() => setPendingAdvance(null)}
+      />
     </div>
   );
 };

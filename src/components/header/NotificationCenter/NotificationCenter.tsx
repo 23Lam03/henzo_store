@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useNotification } from '../../../contexts/NotificationContext';
+import { useAuth } from '../../../contexts/AuthContext';
 import { formatDate } from '../../../utils';
 import './NotificationCenter.css';
 
@@ -48,6 +49,7 @@ const typeLabels = {
 };
 
 export const NotificationCenter = ({ onClose }: { onClose: () => void }) => {
+  const { isAuthenticated } = useAuth();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotification();
 
   return (
@@ -66,7 +68,17 @@ export const NotificationCenter = ({ onClose }: { onClose: () => void }) => {
         )}
       </div>
       <div className="notif-center__list">
-        {notifications.length === 0 ? (
+        {!isAuthenticated ? (
+          <div className="notif-center__empty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+            <p>Vui lòng đăng nhập để xem thông báo</p>
+            <Link to="/login" className="btn btn-primary btn-sm" onClick={onClose}>
+              Đăng Nhập
+            </Link>
+          </div>
+        ) : notifications.length === 0 ? (
           <div className="notif-center__empty">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>

@@ -83,6 +83,10 @@ export const ProductDetailPage = () => {
   };
 
   const handleWishlist = () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
     if (inWishlist) removeFromWishlist(product.id);
     else addToWishlist(product);
   };

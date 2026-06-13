@@ -11,6 +11,8 @@ import {
   AdminProvider,
   OrderProvider,
   ReviewProvider,
+  ToastProvider,
+  ToastContainer,
 } from './contexts';
 import { SellerProvider } from './contexts/SellerContext';
 import { router } from './router';
@@ -18,29 +20,32 @@ import { router } from './router';
 function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <SearchProvider>
-          <CartProvider>
-            <WishlistProvider>
-              <NotificationProvider>
-                <CompareProvider>
-                  <RecentlyViewedProvider>
-                    <AdminProvider>
-                      <OrderProvider>
-                        <ReviewProvider>
-                          <SellerProvider>
-                            <RouterProvider router={router} />
-                          </SellerProvider>
-                        </ReviewProvider>
-                      </OrderProvider>
-                    </AdminProvider>
-                  </RecentlyViewedProvider>
-                </CompareProvider>
-              </NotificationProvider>
-            </WishlistProvider>
-          </CartProvider>
-        </SearchProvider>
-      </AuthProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <SearchProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <NotificationProvider>
+                  <CompareProvider>
+                    <RecentlyViewedProvider>
+                      <AdminProvider>
+                        <OrderProvider>
+                          <ReviewProvider>
+                            <SellerProvider>
+                              <RouterProvider router={router} />
+                              <ToastContainer />
+                            </SellerProvider>
+                          </ReviewProvider>
+                        </OrderProvider>
+                      </AdminProvider>
+                    </RecentlyViewedProvider>
+                  </CompareProvider>
+                </NotificationProvider>
+              </WishlistProvider>
+            </CartProvider>
+          </SearchProvider>
+        </AuthProvider>
+      </ToastProvider>
     </ThemeProvider>
   );
 }

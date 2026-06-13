@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAdmin } from '../../../contexts/AdminContext';
 import { AdminDataTable } from '../../../components/admin/AdminDataTable';
 import { MOCK_PRODUCTS } from '../../../data/products';
@@ -15,6 +16,7 @@ const STATUS_OPTIONS = [
 ];
 
 export const AdminProductPage = () => {
+  const navigate = useNavigate();
   const { reviews } = useAdmin();
   const [filter, setFilter] = useState('all');
 
@@ -95,7 +97,7 @@ export const AdminProductPage = () => {
         </div>
         <div className="admin-page-header__actions">
           <span className="admin-page__meta">{formatNumber(filtered.length)} sản phẩm</span>
-          <button className="btn btn-primary">
+          <button className="btn btn-primary" onClick={() => navigate('/seller/products/create')}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Thêm sản phẩm
           </button>
@@ -113,10 +115,10 @@ export const AdminProductPage = () => {
           onFilterChange={setFilter}
           searchable
           searchableFields={['name', 'brand', 'categoryName']}
-          actions={() => (
+          actions={(record) => (
             <>
-              <button className="btn btn-sm btn-secondary">Chi tiết</button>
-              <button className="btn btn-sm btn-outline">Sửa</button>
+              <button className="btn btn-sm btn-secondary" onClick={() => navigate(`/products/${(record as Product).slug || (record as Product).id}`)}>Chi tiết</button>
+              <button className="btn btn-sm btn-outline" onClick={() => navigate(`/admin/products/edit/${(record as Product).id}`)}>Sửa</button>
             </>
           )}
           emptyText="Không có sản phẩm nào"

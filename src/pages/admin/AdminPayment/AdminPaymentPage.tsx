@@ -1,8 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAdmin } from '../../../contexts/AdminContext';
 import { AdminDataTable } from '../../../components/admin/AdminDataTable';
 import type { Payment } from '../../../types';
 import { formatNumber } from '../../../utils';
+import { useToast } from '../../../contexts';
+import { ConfirmModal } from '../../../components/common/ConfirmModal';
 import './AdminPaymentPage.css';
 
 const STATUS_OPTIONS = [
@@ -30,7 +33,10 @@ const STATUS_LABELS: Record<string, string> = {
 
 export const AdminPaymentPage = () => {
   const { payments } = useAdmin();
+  const navigate = useNavigate();
+  const toast = useToast();
   const [filter, setFilter] = useState('all');
+  const [pendingRefund, setPendingRefund] = useState<Payment | null>(null);
 
   const filtered = filter === 'all' ? payments : payments.filter(p => p.status === filter);
 
@@ -127,13 +133,28 @@ export const AdminPaymentPage = () => {
           searchableFields={['transactionId', 'orderId']}
           actions={(record) => (
             <>
-              <button className="btn btn-sm btn-secondary">Chi tiết</button>
+              <button className="btn btn-sm btn-secondary" onClick={() => navigate(`/admin/payments/${(record as Payment).id}`)}>Chi tiết</button>
               {(record as Payment).status === 'completed' && (
-                <button className="btn btn-sm btn-outline">Hoàn tiền</button>
+                <button className="btn btn-sm btn-outline" onClick={() => setPendingRefund(record as Payment)}>Hoàn tiền</button>
               )}
             </>
           )}
           emptyText="Không có giao dịch nào"
+        />
+
+        <ConfirmModal
+          open={!!pendingRefund}
+          title="Xác nhận hoàn tiền"
+          message="Bạn có chắc muốn hoàn tiền cho giao dịch này? Hành động này không thể hoàn tác."
+          confirmLabel="Hoàn tiền"
+          variant="danger"
+          onConfirm={() => {
+            if (pendingRefund) {
+              toast({ title: 'Đang xử lý hoàn tiền', message: `Giao dịch ${pendingRefund.transactionId} đang được hoàn tiền...`, variant: 'info' });
+              setPendingRefund(null);
+            }
+          }}
+          onCancel={() => setPendingRefund(null)}
         />
       </div>
     </div>

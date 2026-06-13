@@ -31,6 +31,10 @@ export const ProductCard = ({ product, viewMode = 'grid' }: ProductCardProps) =>
   const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
     if (inWishlist) {
       removeFromWishlist(product.id);
     } else {

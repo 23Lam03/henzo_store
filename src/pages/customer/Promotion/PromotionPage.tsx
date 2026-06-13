@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { mockApi } from '../../../services/mock/api';
+import { useAuth } from '../../../contexts/AuthContext';
 import type { Promotion } from '../../../types';
 import './PromotionPage.css';
 
@@ -14,6 +15,8 @@ const VOUCHERS = [
 ];
 
 export const PromotionPage = () => {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [saved, setSaved] = useState<string[]>([]);
 
@@ -22,6 +25,10 @@ export const PromotionPage = () => {
   }, []);
 
   const toggleSave = (id: string) => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
     setSaved(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   };
 

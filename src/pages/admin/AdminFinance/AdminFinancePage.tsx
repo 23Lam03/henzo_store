@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { useAdmin } from '../../../contexts/AdminContext';
 import { MONTHLY_REVENUE } from '../../../data/adminData';
 import { formatNumber } from '../../../utils';
+import { useToast } from '../../../contexts';
 import './AdminFinancePage.css';
 
 const TRANSACTIONS = [
@@ -16,6 +18,8 @@ const TRANSACTIONS = [
 
 export const AdminFinancePage = () => {
   const { stats } = useAdmin();
+  const toast = useToast();
+  const [exporting, setExporting] = useState(false);
   const totalRevenue = stats.totalRevenue;
   const commissionRate = 0.05;
   const platformCommission = Math.floor(totalRevenue * commissionRate);
@@ -30,11 +34,11 @@ export const AdminFinancePage = () => {
           <p className="admin-page__subtitle">Theo dõi doanh thu, chi phí và lợi nhuận nền tảng</p>
         </div>
         <div className="admin-page-header__actions">
-          <button className="btn btn-outline">
+          <button className="btn btn-outline" onClick={() => { setExporting(true); setTimeout(() => { setExporting(false); toast({ title: 'Xuất Excel', message: 'Đang chuẩn bị file...', variant: 'info' }); }, 500); }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Xuất Excel
           </button>
-          <button className="btn btn-primary">
+          <button className="btn btn-primary" onClick={() => { setExporting(true); setTimeout(() => { setExporting(false); toast({ title: 'Xuất PDF', message: 'Đang chuẩn bị file...', variant: 'info' }); }, 500); }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             Xuất PDF
           </button>

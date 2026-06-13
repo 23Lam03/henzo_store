@@ -4,6 +4,7 @@ import { AdminDataTable } from '../../../components/admin/AdminDataTable';
 import { MOCK_ADMIN_STORES } from '../../../data/adminData';
 import type { SupportTicket } from '../../../types';
 import { formatNumber } from '../../../utils';
+import { useToast } from '../../../contexts';
 import './AdminSupportPage.css';
 
 const STATUS_OPTIONS = [
@@ -42,6 +43,7 @@ const getStoreName = (ticketId: string) => {
 
 export const AdminSupportPage = () => {
   const { tickets } = useAdmin();
+  const toast = useToast();
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
@@ -173,9 +175,9 @@ export const AdminSupportPage = () => {
           searchableFields={['subject', 'senderName', 'message']}
           actions={(record) => (
             <>
-              <button className="btn btn-sm btn-primary">Trả lời</button>
+              <button className="btn btn-sm btn-primary" onClick={() => toast({ title: 'Mở phản hồi', message: `Đang mở phản hồi cho ticket #${(record as SupportTicket).id}`, variant: 'info' })}>Trả lời</button>
               {(record as SupportTicket).status !== 'resolved' && (record as SupportTicket).status !== 'closed' && (
-                <button className="btn btn-sm btn-secondary">Giải quyết</button>
+                <button className="btn btn-sm btn-secondary" onClick={() => toast({ title: 'Đã giải quyết', message: `Ticket #${(record as SupportTicket).id} đã được giải quyết`, variant: 'success' })}>Giải quyết</button>
               )}
             </>
           )}

@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
+import { useToast } from '../../../contexts';
+import { ConfirmModal } from '../../../components/common/ConfirmModal';
 import './AdminNotificationPage.css';
 
 type NotifType = 'promotion' | 'system' | 'warning';
@@ -31,9 +33,11 @@ const TYPE_ICONS: Record<NotifType, ReactNode> = {
 };
 
 export const AdminNotificationPage = () => {
+  const toast = useToast();
   const [typeFilter, setTypeFilter] = useState('all');
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ title: '', message: '', type: 'system', audience: 'all' });
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
   const filtered = typeFilter === 'all' ? SYSTEM_NOTIFS : SYSTEM_NOTIFS.filter(n => n.type === typeFilter);
 
@@ -71,7 +75,7 @@ export const AdminNotificationPage = () => {
             ))}
           </div>
           <div className="notif-bulk-actions">
-            <button className="btn btn-sm btn-outline">Gửi hàng loạt</button>
+            <button className="btn btn-sm btn-outline" onClick={() => toast({ title: 'Tính năng đang phát triển', message: 'Gửi hàng loạt sẽ sớm có mặt!', variant: 'warning' })}>Gửi hàng loạt</button>
           </div>
         </div>
 
@@ -93,9 +97,9 @@ export const AdminNotificationPage = () => {
                 </div>
               </div>
               <div className="notif-card__actions">
-                <button className="btn btn-sm btn-secondary">Sửa</button>
-                <button className="btn btn-sm btn-outline">Gửi lại</button>
-                <button className="btn btn-sm btn-outline" style={{ color: 'var(--color-danger)' }}>Xóa</button>
+                <button className="btn btn-sm btn-secondary" onClick={() => { setShowCreate(true); toast({ title: 'Chỉnh sửa thông báo', message: `Đang sửa thông báo #${n.id}`, variant: 'info' }); }}>Sửa</button>
+                <button className="btn btn-sm btn-outline" onClick={() => toast({ title: 'Đã gửi lại', message: `Thông báo #${n.id} đã được gửi lại thành công`, variant: 'success' })}>Gửi lại</button>
+                <button className="btn btn-sm btn-outline" style={{ color: 'var(--color-danger)' }} onClick={() => setPendingDelete(n.id)}>Xóa</button>
               </div>
             </div>
           ))}
@@ -150,6 +154,19 @@ export const AdminNotificationPage = () => {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!pendingDelete}
+        title="Xóa thông báo"
+        message="Bạn có chắc muốn xóa thông báo này?"
+        confirmLabel="Xóa"
+        variant="danger"
+        onConfirm={() => {
+          toast({ title: 'Đã xóa thông báo', variant: 'success' });
+          setPendingDelete(null);
+        }}
+        onCancel={() => setPendingDelete(null)}
+      />
     </div>
   );
 };

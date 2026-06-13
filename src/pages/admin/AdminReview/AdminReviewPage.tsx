@@ -1,8 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAdmin } from '../../../contexts/AdminContext';
 import { AdminDataTable } from '../../../components/admin/AdminDataTable';
 import { MOCK_PRODUCTS } from '../../../data/products';
 import type { Review } from '../../../types';
+import { useToast } from '../../../contexts';
+import { ConfirmModal } from '../../../components/common/ConfirmModal';
 import './AdminReviewPage.css';
 
 const STATUS_OPTIONS = [
@@ -23,8 +26,10 @@ const renderStars = (rating: number) => (
 
 export const AdminReviewPage = () => {
   const { reviews } = useAdmin();
+  const toast = useToast();
   const [filter, setFilter] = useState('all');
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
   const enrichedReviews = reviews.map(r => ({
     ...r,
@@ -123,18 +128,34 @@ export const AdminReviewPage = () => {
             const r = record as Review & { isHidden: boolean };
             return (
               <>
-                <button className="btn btn-sm btn-secondary">Chi tiết</button>
+                <button className="btn btn-sm btn-secondary" onClick={() => navigate(`/admin/reviews/${r.id}`)}>Chi tiết</button>
                 <button
                   className={`btn btn-sm ${r.isHidden ? 'btn-primary' : 'btn-outline'}`}
                   onClick={() => handleToggle(r.id, r.isHidden)}
                 >
                   {r.isHidden ? 'Hiện' : 'Ẩn'}
                 </button>
-                <button className="btn btn-sm btn-outline" style={{ color: 'var(--color-danger)' }}>Xóa</button>
+                <button className="btn btn-sm btn-outline" style={{ color: 'var(--color-danger)' }} onClick={() => setPendingDelete(r.id)}>Xóa</button>
               </>
             );
           }}
           emptyText="Không có đánh giá nào"
+        />
+
+        <ConfirmModal
+          open={!!pendingDelete}
+          title="Xóa đánh giá"
+          message="Bạn có chắc muốn xóa đánh giá này? Hành động này không thể hoàn tác."
+          confirmLabel="Xóa"
+          variant="danger"
+          onConfirm={() => {
+            if (pendingDelete) {
+              handleToggle(pendingDelete, true);
+              toast({ title: 'Đã xóa đánh giá', variant: 'success' });
+              setPendingDelete(null);
+            }
+          }}
+          onCancel={() => setPendingDelete(null)}
         />
       </div>
     </div>

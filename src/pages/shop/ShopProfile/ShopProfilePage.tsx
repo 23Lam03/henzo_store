@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useSeller } from '../../../contexts/SellerContext';
+import { useToast } from '../../../contexts';
 import './ShopProfilePage.css';
 
 const formatNum = (n: number) => new Intl.NumberFormat('vi-VN').format(n);
 
 export const ShopProfilePage = () => {
   const { store } = useSeller();
+  const toast = useToast();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
     name: store.name,
@@ -33,7 +35,7 @@ export const ShopProfilePage = () => {
     if (pwForm.newPw !== pwForm.confirm) { setPwError('Mật khẩu xác nhận không khớp'); return; }
     setPwError('');
     setPwForm({ current: '', newPw: '', confirm: '' });
-    alert('Đổi mật khẩu thành công!');
+    toast({ title: 'Đổi mật khẩu thành công!', message: 'Mật khẩu của bạn đã được cập nhật.', variant: 'success' });
   };
 
   return (

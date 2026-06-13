@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useSeller } from '../../../contexts/SellerContext';
+import { useToast } from '../../../contexts';
+import { ConfirmModal } from '../../../components/common/ConfirmModal';
 import './ShopPromotionsPage.css';
 
 const formatVND = (n: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(n);
@@ -26,10 +28,12 @@ const EMPTY_FORM = {
 
 export const ShopPromotionsPage = () => {
   const { promotions, updatePromotionStatus, createPromotion } = useSeller();
+  const toast = useToast();
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showModal, setShowModal] = useState(false);
   const [editingPromo, setEditingPromo] = useState<typeof EMPTY_FORM>(EMPTY_FORM);
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
   const filtered = promotions.filter(p => {
     if (typeFilter !== 'all' && p.type !== typeFilter) return false;
@@ -56,7 +60,8 @@ export const ShopPromotionsPage = () => {
   };
 
   return (
-    <div className="seller-promotions admin-page">
+    <>
+      <div className="seller-promotions admin-page">
       <div className="admin-page__header">
         <div>
           <h1 className="admin-page__title">Quản lý khuyến mãi</h1>
@@ -155,7 +160,7 @@ export const ShopPromotionsPage = () => {
                   {promo.status === 'paused' && (
                     <button className="seller-action-btn seller-action-btn--success" onClick={() => updatePromotionStatus(promo.id, 'active')}>Kích hoạt</button>
                   )}
-                  <button className="seller-action-btn seller-action-btn--danger" onClick={() => { if (confirm('Xóa chương trình này?')) updatePromotionStatus(promo.id, 'ended'); }}>Xóa</button>
+                  <button className="seller-action-btn seller-action-btn--danger" onClick={() => setPendingDelete(promo.id)}>Xóa</button>
                 </div>
               </div>
             );
@@ -240,6 +245,23 @@ export const ShopPromotionsPage = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+
+      <ConfirmModal
+        open={!!pendingDelete}
+        title="Xóa khuyến mãi"
+        message="Bạn có chắc muốn xóa chương trình khuyến mãi này? Hành động này không thể hoàn tác."
+        confirmLabel="Xóa"
+        variant="danger"
+        onConfirm={() => {
+          if (pendingDelete) {
+            updatePromotionStatus(pendingDelete, 'ended');
+            toast({ title: 'Đã xóa khuyến mãi', variant: 'success' });
+            setPendingDelete(null);
+          }
+        }}
+        onCancel={() => setPendingDelete(null)}
+      />
+    </>
   );
 };
