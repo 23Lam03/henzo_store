@@ -4,7 +4,7 @@ import { useAdmin } from '../../../contexts/AdminContext';
 import { AdminDataTable } from '../../../components/admin/AdminDataTable';
 import type { Payment } from '../../../types';
 import { formatNumber } from '../../../utils';
-import { useToast } from '../../../contexts';
+import { useToast } from '../../../contexts/ToastContext/ToastContext';
 import { ConfirmModal } from '../../../components/common/ConfirmModal';
 import './AdminPaymentPage.css';
 

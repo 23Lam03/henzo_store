@@ -92,7 +92,7 @@ export const ReviewProvider = ({ children }: { children: ReactNode }) => {
     const newReview: Review = {
       id: `review-${Date.now()}`,
       productId: input.productId,
-      userId: input.orderId,
+      userId: input.userId,
       userName: input.userName,
       userAvatar: input.userAvatar,
       rating: input.rating,

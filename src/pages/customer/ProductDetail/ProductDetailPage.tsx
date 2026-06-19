@@ -47,7 +47,7 @@ export const ProductDetailPage = () => {
       setLoading(false);
     };
     load();
-  }, [slug]);
+  }, [slug, navigate, addToRecentlyViewed]);
 
   const reviews = useMemo(() => product ? getProductReviews(product.id) : [], [product, getProductReviews]);
   const averageRating = reviews.length > 0 ? +(reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1) : product?.rating || 0;

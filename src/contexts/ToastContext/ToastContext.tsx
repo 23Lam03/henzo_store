@@ -26,7 +26,7 @@ interface ToastContextValue {
   dismissAll: () => void;
 }
 
-const ToastContext = createContext<ToastContextValue | null>(null);
+const ToastContext = createContext<ToastContextValue>({} as ToastContextValue);
 
 const ICONS: Record<ToastVariant, { color: string; path: string }> = {
   success: { color: '#10B981', path: 'M20 6L9 17l-5-5' },
@@ -49,16 +49,25 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
     const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const duration = opts.duration ?? 3500;
     setToasts(prev => [...prev, { ...opts, id }]);
-    const timer = setTimeout(() => dismiss(id), duration);
+    const timer = setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+      timers.current.delete(id);
+    }, duration);
     timers.current.set(id, timer);
-  }, [dismiss]);
+  }, []);
 
   useEffect(() => {
     return () => { timers.current.forEach(t => clearTimeout(t)); };
   }, []);
 
+  const dismissAll = useCallback(() => {
+    timers.current.forEach(t => clearTimeout(t));
+    timers.current.clear();
+    setToasts([]);
+  }, []);
+
   return (
-    <ToastContext.Provider value={{ toasts, toast, dismiss, dismissAll: () => setToasts([]) }}>
+    <ToastContext.Provider value={{ toasts, toast, dismiss, dismissAll }}>
       {children}
     </ToastContext.Provider>
   );
@@ -69,6 +78,8 @@ export const useToast = (): ToastContextValue => {
   if (!ctx) throw new Error('useToast must be used within ToastProvider');
   return ctx;
 };
+
+export type { ToastContextValue };
 
 const ToastItem = ({ toast: t, onDismiss }: { toast: Toast; onDismiss: (id: string) => void }) => {
   const icon = ICONS[t.variant];
@@ -93,11 +104,12 @@ const ToastItem = ({ toast: t, onDismiss }: { toast: Toast; onDismiss: (id: stri
 };
 
 export const ToastContainer = () => {
-  const { toasts, dismiss } = useToast();
-  if (toasts.length === 0) return null;
+  const ctx = useContext(ToastContext);
+  if (!ctx) return null;
+  if (ctx.toasts.length === 0) return null;
   return (
     <div className="toast-container" aria-live="polite">
-      {toasts.map(t => <ToastItem key={t.id} toast={t} onDismiss={dismiss} />)}
+      {ctx.toasts.map(t => <ToastItem key={t.id} toast={t} onDismiss={ctx.dismiss} />)}
     </div>
   );
 };

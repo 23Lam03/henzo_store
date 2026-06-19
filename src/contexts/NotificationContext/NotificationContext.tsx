@@ -10,6 +10,7 @@ import type { Notification } from '../../types';
 import { STORAGE_KEYS } from '../../constants';
 import { getStorageItem, setStorageItem } from '../../utils';
 import { mockApi } from '../../services';
+import { useAuth } from '../AuthContext';
 
 interface NotificationContextValue {
   notifications: Notification[];
@@ -24,6 +25,7 @@ interface NotificationContextValue {
 const NotificationContext = createContext<NotificationContextValue | null>(null);
 
 export const NotificationProvider = ({ children }: { children: ReactNode }) => {
+  const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>(() =>
     getStorageItem<Notification[]>(STORAGE_KEYS.notifications, [])
   );
@@ -60,16 +62,17 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
 
   const refresh = useCallback(async () => {
     setIsLoading(true);
-    const data = await mockApi.getNotifications('user-1');
+    const userId = user?.id ?? 'guest';
+    const data = await mockApi.getNotifications(userId);
     setNotifications(data);
     setIsLoading(false);
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
     if (notifications.length === 0) {
       refresh();
     }
-  }, []);
+  }, [refresh]);
 
   useEffect(() => {
     const syncNotifications = () => {

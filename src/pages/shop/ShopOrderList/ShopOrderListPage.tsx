@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useSeller } from '../../../contexts/SellerContext';
-import { useToast } from '../../../contexts';
+import { useToast } from '../../../contexts/ToastContext/ToastContext';
 import { ConfirmModal } from '../../../components/common/ConfirmModal';
 import type { SellerOrder } from '../../../types/seller';
 import './ShopOrderListPage.css';
@@ -75,7 +75,7 @@ export const ShopOrderListPage = () => {
     if (next) { setPendingAdvance({ order, next }); }
   };
 
-  const orderStatuses = STATUS_TABS.slice(1, STATUS_TABS.length - 2).map(t => t.key);
+  const orderStatuses = STATUS_TABS.slice(1, STATUS_TABS.length - 2).map(t => t.key) as SellerOrder['status'][];
 
   return (
     <div className="seller-orders admin-page">
@@ -232,7 +232,7 @@ export const ShopOrderListPage = () => {
               {/* Status */}
               <div className="seller-order-timeline">
                 {orderStatuses.map(s => (
-                  <div key={s} className={`seller-order-timeline__step ${s === selectedOrder.status ? 'active' : orderStatuses.indexOf(s) < orderStatuses.indexOf(selectedOrder.status as any) ? 'done' : ''}`}>
+                  <div key={s} className={`seller-order-timeline__step ${s === selectedOrder.status ? 'active' : orderStatuses.indexOf(s) < orderStatuses.indexOf(selectedOrder.status) ? 'done' : ''}`}>
                     <div className="seller-order-timeline__dot" />
                     <span>{STATUS_LABEL[s]}</span>
                   </div>
@@ -322,7 +322,7 @@ export const ShopOrderListPage = () => {
         confirmLabel="Xác nhận"
         onConfirm={() => {
           if (pendingAdvance) {
-            updateOrderStatus(pendingAdvance.order.id, pendingAdvance.next.next as any);
+            updateOrderStatus(pendingAdvance.order.id, pendingAdvance.next.next as SellerOrder['status']);
             toast({ title: 'Cập nhật thành công', message: `Đơn hàng ${pendingAdvance.order.orderCode} đã được cập nhật`, variant: 'success' });
             setPendingAdvance(null);
           }

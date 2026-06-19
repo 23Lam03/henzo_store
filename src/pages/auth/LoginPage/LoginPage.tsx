@@ -40,7 +40,7 @@ export const LoginPage = () => {
     <div className="login-page">
       <div className="login-page__header">
         <h2 className="login-page__title">Đăng nhập</h2>
-        <p className="login-page__subtitle">Chào mừng bạn quay trở lại HenzoStore</p>
+        <p className="login-page__subtitle">Chào mừng bạn đến với HenzoStore</p>
       </div>
 
       {error && (

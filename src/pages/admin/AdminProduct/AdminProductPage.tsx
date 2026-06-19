@@ -36,7 +36,7 @@ export const AdminProductPage = () => {
       key: 'name', label: 'Sản phẩm', sortable: true,
       render: (_: unknown, r: Product) => (
         <div className="product-cell">
-          <img src={(r as Product).images[0]} alt="" className="product-thumb" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/48x48/cccccc/999999?text=No+Image'; }} />
+          <img src={(r as Product).images[0]} alt={r.name} className="product-thumb" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/48x48/cccccc/999999?text=No+Image'; }} />
           <div>
             <p className="product-name">{(r as Product).name}</p>
             <p className="product-brand">{r.brand}</p>

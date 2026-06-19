@@ -88,7 +88,12 @@ export type OrderStatus =
 export interface Order {
   id: string;
   orderNumber: string;
+  customerName: string;
+  customerPhone: string;
   items: CartItem[];
+  subtotal: number;
+  shippingFee: number;
+  discount: number;
   totalPrice: number;
   status: OrderStatus;
   shippingAddress: string;

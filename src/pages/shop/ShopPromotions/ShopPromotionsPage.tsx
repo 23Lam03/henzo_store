@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useSeller } from '../../../contexts/SellerContext';
-import { useToast } from '../../../contexts';
+import { useToast } from '../../../contexts/ToastContext/ToastContext';
 import { ConfirmModal } from '../../../components/common/ConfirmModal';
 import './ShopPromotionsPage.css';
 
@@ -20,8 +20,11 @@ const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
   draft: { label: 'Bản nháp', cls: 'badge-dark' },
 };
 
+type PromoType = 'voucher' | 'flash_sale' | 'combo' | 'discount_campaign';
+type DiscountType = 'percent' | 'fixed';
+
 const EMPTY_FORM = {
-  name: '', type: 'voucher' as const, code: '', discountType: 'percent' as const,
+  name: '', type: 'voucher' as PromoType, code: '', discountType: 'percent' as DiscountType,
   discountValue: 0, minOrderValue: 0, maxDiscount: 0,
   startDate: '', endDate: '', usageLimit: 0,
 };
@@ -187,7 +190,7 @@ export const ShopPromotionsPage = () => {
                 <div className="admin-form-row">
                   <div className="admin-form-group">
                     <label className="admin-form-label">Loại <span>*</span></label>
-                    <select className="admin-form-select" value={editingPromo.type} onChange={e => setEditingPromo(p => ({ ...p, type: e.target.value as any }))}>
+                    <select className="admin-form-select" value={editingPromo.type} onChange={e => setEditingPromo(p => ({ ...p, type: e.target.value as PromoType }))}>
                       <option value="voucher">Voucher</option>
                       <option value="flash_sale">Flash Sale</option>
                       <option value="combo">Combo</option>
@@ -202,7 +205,7 @@ export const ShopPromotionsPage = () => {
                 <div className="admin-form-row">
                   <div className="admin-form-group">
                     <label className="admin-form-label">Loại giảm giá</label>
-                    <select className="admin-form-select" value={editingPromo.discountType} onChange={e => setEditingPromo(p => ({ ...p, discountType: e.target.value as any }))}>
+                    <select className="admin-form-select" value={editingPromo.discountType} onChange={e => setEditingPromo(p => ({ ...p, discountType: e.target.value as DiscountType }))}>
                       <option value="percent">Phần trăm (%)</option>
                       <option value="fixed">Số tiền cố định (đ)</option>
                     </select>

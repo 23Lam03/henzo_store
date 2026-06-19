@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { mockSellerProducts } from '../../../data/sellerData';
-import { useToast } from '../../../contexts';
+import { useToast } from '../../../contexts/ToastContext/ToastContext';
 import { ConfirmModal } from '../../../components/common/ConfirmModal';
 import './ShopProductListPage.css';
 
@@ -18,6 +18,7 @@ const STOCK_STATUS = {
 type StockFilter = keyof typeof STOCK_STATUS;
 
 export const ShopProductListPage = () => {
+  const toast = useToast();
   const [search, setSearch] = useState('');
   const [stockFilter, setStockFilter] = useState<StockFilter>('all');
   const [page, setPage] = useState(1);

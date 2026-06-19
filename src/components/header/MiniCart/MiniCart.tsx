@@ -17,7 +17,7 @@ const IconCart = () => (
 );
 
 export const MiniCart = ({ onClose }: { onClose: () => void }) => {
-  const { items, totalPrice, totalItems } = useCart();
+  const { items, totalPrice, totalItems, removeItem } = useCart();
 
   return (
     <div className="mini-cart animate-fade-down">
@@ -46,7 +46,7 @@ export const MiniCart = ({ onClose }: { onClose: () => void }) => {
                     {item.quantity} × <strong>{formatPrice(item.product.price)}</strong>
                   </p>
                 </div>
-                <button className="mini-cart__item-remove" onClick={() => {}}>
+                <button className="mini-cart__item-remove" onClick={() => removeItem(item.product.id)}>
                   <IconX />
                 </button>
               </div>

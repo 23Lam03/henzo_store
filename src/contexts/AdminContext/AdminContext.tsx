@@ -109,11 +109,11 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const lockStore = useCallback((id: string) => {
-    setStores(prev => prev.map(s => s.id === id ? { ...s } : s));
+    setStores(prev => prev.map(s => s.id === id ? { ...s, isLocked: true } : s));
   }, []);
 
   const unlockStore = useCallback((id: string) => {
-    setStores(prev => prev.map(s => s.id === id ? { ...s } : s));
+    setStores(prev => prev.map(s => s.id === id ? { ...s, isLocked: false } : s));
   }, []);
 
   // Customers
@@ -122,11 +122,11 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const lockCustomer = useCallback((id: string) => {
-    setCustomers(prev => prev.map(c => c.id === id ? { ...c } : c));
+    setCustomers(prev => prev.map(c => c.id === id ? { ...c, isLocked: true } : c));
   }, []);
 
   const unlockCustomer = useCallback((id: string) => {
-    setCustomers(prev => prev.map(c => c.id === id ? { ...c } : c));
+    setCustomers(prev => prev.map(c => c.id === id ? { ...c, isLocked: false } : c));
   }, []);
 
   const deleteCustomer = useCallback((id: string) => {
@@ -140,11 +140,11 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
 
   // Reviews
   const approveReview = useCallback((id: string) => {
-    setReviews(prev => prev.map(r => r.id === id ? r : r));
+    setReviews(prev => prev.map(r => r.id === id ? { ...r, isApproved: true } : r));
   }, []);
 
   const hideReview = useCallback((id: string) => {
-    setReviews(prev => prev.filter(r => r.id !== id));
+    setReviews(prev => prev.map(r => r.id === id ? { ...r, isHidden: true } : r));
   }, []);
 
   const deleteReview = useCallback((id: string) => {
@@ -169,8 +169,8 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setTickets(prev => prev.map(t => t.id === id ? { ...t, status, updatedAt: new Date().toISOString() } : t));
   }, []);
 
-  const assignTicket = useCallback((id: string) => {
-    setTickets(prev => prev.map(t => t.id === id ? { ...t, status: 'pending', updatedAt: new Date().toISOString() } : t));
+  const assignTicket = useCallback((id: string, assignee: string) => {
+    setTickets(prev => prev.map(t => t.id === id ? { ...t, assignee, status: 'open' as const, updatedAt: new Date().toISOString() } : t));
   }, []);
 
   return (

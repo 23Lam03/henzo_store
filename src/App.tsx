@@ -15,6 +15,7 @@ import {
   ToastContainer,
 } from './contexts';
 import { SellerProvider } from './contexts/SellerContext';
+import { ErrorBoundary } from './components/common/ErrorBoundary/ErrorBoundary';
 import { router } from './router';
 
 function App() {
@@ -32,8 +33,10 @@ function App() {
                         <OrderProvider>
                           <ReviewProvider>
                             <SellerProvider>
+                            <ErrorBoundary>
                               <RouterProvider router={router} />
                               <ToastContainer />
+                            </ErrorBoundary>
                             </SellerProvider>
                           </ReviewProvider>
                         </OrderProvider>

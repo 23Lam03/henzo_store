@@ -113,14 +113,14 @@ export const AdminOrderDetailPage = () => {
               <tr key={idx}>
                 <td>
                   <div className="order-item-cell">
-                    <img src={item.image} alt={item.name} className="order-item-thumb"
+                    <img src={item.product.images[0]} alt={item.product.name} className="order-item-thumb"
                       onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/48x48/cccccc/999999?text=No'; }} />
-                    <span>{item.name}</span>
+                    <span>{item.product.name}</span>
                   </div>
                 </td>
-                <td style={{ textAlign: 'right' }}>{formatNumber(item.price)}đ</td>
+                <td style={{ textAlign: 'right' }}>{formatNumber(item.product.price)}đ</td>
                 <td style={{ textAlign: 'center' }}>{item.quantity}</td>
-                <td style={{ textAlign: 'right' }}>{formatNumber(item.price * item.quantity)}đ</td>
+                <td style={{ textAlign: 'right' }}>{formatNumber(item.product.price * item.quantity)}đ</td>
               </tr>
             ))}
           </tbody>

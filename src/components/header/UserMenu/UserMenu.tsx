@@ -22,7 +22,8 @@ const IconHeart = () => (
 
 const IconSettings = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
   </svg>
 );
 
@@ -48,8 +49,8 @@ export const UserMenu = ({ onClose }: { onClose: () => void }) => {
 
   const getRoleLabel = (role: string) => {
     switch (role) {
-      case 'admin': return 'Quản trị viên';
-      case 'shop': return 'Cửa hàng';
+      case 'ADMIN': return 'Quản trị viên';
+      case 'SHOP': return 'Cửa hàng';
       default: return 'Khách hàng';
     }
   };
@@ -67,15 +68,6 @@ export const UserMenu = ({ onClose }: { onClose: () => void }) => {
       )}
 
       <div className="user-menu__links">
-        <Link to="/account" className="user-menu__link" onClick={onClose}>
-          <IconUser /> Tài khoản của tôi
-        </Link>
-        <Link to="/account/orders" className="user-menu__link" onClick={onClose}>
-          <IconPackage /> Đơn hàng
-        </Link>
-        <Link to="/wishlist" className="user-menu__link" onClick={onClose}>
-          <IconHeart /> Yêu thích
-        </Link>
         {user?.role === 'ADMIN' && (
           <Link to="/admin" className="user-menu__link user-menu__link--admin" onClick={onClose}>
             <IconShield /> Trang quản trị
@@ -86,9 +78,28 @@ export const UserMenu = ({ onClose }: { onClose: () => void }) => {
             <IconShield /> Trang cửa hàng
           </Link>
         )}
-        <Link to="/account/settings" className="user-menu__link" onClick={onClose}>
-          <IconSettings /> Cài đặt
-        </Link>
+        {user?.role === 'CUSTOMER' && (
+          <>
+            <Link to="/account" className="user-menu__link" onClick={onClose}>
+              <IconUser /> Tài khoản của tôi
+            </Link>
+            <Link to="/account/orders" className="user-menu__link" onClick={onClose}>
+              <IconPackage /> Đơn hàng
+            </Link>
+            <Link to="/wishlist" className="user-menu__link" onClick={onClose}>
+              <IconHeart /> Yêu thích
+            </Link>
+            <Link to="/account/settings" className="user-menu__link" onClick={onClose}>
+              <IconSettings /> Cài đặt
+            </Link>
+          </>
+        )}
+        {(user?.role !== 'CUSTOMER') && (
+          <Link to="/" className="user-menu__link" onClick={onClose}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Về trang chủ
+          </Link>
+        )}
       </div>
 
       <div className="user-menu__footer">

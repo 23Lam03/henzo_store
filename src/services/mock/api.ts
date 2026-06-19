@@ -149,10 +149,15 @@ const MOCK_ORDERS: Order[] = [
   {
     id: 'order-1',
     orderNumber: 'HDN-20250603-001',
+    customerName: 'Nguyễn Văn Minh',
+    customerPhone: '0901234567',
     items: [
       { product: MOCK_PRODUCTS[0], quantity: 1, selected: true },
       { product: MOCK_PRODUCTS[24], quantity: 1, selected: true },
     ],
+    subtotal: 38500000,
+    shippingFee: 30000,
+    discount: 0,
     totalPrice: 39980000,
     status: 'confirmed',
     shippingAddress: '123 Nguyễn Trãi, Quận 1, TP.HCM',
@@ -163,9 +168,14 @@ const MOCK_ORDERS: Order[] = [
   {
     id: 'order-2',
     orderNumber: 'HDN-20250528-042',
+    customerName: 'Trần Thị Lan',
+    customerPhone: '0912345678',
     items: [
       { product: MOCK_PRODUCTS[26], quantity: 1, selected: true },
     ],
+    subtotal: 55500000,
+    shippingFee: 50000,
+    discount: 0,
     totalPrice: 56990000,
     status: 'delivered',
     shippingAddress: '456 Lê Lợi, Quận 1, TP.HCM',
@@ -519,11 +529,17 @@ export const mockApi = {
 
   createOrder: async (data: Partial<Order>): Promise<Order> => {
     await delay(API_DELAY.slow);
+    const shippingFee = 30000;
     return {
       id: `order-${Date.now()}`,
       orderNumber: `HDN-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
+      customerName: data.customerName || 'Khách hàng',
+      customerPhone: data.customerPhone || '0000000000',
       items: data.items || [],
-      totalPrice: data.totalPrice || 0,
+      subtotal: data.totalPrice || 0,
+      shippingFee,
+      discount: 0,
+      totalPrice: (data.totalPrice || 0) + shippingFee,
       status: 'pending',
       shippingAddress: data.shippingAddress || '',
       paymentMethod: data.paymentMethod || 'COD',

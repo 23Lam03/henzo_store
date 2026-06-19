@@ -26,7 +26,7 @@ export const AuthLayout = () => {
           </Link>
         </div>
         <div className="auth-layout__content">
-          <h1 className="auth-layout__title">Chào mừng bạn quay trở lại</h1>
+          <h1 className="auth-layout__title">Chào mừng bạn đến với Henzo Store</h1>
           <p className="auth-layout__subtitle">
             Đăng nhập để trải nghiệm mua sắm công nghệ hàng đầu với hàng ngàn sản phẩm chính hãng, khuyến mãi hấp dẫn và dịch vụ hậu mãi tận tâm.
           </p>

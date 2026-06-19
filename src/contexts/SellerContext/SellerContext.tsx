@@ -67,19 +67,19 @@ const calculateStats = (orders: SellerOrder[]) => {
   const pendingOrders = orders.filter(o => ['pending', 'confirmed', 'preparing'].includes(o.status));
 
   const totalRevenue = monthOrders.reduce((sum, o) => sum + o.finalAmount, 0);
-  const prevMonthRevenue = totalRevenue * (0.85 + Math.random() * 0.1);
+  const prevMonthRevenue = totalRevenue * 0.9;
 
   return {
     totalRevenue,
-    revenueChange: +((totalRevenue / prevMonthRevenue - 1) * 100).toFixed(1),
+    revenueChange: +(prevMonthRevenue > 0 ? ((totalRevenue / prevMonthRevenue - 1) * 100) : 0).toFixed(1),
     totalOrders: monthOrders.length,
-    ordersChange: +(monthOrders.length / Math.max(completedOrders.length, 1) * 100).toFixed(1),
+    ordersChange: +(completedOrders.length > 0 ? (monthOrders.length / completedOrders.length * 100) : 0).toFixed(1),
     pendingOrders: pendingOrders.length,
     completedOrders: completedOrders.length,
     totalProducts: mockSellerProducts.length,
     outOfStockProducts: mockSellerProducts.filter(p => p.stock === 0).length,
-    newCustomers: 156 + Math.floor(Math.random() * 100),
-    conversionRate: +(3.2 + Math.random() * 2).toFixed(1),
+    newCustomers: 156,
+    conversionRate: 4.2,
     avgRating: 4.5,
   } satisfies SellerDashboardStats;
 };
@@ -225,7 +225,7 @@ export const SellerProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const stats = calculateStats(orders);
+  const stats = useMemo(() => calculateStats(orders), [orders]);
 
   const updateOrderStatus = useCallback((orderId: string, status: OrderStatus) => {
     setOrders(prev => {

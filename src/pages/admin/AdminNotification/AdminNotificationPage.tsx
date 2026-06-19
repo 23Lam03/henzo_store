@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { useToast } from '../../../contexts';
+import { useToast } from '../../../contexts/ToastContext/ToastContext';
 import { ConfirmModal } from '../../../components/common/ConfirmModal';
 import './AdminNotificationPage.css';
 

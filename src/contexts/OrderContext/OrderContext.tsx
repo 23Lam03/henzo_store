@@ -12,6 +12,8 @@ import { getStorageItem, setStorageItem } from '../../utils';
 import type { CartItem, Order, OrderStatus } from '../../types';
 
 interface CreateOrderInput {
+  customerName: string;
+  customerPhone: string;
   items: CartItem[];
   totalPrice: number;
   shippingAddress: string;
@@ -32,7 +34,12 @@ const DEFAULT_ORDERS: Order[] = [
   {
     id: 'order-1',
     orderNumber: 'HDN-20250603-001',
+    customerName: 'Nguyễn Văn Minh',
+    customerPhone: '0901234567',
     items: [],
+    subtotal: 38500000,
+    shippingFee: 30000,
+    discount: 0,
     totalPrice: 39980000,
     status: 'confirmed',
     shippingAddress: '123 Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh',
@@ -43,7 +50,12 @@ const DEFAULT_ORDERS: Order[] = [
   {
     id: 'order-2',
     orderNumber: 'HDN-20250528-042',
+    customerName: 'Trần Thị Lan',
+    customerPhone: '0912345678',
     items: [],
+    subtotal: 55500000,
+    shippingFee: 50000,
+    discount: 0,
     totalPrice: 56990000,
     status: 'delivered',
     shippingAddress: '45 Lê Lợi, Hải Châu, Đà Nẵng',
@@ -54,7 +66,12 @@ const DEFAULT_ORDERS: Order[] = [
   {
     id: 'order-3',
     orderNumber: 'HDN-20250515-008',
+    customerName: 'Lê Hoàng Nam',
+    customerPhone: '0923456789',
     items: [],
+    subtotal: 24200000,
+    shippingFee: 40000,
+    discount: 0,
     totalPrice: 25020000,
     status: 'shipping',
     shippingAddress: '88 Hùng Vương, Ninh Kiều, Cần Thơ',
@@ -65,7 +82,12 @@ const DEFAULT_ORDERS: Order[] = [
   {
     id: 'order-4',
     orderNumber: 'HDN-20250420-015',
+    customerName: 'Phạm Thị Hương',
+    customerPhone: '0934567890',
     items: [],
+    subtotal: 17500000,
+    shippingFee: 30000,
+    discount: 0,
     totalPrice: 17990000,
     status: 'cancelled',
     shippingAddress: '12 Trần Phú, Nha Trang, Khánh Hòa',
@@ -76,7 +98,12 @@ const DEFAULT_ORDERS: Order[] = [
   {
     id: 'order-5',
     orderNumber: 'HDN-20250410-003',
+    customerName: 'Hoàng Minh Tuấn',
+    customerPhone: '0945678901',
     items: [],
+    subtotal: 34000000,
+    shippingFee: 35000,
+    discount: 0,
     totalPrice: 34990000,
     status: 'delivered',
     shippingAddress: '221B Pasteur, Quận 3, TP. Hồ Chí Minh',
@@ -106,11 +133,17 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
 
   const createOrder = useCallback((input: CreateOrderInput) => {
     const now = new Date().toISOString();
+    const shippingFee = 30000;
     const newOrder: Order = {
       id: `order-${Date.now()}`,
       orderNumber: buildOrderNumber(),
+      customerName: input.customerName || 'Khách hàng',
+      customerPhone: input.customerPhone || '0000000000',
       items: input.items,
-      totalPrice: input.totalPrice,
+      subtotal: input.totalPrice,
+      shippingFee,
+      discount: 0,
+      totalPrice: input.totalPrice + shippingFee,
       status: 'pending',
       shippingAddress: input.shippingAddress,
       paymentMethod: input.paymentMethod,

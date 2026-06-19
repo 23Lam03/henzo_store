@@ -95,13 +95,20 @@ export const MOCK_ADMIN_ORDERS: Order[] = Array.from({ length: 500 }, (_, i) => 
   const status = ORDER_STATUSES[i % ORDER_STATUSES.length];
   const customer = MOCK_ADMIN_CUSTOMERS[i % MOCK_ADMIN_CUSTOMERS.length];
   const total = Math.floor(Math.random() * 500000000) + 500000;
+  const shippingFee = Math.floor(Math.random() * 50000) + 20000;
+  const discount = Math.random() > 0.7 ? Math.floor(total * 0.1) : 0;
   const day = Math.floor(i / 20);
   const created = new Date();
   created.setDate(created.getDate() - day);
   return {
     id: `order-${i + 1}`,
     orderNumber: `HDN-${new Date(created).getFullYear()}${String(new Date(created).getMonth() + 1).padStart(2, '0')}${String(new Date(created).getDate()).padStart(2, '0')}-${String(i + 1).padStart(3, '0')}`,
+    customerName: customer.name,
+    customerPhone: customer.phone,
     items: [],
+    subtotal: total - shippingFee + discount,
+    shippingFee,
+    discount,
     totalPrice: total,
     status,
     shippingAddress: customer.address || `Số ${i + 1}, Đường ${i + 1}, Quận 1, TP.HCM`,

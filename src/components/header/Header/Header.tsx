@@ -214,7 +214,7 @@ export const Header = () => {
                     className="header__action-btn header__user-btn"
                     onClick={() => setShowUserMenu(!showUserMenu)}
                   >
-                    <img src={user?.avatar} alt={user?.name} className="header__user-avatar" />
+                    <img src={user?.avatar} alt={user?.name} className="header__user-avatar" onError={(e) => { (e.target as HTMLImageElement).src = 'https://api.dicebear.com/7.x/avataaars/svg?seed=fallback'; }} />
                     <span className="header__user-name hide-tablet">{user?.name}</span>
                   </button>
                 ) : (
@@ -235,14 +235,16 @@ export const Header = () => {
             </div>
           </div>
 
-          {isMobile && showSearch && (
-            <div className="header__mobile-search">
-              <SearchBar autoFocus />
-            </div>
-          )}
+        {isMobile && showSearch && (
+          <div className="header__mobile-search">
+            <SearchBar autoFocus />
+          </div>
+        )}
         </div>
+      </header>
 
-        {showMobileMenu && (
+      {showMobileMenu && (
+        <>
           <div className="header__mobile-menu" ref={mobileMenuRef}>
             <div className="header__mobile-menu-header">
               <Link to="/" className="header__logo" onClick={() => setShowMobileMenu(false)}>
@@ -281,10 +283,9 @@ export const Header = () => {
               </button>
             </div>
           </div>
-        )}
-      </header>
-
-      {showMobileMenu && <div className="header__backdrop" onClick={() => setShowMobileMenu(false)} />}
+          <div className="header__backdrop" onClick={() => setShowMobileMenu(false)} />
+        </>
+      )}
     </>
   );
 };

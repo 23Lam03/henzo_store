@@ -4,7 +4,7 @@ import { useAdmin } from '../../../contexts/AdminContext';
 import { AdminDataTable } from '../../../components/admin/AdminDataTable';
 import type { Store } from '../../../types';
 import { formatNumber } from '../../../utils';
-import { useToast } from '../../../contexts';
+import { useToast } from '../../../contexts/ToastContext/ToastContext';
 import { ConfirmModal } from '../../../components/common/ConfirmModal';
 import './AdminStorePage.css';
 
@@ -15,6 +15,7 @@ const STATUS_OPTIONS = [
 ];
 
 export const AdminStorePage = () => {
+  const navigate = useNavigate();
   const { stores } = useAdmin();
   const toast = useToast();
   const [filter, setFilter] = useState('all');

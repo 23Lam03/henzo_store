@@ -53,8 +53,11 @@ export const CheckoutPage = () => {
       setErrors({});
       setStep(2);
     } else {
+      if (selectedItems.length === 0) return;
       const shippingAddress = `${form.address}, ${district}, ${province}`;
       const order = createOrder({
+        customerName: form.name,
+        customerPhone: form.phone,
         items: selectedItems,
         totalPrice: total + shipping,
         shippingAddress,

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAdmin } from '../../../contexts/AdminContext';
 import { MONTHLY_REVENUE } from '../../../data/adminData';
 import { formatNumber } from '../../../utils';
-import { useToast } from '../../../contexts';
+import { useToast } from '../../../contexts/ToastContext/ToastContext';
 import './AdminFinancePage.css';
 
 const TRANSACTIONS = [
@@ -20,6 +20,7 @@ export const AdminFinancePage = () => {
   const { stats } = useAdmin();
   const toast = useToast();
   const [exporting, setExporting] = useState(false);
+  void exporting;
   const totalRevenue = stats.totalRevenue;
   const commissionRate = 0.05;
   const platformCommission = Math.floor(totalRevenue * commissionRate);

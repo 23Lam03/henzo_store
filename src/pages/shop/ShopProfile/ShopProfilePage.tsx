@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useSeller } from '../../../contexts/SellerContext';
-import { useToast } from '../../../contexts';
+import { useToast } from '../../../contexts/ToastContext/ToastContext';
 import './ShopProfilePage.css';
 
 const formatNum = (n: number) => new Intl.NumberFormat('vi-VN').format(n);

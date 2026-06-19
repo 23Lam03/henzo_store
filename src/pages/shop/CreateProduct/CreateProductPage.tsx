@@ -5,7 +5,16 @@ import './CreateProductPage.css';
 const CATEGORIES = ['Điện thoại', 'Laptop', 'PC Gaming', 'Màn hình', 'Chuột', 'Bàn phím', 'Tai nghe', 'Phụ kiện'];
 const BRANDS = ['Apple', 'Samsung', 'ASUS', 'Dell', 'Lenovo', 'MSI', 'Razer', 'Logitech', 'Sony', 'Xiaomi'];
 
-const EMPTY_FORM = {
+interface ProductForm {
+  name: string; category: string; brand: string; sku: string;
+  shortDesc: string; detailDesc: string;
+  price: string; originalPrice: string; stock: string;
+  imageUrl: string;
+  cpu: string; gpu: string; ram: string; ssd: string; screen: string; pin: string; weight: string;
+  isHot: boolean; isNew: boolean; isFeatured: boolean;
+}
+
+const EMPTY_FORM: ProductForm = {
   name: '', category: '', brand: '', sku: '',
   shortDesc: '', detailDesc: '',
   price: '', originalPrice: '', stock: '',
@@ -20,7 +29,7 @@ export const CreateProductPage = () => {
   const [preview, setPreview] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const set = (key: keyof typeof EMPTY_FORM, val: string | boolean) => {
+  const set = (key: keyof ProductForm, val: string | boolean) => {
     setForm(f => ({ ...f, [key]: val }));
     if (errors[key]) setErrors(e => { const n = { ...e }; delete n[key]; return n; });
   };
@@ -35,9 +44,9 @@ export const CreateProductPage = () => {
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = (action: 'save' | 'publish') => {
+  const handleSubmit = (_action: 'save' | 'publish') => {
     if (!validate()) return;
-    console.log('Product data:', { ...form, status: action === 'publish' ? 'selling' : 'draft' });
+    // In production, send to API here
     navigate('/seller/products');
   };
 
@@ -162,18 +171,18 @@ export const CreateProductPage = () => {
             <div className="admin-section__body">
               <div className="admin-form">
                 <div className="admin-form-row">
-                  {[['cpu', 'CPU'], ['gpu', 'GPU'], ['ram', 'RAM'], ['ssd', 'Ổ cứng SSD']].map(([key, label]) => (
+                  {([['cpu', 'CPU'], ['gpu', 'GPU'], ['ram', 'RAM'], ['ssd', 'Ổ cứng SSD']] as [keyof ProductForm, string][]).map(([key, label]) => (
                     <div key={key} className="admin-form-group">
                       <label className="admin-form-label">{label}</label>
-                      <input className="admin-form-input" placeholder={`VD: Intel Core i9`} value={(form as any)[key]} onChange={e => set(key as any, e.target.value)} />
+                      <input className="admin-form-input" placeholder={`VD: Intel Core i9`} value={String(form[key])} onChange={e => set(key, e.target.value)} />
                     </div>
                   ))}
                 </div>
                 <div className="admin-form-row">
-                  {[['screen', 'Màn hình'], ['pin', 'Pin'], ['weight', 'Trọng lượng']].map(([key, label]) => (
+                  {([['screen', 'Màn hình'], ['pin', 'Pin'], ['weight', 'Trọng lượng']] as [keyof ProductForm, string][]).map(([key, label]) => (
                     <div key={key} className="admin-form-group">
                       <label className="admin-form-label">{label}</label>
-                      <input className="admin-form-input" placeholder={`VD: 15.6 inch`} value={(form as any)[key]} onChange={e => set(key as any, e.target.value)} />
+                      <input className="admin-form-input" placeholder={`VD: 15.6 inch`} value={String(form[key])} onChange={e => set(key, e.target.value)} />
                     </div>
                   ))}
                 </div>
@@ -193,8 +202,8 @@ export const CreateProductPage = () => {
                   { key: 'isNew', label: '✨ Mới - Sản phẩm mới' },
                   { key: 'isFeatured', label: '⭐ Nổi bật - Sản phẩm nổi bật' },
                 ].map(t => (
-                  <label key={t.key} className={`create-product__tag ${(form as any)[t.key] ? 'create-product__tag--active' : ''}`}>
-                    <input type="checkbox" checked={(form as any)[t.key]} onChange={e => set(t.key as any, e.target.checked)} />
+                  <label key={t.key} className={`create-product__tag ${form[t.key as keyof ProductForm] ? 'create-product__tag--active' : ''}`}>
+                    <input type="checkbox" checked={!!form[t.key as keyof ProductForm]} onChange={e => set(t.key as keyof ProductForm, e.target.checked)} />
                     {t.label}
                   </label>
                 ))}

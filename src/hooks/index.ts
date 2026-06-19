@@ -22,6 +22,12 @@ export const useDebouncedCallback = <T extends (...args: Parameters<T>) => void>
     callbackRef.current = callback;
   }, [callback]);
 
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
   return useCallback(
     ((...args: Parameters<T>) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);

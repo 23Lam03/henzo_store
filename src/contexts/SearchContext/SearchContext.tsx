@@ -55,7 +55,7 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const addToHistory = useCallback((q: string) => {
-    if (!q.trim()) return;
+    if (!q || !q.trim()) return;
     setHistory(prev => {
       const filtered = prev.filter(h => h.query.toLowerCase() !== q.toLowerCase());
       return [

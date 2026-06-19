@@ -4,7 +4,7 @@ import { AdminDataTable } from '../../../components/admin/AdminDataTable';
 import { MOCK_ADMIN_STORES } from '../../../data/adminData';
 import type { SupportTicket } from '../../../types';
 import { formatNumber } from '../../../utils';
-import { useToast } from '../../../contexts';
+import { useToast } from '../../../contexts/ToastContext/ToastContext';
 import './AdminSupportPage.css';
 
 const STATUS_OPTIONS = [

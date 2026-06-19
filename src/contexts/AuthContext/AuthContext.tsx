@@ -4,7 +4,6 @@ import {
   useEffect,
   useState,
   useCallback,
-  useRef,
   type ReactNode,
 } from 'react';
 import type { User, UserRole } from '../../types/auth';
@@ -29,28 +28,48 @@ const STORAGE_TOKEN = 'henzo_auth_token';
 const STORAGE_USER = 'henzo_auth_user';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem(STORAGE_TOKEN));
+  const [user, setUser] = useState<User | null>(() => {
+    const storedUser = localStorage.getItem(STORAGE_USER);
+    if (storedUser) {
+      try { return JSON.parse(storedUser); } catch { /* ignore */ }
+    }
+    const sessionUser = sessionStorage.getItem(STORAGE_USER);
+    if (sessionUser) {
+      try { return JSON.parse(sessionUser); } catch { /* ignore */ }
+    }
+    return null;
+  });
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem(STORAGE_TOKEN) ?? sessionStorage.getItem(STORAGE_TOKEN));
   const [isLoading, setIsLoading] = useState(true);
-  const initRef = useRef(false);
 
   useEffect(() => {
-    if (initRef.current) return;
-    initRef.current = true;
-
-    const storedToken = localStorage.getItem(STORAGE_TOKEN);
-    const storedUser = localStorage.getItem(STORAGE_USER);
-
-    if (storedToken && storedUser) {
-      try {
-        setToken(storedToken);
-        setUser(JSON.parse(storedUser));
-      } catch {
+    const storedToken = localStorage.getItem(STORAGE_TOKEN) ?? sessionStorage.getItem(STORAGE_TOKEN);
+    if (storedToken) {
+      authService.getCurrentUser(storedToken).then((foundUser: User | null) => {
+        if (foundUser) {
+          setUser(foundUser);
+          localStorage.setItem(STORAGE_USER, JSON.stringify(foundUser));
+        } else {
+          setToken(null);
+          setUser(null);
+          localStorage.removeItem(STORAGE_TOKEN);
+          localStorage.removeItem(STORAGE_USER);
+          sessionStorage.removeItem(STORAGE_TOKEN);
+          sessionStorage.removeItem(STORAGE_USER);
+        }
+        setIsLoading(false);
+      }).catch(() => {
+        setToken(null);
+        setUser(null);
         localStorage.removeItem(STORAGE_TOKEN);
         localStorage.removeItem(STORAGE_USER);
-      }
+        sessionStorage.removeItem(STORAGE_TOKEN);
+        sessionStorage.removeItem(STORAGE_USER);
+        setIsLoading(false);
+      });
+    } else {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -59,14 +78,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (foundUser) {
         setUser(foundUser);
         localStorage.setItem(STORAGE_USER, JSON.stringify(foundUser));
+      } else {
+        setToken(null);
+        setUser(null);
+        localStorage.removeItem(STORAGE_TOKEN);
+        localStorage.removeItem(STORAGE_USER);
+        sessionStorage.removeItem(STORAGE_TOKEN);
+        sessionStorage.removeItem(STORAGE_USER);
       }
     }).catch(() => {
       setToken(null);
       setUser(null);
       localStorage.removeItem(STORAGE_TOKEN);
       localStorage.removeItem(STORAGE_USER);
+      sessionStorage.removeItem(STORAGE_TOKEN);
+      sessionStorage.removeItem(STORAGE_USER);
     });
-  }, [token]);
+  }, []);
 
   const login = useCallback(async (
     email: string,
@@ -92,7 +120,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       setIsLoading(false);
       return { success: true, message: 'Đăng nhập thành công!', role: loggedInUser.role };
-    } catch {
+    } catch (error) {
+      console.error('Login failed:', error);
       setIsLoading(false);
       return { success: false, message: 'Đã xảy ra lỗi. Vui lòng thử lại!' };
     }
@@ -105,8 +134,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await authService.register(data);
       setIsLoading(false);
-      return { success: true, message: '�ăng ký thành công! Vui lòng đăng nhập.' };
-    } catch {
+      return { success: true, message: 'Đăng ký thành công! Vui lòng đăng nhập.' };
+    } catch (error) {
+      console.error('Register failed:', error);
       setIsLoading(false);
       return { success: false, message: 'Đăng ký thất bại. Email có thể đã tồn tại!' };
     }
@@ -128,7 +158,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser((prev: User | null) => {
       if (!prev) return prev;
       const updated = { ...prev, ...data };
-      localStorage.setItem(STORAGE_USER, JSON.stringify(updated));
+      const localToken = localStorage.getItem(STORAGE_TOKEN);
+      if (localToken) {
+        localStorage.setItem(STORAGE_USER, JSON.stringify(updated));
+      } else {
+        sessionStorage.setItem(STORAGE_USER, JSON.stringify(updated));
+      }
       return updated;
     });
   }, []);

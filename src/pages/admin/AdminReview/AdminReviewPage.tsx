@@ -4,7 +4,7 @@ import { useAdmin } from '../../../contexts/AdminContext';
 import { AdminDataTable } from '../../../components/admin/AdminDataTable';
 import { MOCK_PRODUCTS } from '../../../data/products';
 import type { Review } from '../../../types';
-import { useToast } from '../../../contexts';
+import { useToast } from '../../../contexts/ToastContext/ToastContext';
 import { ConfirmModal } from '../../../components/common/ConfirmModal';
 import './AdminReviewPage.css';
 
@@ -25,6 +25,7 @@ const renderStars = (rating: number) => (
 );
 
 export const AdminReviewPage = () => {
+  const navigate = useNavigate();
   const { reviews } = useAdmin();
   const toast = useToast();
   const [filter, setFilter] = useState('all');

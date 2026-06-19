@@ -100,16 +100,19 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const savings = totalOriginalPrice - totalPrice;
 
   const addItem = useCallback((product: Product, quantity = 1): boolean => {
+    if (product.stock === 0) return false;
     setItems(prev => {
       const existing = prev.find(i => i.product.id === product.id);
       if (existing) {
+        const newQty = existing.quantity + quantity;
+        if (newQty > product.stock) return prev; // can't exceed stock
         return prev.map(i =>
           i.product.id === product.id
-            ? { ...i, quantity: i.quantity + quantity }
+            ? { ...i, quantity: newQty }
             : i
         );
       }
-      return [...prev, { product, quantity, selected: true }];
+      return [...prev, { product, quantity: Math.min(quantity, product.stock), selected: true }];
     });
     return true;
   }, []);

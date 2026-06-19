@@ -4,7 +4,7 @@ import { ProtectedRoute } from '../guards';
 import { PermissionRoute } from '../guards';
 import { ROUTES } from '../constants/routes';
 import { RouteLoader } from '../components/common/RouteLoader/RouteLoader';
-import { MainLayout, ShopLayout, AdminLayout, CustomerLayout, AuthLayout } from '../components/layouts';
+import { MainLayout, ShopLayout, AdminLayout, AuthLayout } from '../components/layouts';
 import type { UserRole } from '../types';
 
 // ─── Các vai trò trong hệ thống ───────────────────────────────────────────────
@@ -26,6 +26,14 @@ const ProductDetailPage = load(() => import('../pages/customer/ProductDetail/Pro
 const CategoryPage = load(() => import('../pages/customer/Category/CategoryPage'), 'CategoryPage');
 const BrandPage = load(() => import('../pages/customer/Brand/BrandPage'), 'BrandPage');
 const ComparePage = load(() => import('../pages/customer/Compare/ComparePage'), 'ComparePage');
+const CategoriesPage = load(() => import('../pages/customer/Categories/CategoriesPage'), 'CategoriesPage');
+const BrandsPage = load(() => import('../pages/customer/Brands/BrandsPage'), 'BrandsPage');
+const AboutPage = load(() => import('../pages/customer/About/AboutPage'), 'AboutPage');
+const FAQPage = load(() => import('../pages/customer/Faq/FAQPage'), 'FAQPage');
+const BlogPage = load(() => import('../pages/customer/Blog/BlogPage'), 'BlogPage');
+const BlogDetailPage = load(() => import('../pages/customer/Blog/BlogDetailPage'), 'BlogDetailPage');
+const ShopPage = load(() => import('../pages/customer/Shops/ShopPage'), 'ShopPage');
+const ShopDetailPage = load(() => import('../pages/customer/Shops/ShopDetailPage'), 'ShopDetailPage');
 
 // Các trang xác thực
 const LoginPage = load(() => import('../pages/auth/LoginPage/LoginPage'), 'LoginPage');
@@ -47,6 +55,8 @@ const SearchPage = load(() => import('../pages/customer/Search/SearchPage'), 'Se
 const RecentlyViewedPage = load(() => import('../pages/customer/RecentlyViewed/RecentlyViewedPage'), 'RecentlyViewedPage');
 const ContactPage = load(() => import('../pages/customer/Contact/ContactPage'), 'ContactPage');
 const CustomerSettingsPage = load(() => import('../pages/customer/CustomerSettings/CustomerSettingsPage'), 'CustomerSettingsPage');
+const AddressesPage = load(() => import('../pages/customer/Addresses/AddressesPage'), 'AddressesPage');
+const PaymentsPage = load(() => import('../pages/customer/Payments/PaymentsPage'), 'PaymentsPage');
 
 // Các trang shop
 const ShopDashboardPage = load(() => import('../pages/shop/ShopDashboard/ShopDashboardPage'), 'ShopDashboardPage');
@@ -113,23 +123,26 @@ export const router = createBrowserRouter(
         { index: true, element: <Page><HomePage /></Page> },
         { path: ROUTES.PRODUCTS, element: <Page><ProductListPage /></Page> },
         { path: ROUTES.PRODUCT_DETAIL, element: <Page><ProductDetailPage /></Page> },
+        { path: ROUTES.CATEGORIES, element: <Page><CategoriesPage /></Page> },
         { path: ROUTES.CATEGORY_DETAIL, element: <Page><CategoryPage /></Page> },
+        { path: ROUTES.BRANDS, element: <Page><BrandsPage /></Page> },
         { path: ROUTES.BRAND_DETAIL, element: <Page><BrandPage /></Page> },
         { path: ROUTES.SEARCH, element: <Page><SearchPage /></Page> },
-        { path: ROUTES.COMPARE, element: <Page><ComparePage /></Page> },
         { path: ROUTES.PROMOTIONS, element: <Page><PromotionPage /></Page> },
         { path: ROUTES.CONTACT, element: <Page><ContactPage /></Page> },
         { path: ROUTES.WISHLIST, element: <Page><WishlistPage /></Page> },
         { path: ROUTES.CART, element: <Page><CartPage /></Page> },
         { path: ROUTES.RECENTLY_VIEWED, element: <Page><RecentlyViewedPage /></Page> },
         { path: ROUTES.ORDER_DETAIL, element: <Page><OrderDetailPage /></Page> },
-      ],
-    },
+        { path: ROUTES.COMPARE, element: <Page><ComparePage /></Page> },
+        { path: ROUTES.BLOGS, element: <Page><BlogPage /></Page> },
+        { path: ROUTES.BLOG_DETAIL, element: <Page><BlogDetailPage /></Page> },
+        { path: ROUTES.SHOPS, element: <Page><ShopPage /></Page> },
+        { path: ROUTES.SHOP_DETAIL, element: <Page><ShopDetailPage /></Page> },
+        { path: ROUTES.ABOUT, element: <Page><AboutPage /></Page> },
+        { path: ROUTES.FAQ, element: <Page><FAQPage /></Page> },
 
-    // ─── Tuyến khách hàng ───────────────────────────────────────────────────────
-    {
-      element: <CustomerLayout />,
-      children: [
+        // ─── Tuyến khách hàng được bảo vệ ───────────────────────────────────────
         {
           path: ROUTES.ACCOUNT,
           element: (
@@ -194,6 +207,26 @@ export const router = createBrowserRouter(
             <ProtectedRoute>
               <PermissionRoute allowedRoles={CUSTOMER_ROLE}>
                 <Page><ShippingTrackingPage /></Page>
+              </PermissionRoute>
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: ROUTES.ADDRESSES,
+          element: (
+            <ProtectedRoute>
+              <PermissionRoute allowedRoles={CUSTOMER_ROLE}>
+                <Page><AddressesPage /></Page>
+              </PermissionRoute>
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: ROUTES.PAYMENTS,
+          element: (
+            <ProtectedRoute>
+              <PermissionRoute allowedRoles={CUSTOMER_ROLE}>
+                <Page><PaymentsPage /></Page>
               </PermissionRoute>
             </ProtectedRoute>
           ),
