@@ -12,7 +12,6 @@ import {
   OrderProvider,
   ReviewProvider,
   ToastProvider,
-  ToastContainer,
 } from './contexts';
 import { SellerProvider } from './contexts/SellerContext';
 import { ErrorBoundary } from './components/common/ErrorBoundary/ErrorBoundary';
@@ -35,7 +34,6 @@ function App() {
                             <SellerProvider>
                             <ErrorBoundary>
                               <RouterProvider router={router} />
-                              <ToastContainer />
                             </ErrorBoundary>
                             </SellerProvider>
                           </ReviewProvider>
